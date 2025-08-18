@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: barq-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - barq-network
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: barq-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - barq-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Flowable All-in-One (REST API, Task, Admin, Modeler)
+  flowable:
+    image: flowable/all-in-one:6.8.0
+    container_name: barq-flowable
+    environment:
+      - FLOWABLE_DATABASE_TYPE=mssql
+      - FLOWABLE_DATABASE_HOST=sqlserver
+      - FLOWABLE_DATABASE_PORT=1433
+      - FLOWABLE_DATABASE_NAME=flowable
+      - FLOWABLE_DATABASE_USERNAME=sa
+      - FLOWABLE_DATABASE_PASSWORD=YourStrong@Passw0rd
+      - FLOWABLE_DATABASE_SCHEMA=dbo
+    ports:
+      - "8080:8080"  # Flowable UI
+      - "9999:9999"  # Flowable REST API
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - barq-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/flowable-ui/"]
+      interval: 60s
+      timeout: 30s
+      retries: 10
+      start_period: 120s
+
+  # Mailhog for email testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: barq-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - barq-network
+
+  # BARQ API (when running in Docker)
+  barq-api:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: barq-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=BARQ_DB;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;MultipleActiveResultSets=true
+      - BARQ__FlowableApiUrl=http://flowable:9999
+      - BARQ__RedisConnection=redis:6379
+      - BARQ__SmtpHost=mailhog
+      - BARQ__SmtpPort=1025
+    ports:
+      - "5000:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      flowable:
+        condition: service_healthy
+    networks:
+      - barq-network
+    profiles:
+      - full-stack
+
+  # BARQ Frontend (when running in Docker)
+  barq-frontend:
+    build:
+      context: ./Frontend/barq-frontend
+      dockerfile: Dockerfile
+    container_name: barq-frontend
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - barq-api
+    networks:
+      - barq-network
+    profiles:
+      - full-stack
+
+volumes:
+  sqlserver_data:
+  redis_data:
+
+networks:
+  barq-network:
+    driver: bridge
