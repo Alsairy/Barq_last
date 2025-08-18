@@ -13,7 +13,7 @@ namespace BARQ.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
             
-            modelBuilder.ApplySoftDeleteExtensions();
+            modelBuilder.AddSoftDeleteQueryFilter();
         }
 
         public override int SaveChanges()
