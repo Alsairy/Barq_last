@@ -31,11 +31,16 @@ namespace BARQ.Application.Services.RecycleBin
             var (set, type) = GetSet(entity);
             if (set is null) return false;
             var idProperty = type.GetProperty("Id");
-            var e = ((IQueryable<object>)set).FirstOrDefault(entity => 
+            object? e = null;
+            foreach (var entity in (IQueryable<object>)set)
             {
                 var entityId = idProperty?.GetValue(entity);
-                return entityId != null && entityId.Equals(id);
-            });
+                if (entityId != null && entityId.Equals(id))
+                {
+                    e = entity;
+                    break;
+                }
+            }
             if (e is null) return false;
             var propIsDeleted = type.GetProperty("IsDeleted");
             var propDeletedAt = type.GetProperty("DeletedAt");
