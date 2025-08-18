@@ -1,0 +1,451 @@
+From 2b145c06a52c4326409be85de22ae8fc84907f8f Mon Sep 17 00:00:00 2001
+From: Devin <devin@example.com>
+Date: Fri, 15 Aug 2025 21:38:05 +0000
+Subject: [PATCH] feat: add default auth, swagger guard, recycle bin stubs,
+ frontend components, playwright
+
+---
+ .../Controllers/RecycleBinController.cs       | 32 +++++++++++
+ .../Extensions/AuthorizationExtensions.cs     | 23 ++++++++
+ Backend/src/BARQ.API/Program.cs               | 21 +++++++
+ .../Services/RecycleBin/IRecycleBinService.cs |  8 +++
+ .../Services/RecycleBin/RecycleBinService.cs  | 55 +++++++++++++++++++
+ .../Data/ModelBuilderSoftDeleteExtensions.cs  | 31 +++++++++++
+ Frontend/barq-frontend/package.json           |  8 ++-
+ Frontend/barq-frontend/playwright.config.ts   |  6 ++
+ .../src/components/DataTable.tsx              | 40 ++++++++++++++
+ .../notifications/NotificationBell.tsx        | 18 ++++++
+ .../features/recycle-bin/RecycleBinPage.tsx   | 37 +++++++++++++
+ .../src/features/tenants/TenantSwitcher.tsx   | 25 +++++++++
+ Frontend/barq-frontend/tests/smoke.spec.ts    |  5 ++
+ 13 files changed, 306 insertions(+), 3 deletions(-)
+ create mode 100644 Backend/src/BARQ.API/Controllers/RecycleBinController.cs
+ create mode 100644 Backend/src/BARQ.API/Extensions/AuthorizationExtensions.cs
+ create mode 100644 Backend/src/BARQ.Application/Services/RecycleBin/IRecycleBinService.cs
+ create mode 100644 Backend/src/BARQ.Application/Services/RecycleBin/RecycleBinService.cs
+ create mode 100644 Backend/src/BARQ.Infrastructure/Data/ModelBuilderSoftDeleteExtensions.cs
+ create mode 100644 Frontend/barq-frontend/playwright.config.ts
+ create mode 100644 Frontend/barq-frontend/src/components/DataTable.tsx
+ create mode 100644 Frontend/barq-frontend/src/features/notifications/NotificationBell.tsx
+ create mode 100644 Frontend/barq-frontend/src/features/recycle-bin/RecycleBinPage.tsx
+ create mode 100644 Frontend/barq-frontend/src/features/tenants/TenantSwitcher.tsx
+ create mode 100644 Frontend/barq-frontend/tests/smoke.spec.ts
+
+diff --git a/Backend/src/BARQ.API/Controllers/RecycleBinController.cs b/Backend/src/BARQ.API/Controllers/RecycleBinController.cs
+new file mode 100644
+index 0000000..82f18f1
+--- /dev/null
++++ b/Backend/src/BARQ.API/Controllers/RecycleBinController.cs
+@@ -0,0 +1,32 @@
++using Microsoft.AspNetCore.Mvc;
++using Microsoft.AspNetCore.Authorization;
++using BARQ.Core.Models.Responses;
++using BARQ.API.Controllers;
++using BARQ.Application.Services.RecycleBin;
++
++namespace BARQ.API.Controllers
++{
++    [ApiController]
++    [Route("api/recycle-bin")]
++    [Authorize]
++    public class RecycleBinController : ControllerBase
++    {
++        private readonly IRecycleBinService _svc;
++        public RecycleBinController(IRecycleBinService svc) => _svc = svc;
++
++        [HttpGet]
++        public async Task<IActionResult> List([FromQuery] string entity, [FromQuery] int page = 1, [FromQuery] int pageSize = 25)
++        {
++            var result = await _svc.ListDeletedAsync(entity, page, pageSize);
++            return Ok(ApiResponse<object>.SuccessResponse(result, "Recycle bin list fetched"));
++        }
++
++        [HttpPost("{entity}/{id:guid}/restore")]
++        public async Task<IActionResult> Restore([FromRoute] string entity, [FromRoute] Guid id)
++        {
++            var ok = await _svc.RestoreAsync(entity, id);
++            if (!ok) return NotFound(ApiResponse<object>.ErrorResponse("Item not found or cannot be restored"));
++            return Ok(ApiResponse<object>.SuccessResponse(null, "Restored"));
++        }
++    }
++}
+diff --git a/Backend/src/BARQ.API/Extensions/AuthorizationExtensions.cs b/Backend/src/BARQ.API/Extensions/AuthorizationExtensions.cs
+new file mode 100644
+index 0000000..eb570db
+--- /dev/null
++++ b/Backend/src/BARQ.API/Extensions/AuthorizationExtensions.cs
+@@ -0,0 +1,23 @@
++using Microsoft.AspNetCore.Authorization;
++using Microsoft.Extensions.DependencyInjection;
++
++namespace BARQ.API.Extensions
++{
++    public static class AuthorizationExtensions
++    {
++        /// <summary>
++        /// Configure a default fallback policy that requires authenticated users
++        /// unless an endpoint explicitly allows anonymous access.
++        /// </summary>
++        public static IServiceCollection AddDefaultAuthorization(this IServiceCollection services)
++        {
++            services.AddAuthorization(options =>
++            {
++                options.FallbackPolicy = new AuthorizationPolicyBuilder()
++                    .RequireAuthenticatedUser()
++                    .Build();
++            });
++            return services;
++        }
++    }
++}
+diff --git a/Backend/src/BARQ.API/Program.cs b/Backend/src/BARQ.API/Program.cs
+index 9e56a70..66b6559 100644
+--- a/Backend/src/BARQ.API/Program.cs
++++ b/Backend/src/BARQ.API/Program.cs
+@@ -1,3 +1,4 @@
++using BARQ.API.Extensions;
+ using Microsoft.EntityFrameworkCore;
+ using Npgsql.EntityFrameworkCore.PostgreSQL;
+ using Microsoft.AspNetCore.Authentication.JwtBearer;
+@@ -328,6 +329,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+     });
+ 
+ builder.Services.AddAuthorization();
++builder.Services.AddDefaultAuthorization();
++// Recycle bin service
++builder.Services.AddScoped<BARQ.Application.Services.RecycleBin.IRecycleBinService, BARQ.Application.Services.RecycleBin.RecycleBinService>();
++
+ 
+ builder.Services.AddStackExchangeRedisCache(options =>
+ {
+@@ -443,6 +448,22 @@ app.UseCors("SecurePolicy");
+ app.UseAuthentication();
+ app.UseAuthorization();
+ 
++
++// Require auth for Swagger in non-development environments
++if (!app.Environment.IsDevelopment())
++{
++    app.Use(async (ctx, next) =>
++    {
++        var path = ctx.Request.Path.Value ?? string.Empty;
++        if ((path.StartsWith("/swagger") || path.StartsWith("/api-docs")) && !(ctx.User?.Identity?.IsAuthenticated ?? false))
++        {
++            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
++            return;
++        }
++        await next();
++    });
++}
++
+ app.MapControllers();
+ app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+ {
+diff --git a/Backend/src/BARQ.Application/Services/RecycleBin/IRecycleBinService.cs b/Backend/src/BARQ.Application/Services/RecycleBin/IRecycleBinService.cs
+new file mode 100644
+index 0000000..a8a9b46
+--- /dev/null
++++ b/Backend/src/BARQ.Application/Services/RecycleBin/IRecycleBinService.cs
+@@ -0,0 +1,8 @@
++namespace BARQ.Application.Services.RecycleBin
++{
++    public interface IRecycleBinService
++    {
++        Task<object> ListDeletedAsync(string entity, int page, int pageSize);
++        Task<bool> RestoreAsync(string entity, Guid id);
++    }
++}
+diff --git a/Backend/src/BARQ.Application/Services/RecycleBin/RecycleBinService.cs b/Backend/src/BARQ.Application/Services/RecycleBin/RecycleBinService.cs
+new file mode 100644
+index 0000000..91f29b1
+--- /dev/null
++++ b/Backend/src/BARQ.Application/Services/RecycleBin/RecycleBinService.cs
+@@ -0,0 +1,55 @@
++using BARQ.Infrastructure.Data;
++using Microsoft.EntityFrameworkCore;
++using System.Reflection;
++
++namespace BARQ.Application.Services.RecycleBin
++{
++    /// <summary>
++    /// Generic recycle bin service using reflection.
++    /// NOTE: This is a stub; refine with strong types and per-entity policies.
++    /// </summary>
++    public class RecycleBinService : IRecycleBinService
++    {
++        private readonly BarqDbContext _db;
++        public RecycleBinService(BarqDbContext db) => _db = db;
++
++        public async Task<object> ListDeletedAsync(string entity, int page, int pageSize)
++        {
++            var (set, type) = GetSet(entity);
++            if (set is null) return new { Items = Array.Empty<object>(), Total = 0, Page = page, PageSize = pageSize };
++
++            var propIsDeleted = type.GetProperty("IsDeleted");
++            var query = ((IQueryable<object>)set).Where(e => (bool)(propIsDeleted!.GetValue(e) ?? false));
++            var total = query.Count();
++            var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
++            return new { Items = items, Total = total, Page = page, PageSize = pageSize };
++        }
++
++        public async Task<bool> RestoreAsync(string entity, Guid id)
++        {
++            var (set, type) = GetSet(entity);
++            if (set is null) return false;
++            var e = await ((IQueryable<object>)set).Cast<dynamic>().FirstOrDefaultAsync(x => x.Id == id);
++            if (e is null) return false;
++            var propIsDeleted = type.GetProperty("IsDeleted");
++            var propDeletedAt = type.GetProperty("DeletedAt");
++            var propDeletedBy = type.GetProperty("DeletedById");
++            propIsDeleted?.SetValue(e, false);
++            propDeletedAt?.SetValue(e, null);
++            propDeletedBy?.SetValue(e, null);
++            await _db.SaveChangesAsync();
++            return true;
++        }
++
++        private (object? set, Type type) GetSet(string entity)
++        {
++            var entityType = Assembly.GetAssembly(typeof(BarqDbContext))!
++                .GetTypes()
++                .FirstOrDefault(t => t.Name.Equals(entity, StringComparison.OrdinalIgnoreCase));
++            if (entityType == null) return (null, typeof(object));
++            var setMethod = typeof(BarqDbContext).GetMethod("Set", Type.EmptyTypes)!.MakeGenericMethod(entityType);
++            var set = setMethod.Invoke(_db, null);
++            return (set, entityType);
++        }
++    }
++}
+diff --git a/Backend/src/BARQ.Infrastructure/Data/ModelBuilderSoftDeleteExtensions.cs b/Backend/src/BARQ.Infrastructure/Data/ModelBuilderSoftDeleteExtensions.cs
+new file mode 100644
+index 0000000..3563ed3
+--- /dev/null
++++ b/Backend/src/BARQ.Infrastructure/Data/ModelBuilderSoftDeleteExtensions.cs
+@@ -0,0 +1,31 @@
++using System.Linq.Expressions;
++using BARQ.Core.Entities;
++using Microsoft.EntityFrameworkCore;
++using Microsoft.EntityFrameworkCore.Metadata;
++
++namespace BARQ.Infrastructure.Data
++{
++    public static class ModelBuilderSoftDeleteExtensions
++    {
++        /// <summary>
++        /// Adds a global query filter for all entities derived from BaseEntity to exclude IsDeleted records.
++        /// Call from OnModelCreating: modelBuilder.AddSoftDeleteQueryFilter();
++        /// </summary>
++        public static void AddSoftDeleteQueryFilter(this ModelBuilder modelBuilder)
++        {
++            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
++            {
++                var clrType = entityType.ClrType;
++                if (typeof(BaseEntity).IsAssignableFrom(clrType))
++                {
++                    // e => !e.IsDeleted
++                    var parameter = Expression.Parameter(clrType, "e");
++                    var prop = Expression.PropertyOrField(parameter, nameof(BaseEntity.IsDeleted));
++                    var notDeleted = Expression.Not(prop);
++                    var lambda = Expression.Lambda(notDeleted, parameter);
++                    entityType.SetQueryFilter(lambda);
++                }
++            }
++        }
++    }
++}
+diff --git a/Frontend/barq-frontend/package.json b/Frontend/barq-frontend/package.json
+index 1bbd921..b993259 100644
+--- a/Frontend/barq-frontend/package.json
++++ b/Frontend/barq-frontend/package.json
+@@ -11,7 +11,8 @@
+     "test": "jest",
+     "test:ci": "jest --ci --coverage --watchAll=false",
+     "test:watch": "jest --watch",
+-    "test:coverage": "jest --coverage"
++    "test:coverage": "jest --coverage",
++    "e2e": "playwright test"
+   },
+   "dependencies": {
+     "@hookform/resolvers": "^5.1.1",
+@@ -102,6 +103,7 @@
+     "ts-jest": "^29.4.0",
+     "typescript": "~5.6.2",
+     "typescript-eslint": "^8.15.0",
+-    "vite": "^6.0.1"
++    "vite": "^6.0.1",
++    "@playwright/test": "^1.45.0"
+   }
+-}
++}
+\ No newline at end of file
+diff --git a/Frontend/barq-frontend/playwright.config.ts b/Frontend/barq-frontend/playwright.config.ts
+new file mode 100644
+index 0000000..27c7a0b
+--- /dev/null
++++ b/Frontend/barq-frontend/playwright.config.ts
+@@ -0,0 +1,6 @@
++import { defineConfig, devices } from '@playwright/test';
++export default defineConfig({
++  testDir: './tests',
++  use: { baseURL: 'http://localhost:5173', trace: 'on-first-retry' },
++  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }]
++});
+\ No newline at end of file
+diff --git a/Frontend/barq-frontend/src/components/DataTable.tsx b/Frontend/barq-frontend/src/components/DataTable.tsx
+new file mode 100644
+index 0000000..b8822a3
+--- /dev/null
++++ b/Frontend/barq-frontend/src/components/DataTable.tsx
+@@ -0,0 +1,40 @@
++import React, { useEffect, useState } from 'react';
++
++export type Column<T> = { key: keyof T | string; header: string; render?: (row: T) => React.ReactNode };
++export type FetchParams = { page: number; pageSize: number; search?: string; sort?: string; filters?: Record<string, any> };
++export type Fetcher<T> = (params: FetchParams) => Promise<{ items: T[]; total: number }>;
++
++export function DataTable<T>({ columns, fetcher, bulkActions }: { columns: Column<T>[]; fetcher: Fetcher<T>; bulkActions?: React.ReactNode }) {
++  const [rows, setRows] = useState<T[]>([]);
++  const [selected, setSelected] = useState<Set<number>>(new Set());
++  const [page, setPage] = useState(1);
++  const [pageSize, setPageSize] = useState(25);
++  const [total, setTotal] = useState(0);
++
++  useEffect(() => {
++    fetcher({ page, pageSize }).then(r => { setRows(r.items); setTotal(r.total) });
++  }, [page, pageSize]);
++
++  return (
++    <div className="space-y-2">
++      <div className="flex items-center justify-between">{bulkActions}</div>
++      <table className="min-w-full border">
++        <thead>
++          <tr>{columns.map(c => <th key={String(c.key)} className="text-left p-2 border-b">{c.header}</th>)}</tr>
++        </thead>
++        <tbody>
++          {rows.map((row, i) => (
++            <tr key={i} className="border-b">
++              {columns.map(c => <td key={String(c.key)} className="p-2">{c.render ? c.render(row) : String((row as any)[c.key])}</td>)}
++            </tr>
++          ))}
++        </tbody>
++      </table>
++      <div className="flex items-center gap-2">
++        <button onClick={() => setPage(p => Math.max(1, p-1))}>Prev</button>
++        <span>{page} / {Math.ceil(total / pageSize) || 1}</span>
++        <button onClick={() => setPage(p => p+1)}>Next</button>
++      </div>
++    </div>
++  );
++}
+diff --git a/Frontend/barq-frontend/src/features/notifications/NotificationBell.tsx b/Frontend/barq-frontend/src/features/notifications/NotificationBell.tsx
+new file mode 100644
+index 0000000..9dad90c
+--- /dev/null
++++ b/Frontend/barq-frontend/src/features/notifications/NotificationBell.tsx
+@@ -0,0 +1,18 @@
++import React, { useEffect, useState } from 'react';
++
++export default function NotificationBell() {
++  const [unread, setUnread] = useState(0);
++  useEffect(() => {
++    const interval = setInterval(() => {
++      fetch('/api/notifications?unreadOnly=true', { credentials: 'include' })
++        .then(r => r.json()).then(d => setUnread(d?.data?.length || 0)).catch(() => {});
++    }, 5000);
++    return () => clearInterval(interval);
++  }, []);
++  return (
++    <button aria-label="Notifications" className="relative">
++      <span>🔔</span>
++      {unread > 0 && <span className="absolute -top-1 -right-1 text-xs bg-red-600 text-white rounded-full px-1">{unread}</span>}
++    </button>
++  );
++}
+diff --git a/Frontend/barq-frontend/src/features/recycle-bin/RecycleBinPage.tsx b/Frontend/barq-frontend/src/features/recycle-bin/RecycleBinPage.tsx
+new file mode 100644
+index 0000000..f95d16f
+--- /dev/null
++++ b/Frontend/barq-frontend/src/features/recycle-bin/RecycleBinPage.tsx
+@@ -0,0 +1,37 @@
++import React, { useEffect, useState } from 'react';
++type Item = { id: string; [k: string]: any };
++
++export default function RecycleBinPage() {
++  const [entity, setEntity] = useState('Project');
++  const [items, setItems] = useState<Item[]>([]);
++  const [page, setPage] = useState(1);
++
++  useEffect(() => {
++    fetch(`/api/recycle-bin?entity=${entity}&page=${page}`, { credentials: 'include' })
++      .then(r => r.json()).then(d => setItems(d?.data?.items || [])).catch(() => {});
++  }, [entity, page]);
++
++  const restore = async (id: string) => {
++    await fetch(`/api/recycle-bin/${entity}/${id}/restore`, { method: 'POST', credentials: 'include' });
++    setItems(x => x.filter(i => i.id !== id));
++  };
++
++  return (
++    <div className="space-y-4">
++      <h1 className="text-xl font-semibold">Recycle Bin</h1>
++      <select value={entity} onChange={e => setEntity(e.target.value)}>
++        <option>Project</option>
++        <option>UserStory</option>
++        <option>WorkflowTemplate</option>
++      </select>
++      <ul className="space-y-2">
++        {items.map(i => (
++          <li key={i.id} className="border p-2 flex justify-between items-center">
++            <pre className="truncate">{JSON.stringify(i)}</pre>
++            <button onClick={() => restore(i.id)} className="border px-2 py-1">Restore</button>
++          </li>
++        ))}
++      </ul>
++    </div>
++  );
++}
+diff --git a/Frontend/barq-frontend/src/features/tenants/TenantSwitcher.tsx b/Frontend/barq-frontend/src/features/tenants/TenantSwitcher.tsx
+new file mode 100644
+index 0000000..90f59f9
+--- /dev/null
++++ b/Frontend/barq-frontend/src/features/tenants/TenantSwitcher.tsx
+@@ -0,0 +1,25 @@
++import React, { useEffect, useState } from 'react';
++
++type Tenant = { id: string; name: string };
++export default function TenantSwitcher() {
++  const [tenants, setTenants] = useState<Tenant[]>([]);
++  const [current, setCurrent] = useState('');
++
++  useEffect(() => {
++    fetch('/api/tenants', { credentials: 'include' })
++      .then(r => r.json()).then(d => setTenants(d?.data?.items || [])).catch(()=>{});
++  }, []);
++
++  const select = (id: string) => {
++    setCurrent(id);
++    // set the header for subsequent requests (X-Tenant-Id)
++    localStorage.setItem('x-tenant-id', id);
++  };
++
++  return (
++    <select value={current} onChange={e => select(e.target.value)}>
++      <option value="">Select tenant</option>
++      {tenants.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
++    </select>
++  );
++}
+diff --git a/Frontend/barq-frontend/tests/smoke.spec.ts b/Frontend/barq-frontend/tests/smoke.spec.ts
+new file mode 100644
+index 0000000..7b2485e
+--- /dev/null
++++ b/Frontend/barq-frontend/tests/smoke.spec.ts
+@@ -0,0 +1,5 @@
++import { test, expect } from '@playwright/test';
++test('homepage renders', async ({ page }) => {
++  await page.goto('/');
++  await expect(page.locator('text=Vite')).toBeVisible();
++});
+-- 
+2.39.2
+
