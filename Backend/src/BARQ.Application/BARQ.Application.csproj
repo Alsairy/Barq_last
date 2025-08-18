@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BARQ.Core\BARQ.Core.csproj" />
     <ProjectReference Include="..\BARQ.Infrastructure\BARQ.Infrastructure.csproj" />
   </ItemGroup>
 
