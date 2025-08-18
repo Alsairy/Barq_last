@@ -1,6 +1,7 @@
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using BARQ.Core.Entities;
 
 namespace BARQ.Application.Services.RecycleBin
 {
@@ -29,7 +30,12 @@ namespace BARQ.Application.Services.RecycleBin
         {
             var (set, type) = GetSet(entity);
             if (set is null) return false;
-            var e = await ((IQueryable<object>)set).Cast<dynamic>().FirstOrDefaultAsync(x => x.Id == id);
+            var idProperty = type.GetProperty("Id");
+            var e = ((IQueryable<object>)set).FirstOrDefault(entity => 
+            {
+                var entityId = idProperty?.GetValue(entity);
+                return entityId != null && entityId.Equals(id);
+            });
             if (e is null) return false;
             var propIsDeleted = type.GetProperty("IsDeleted");
             var propDeletedAt = type.GetProperty("DeletedAt");
