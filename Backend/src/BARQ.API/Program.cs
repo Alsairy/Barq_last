@@ -52,7 +52,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHealthChecks()
-    .AddDbContext<BarqDbContext>();
+    .AddDbContextCheck<BarqDbContext>();
 
 var app = builder.Build();
 
