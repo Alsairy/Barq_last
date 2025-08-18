@@ -32,12 +32,12 @@ namespace BARQ.Application.Services.RecycleBin
             if (set is null) return false;
             var idProperty = type.GetProperty("Id");
             object? e = null;
-            foreach (var entity in (IQueryable<object>)set)
+            foreach (var item in (IQueryable<object>)set)
             {
-                var entityId = idProperty?.GetValue(entity);
+                var entityId = idProperty?.GetValue(item);
                 if (entityId != null && entityId.Equals(id))
                 {
-                    e = entity;
+                    e = item;
                     break;
                 }
             }
