@@ -45,6 +45,12 @@ namespace BARQ.Infrastructure.Data
         public DbSet<FileQuarantine> FileQuarantines { get; set; }
         public DbSet<AuditReport> AuditReports { get; set; }
         public DbSet<ReportTemplate> ReportTemplates { get; set; }
+        public DbSet<BillingPlan> BillingPlans { get; set; }
+        public DbSet<TenantSubscription> TenantSubscriptions { get; set; }
+        public DbSet<UsageQuota> UsageQuotas { get; set; }
+        public DbSet<UsageRecord> UsageRecords { get; set; }
+        public DbSet<Invoice> Invoices { get; set; }
+        public DbSet<InvoiceLineItem> InvoiceLineItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -194,6 +200,38 @@ namespace BARQ.Infrastructure.Data
 
             modelBuilder.Entity<ReportTemplate>()
                 .HasIndex(rt => new { rt.TenantId, rt.Type, rt.IsActive });
+
+            modelBuilder.Entity<BillingPlan>()
+                .HasIndex(bp => new { bp.PlanType, bp.IsActive });
+
+            modelBuilder.Entity<BillingPlan>()
+                .HasIndex(bp => bp.SortOrder);
+
+            modelBuilder.Entity<TenantSubscription>()
+                .HasIndex(ts => new { ts.TenantId, ts.Status });
+
+            modelBuilder.Entity<TenantSubscription>()
+                .HasIndex(ts => ts.NextBillingDate);
+
+            modelBuilder.Entity<UsageQuota>()
+                .HasIndex(uq => new { uq.TenantId, uq.QuotaType, uq.IsActive })
+                .IsUnique();
+
+            modelBuilder.Entity<UsageRecord>()
+                .HasIndex(ur => new { ur.TenantId, ur.UsageType, ur.RecordedAt });
+
+            modelBuilder.Entity<UsageRecord>()
+                .HasIndex(ur => new { ur.BillingPeriod, ur.IsProcessed });
+
+            modelBuilder.Entity<Invoice>()
+                .HasIndex(i => new { i.TenantId, i.Status });
+
+            modelBuilder.Entity<Invoice>()
+                .HasIndex(i => i.InvoiceNumber)
+                .IsUnique();
+
+            modelBuilder.Entity<Invoice>()
+                .HasIndex(i => new { i.DueDate, i.Status });
         }
 
         public override int SaveChanges()
