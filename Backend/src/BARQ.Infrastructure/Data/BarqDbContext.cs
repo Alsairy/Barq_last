@@ -43,6 +43,8 @@ namespace BARQ.Infrastructure.Data
         public DbSet<FileAttachment> FileAttachments { get; set; }
         public DbSet<FileAttachmentAccess> FileAttachmentAccesses { get; set; }
         public DbSet<FileQuarantine> FileQuarantines { get; set; }
+        public DbSet<AuditReport> AuditReports { get; set; }
+        public DbSet<ReportTemplate> ReportTemplates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -183,6 +185,15 @@ namespace BARQ.Infrastructure.Data
 
             modelBuilder.Entity<FileAttachmentAccess>()
                 .HasIndex(faa => new { faa.FileAttachmentId, faa.AccessedAt });
+
+            modelBuilder.Entity<AuditReport>()
+                .HasIndex(ar => new { ar.TenantId, ar.Status });
+
+            modelBuilder.Entity<AuditReport>()
+                .HasIndex(ar => new { ar.GeneratedBy, ar.GeneratedAt });
+
+            modelBuilder.Entity<ReportTemplate>()
+                .HasIndex(rt => new { rt.TenantId, rt.Type, rt.IsActive });
         }
 
         public override int SaveChanges()
