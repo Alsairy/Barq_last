@@ -9,3 +9,4 @@
 /home/ubuntu/repos/Barq_last/Backend/src/BARQ.Core/obj/Release/net8.0/refint/BARQ.Core.dll
 /home/ubuntu/repos/Barq_last/Backend/src/BARQ.Core/obj/Release/net8.0/BARQ.Core.pdb
 /home/ubuntu/repos/Barq_last/Backend/src/BARQ.Core/obj/Release/net8.0/ref/BARQ.Core.dll
+/home/ubuntu/repos/Barq_last/Backend/src/BARQ.Core/obj/Release/net8.0/BARQ.Core.csproj.AssemblyReference.cache

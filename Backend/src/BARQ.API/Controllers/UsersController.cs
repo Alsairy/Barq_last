@@ -33,11 +33,11 @@ namespace BARQ.API.Controllers
             {
                 var tenantId = GetCurrentTenantId();
                 var result = await _userService.GetUsersAsync(tenantId, request);
-                return Ok(ApiResponse<PagedResult<UserDto>>.SuccessResponse(result));
+                return Ok(ApiResponse<PagedResult<UserDto>>.Ok(result));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<PagedResult<UserDto>>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<PagedResult<UserDto>>.Fail(ex.Message));
             }
         }
 
@@ -48,13 +48,13 @@ namespace BARQ.API.Controllers
             {
                 var user = await _userService.GetUserByIdAsync(id);
                 if (user == null)
-                    return NotFound(ApiResponse<UserDto>.ErrorResponse("User not found"));
+                    return NotFound(ApiResponse<UserDto>.Fail("User not found"));
 
-                return Ok(ApiResponse<UserDto>.SuccessResponse(user));
+                return Ok(ApiResponse<UserDto>.Ok(user));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<UserDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<UserDto>.Fail(ex.Message));
             }
         }
 
@@ -67,11 +67,11 @@ namespace BARQ.API.Controllers
                 var tenantId = GetCurrentTenantId();
                 var user = await _userService.CreateUserAsync(tenantId, request);
                 return CreatedAtAction(nameof(GetUser), new { id = user.Id }, 
-                    ApiResponse<UserDto>.SuccessResponse(user, "User created successfully"));
+                    ApiResponse<UserDto>.Ok(user, "User created successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<UserDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<UserDto>.Fail(ex.Message));
             }
         }
 
@@ -81,11 +81,11 @@ namespace BARQ.API.Controllers
             try
             {
                 var user = await _userService.UpdateUserAsync(id, request);
-                return Ok(ApiResponse<UserDto>.SuccessResponse(user, "User updated successfully"));
+                return Ok(ApiResponse<UserDto>.Ok(user, "User updated successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<UserDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<UserDto>.Fail(ex.Message));
             }
         }
 
@@ -97,13 +97,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _userService.DeleteUserAsync(id);
                 if (!result)
-                    return NotFound(ApiResponse<bool>.ErrorResponse("User not found"));
+                    return NotFound(ApiResponse<bool>.Fail("User not found"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "User deleted successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "User deleted successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -115,13 +115,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _userService.AssignRoleAsync(id, roleName);
                 if (!result)
-                    return BadRequest(ApiResponse<bool>.ErrorResponse("Failed to assign role"));
+                    return BadRequest(ApiResponse<bool>.Fail("Failed to assign role"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Role assigned successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Role assigned successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -133,13 +133,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _userService.RemoveRoleAsync(id, roleName);
                 if (!result)
-                    return BadRequest(ApiResponse<bool>.ErrorResponse("Failed to remove role"));
+                    return BadRequest(ApiResponse<bool>.Fail("Failed to remove role"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Role removed successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Role removed successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
     }

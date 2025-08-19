@@ -5,6 +5,7 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SystemTask = System.Threading.Tasks.Task;
 
 namespace BARQ.Application.Services
 {
@@ -57,7 +58,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<UserLanguagePreferenceDto>
                 {
                     Items = preferenceDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -454,7 +455,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task ClearDefaultLanguagePreferenceAsync(Guid userId)
+        private async SystemTask ClearDefaultLanguagePreferenceAsync(Guid userId)
         {
             var currentDefault = await _context.UserLanguagePreferences
                 .FirstOrDefaultAsync(ulp => ulp.UserId == userId && ulp.IsDefault);

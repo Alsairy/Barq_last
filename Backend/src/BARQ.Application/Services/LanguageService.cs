@@ -5,6 +5,7 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SystemTask = System.Threading.Tasks.Task;
 
 namespace BARQ.Application.Services
 {
@@ -54,7 +55,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<LanguageDto>
                 {
                     Items = languageDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -360,7 +361,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task RefreshLanguageCompletionAsync(string languageCode)
+        public async SystemTask RefreshLanguageCompletionAsync(string languageCode)
         {
             try
             {
@@ -422,7 +423,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task ClearDefaultLanguageAsync()
+        private async SystemTask ClearDefaultLanguageAsync()
         {
             var currentDefault = await _context.Languages.FirstOrDefaultAsync(l => l.IsDefault);
             if (currentDefault != null)

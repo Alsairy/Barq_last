@@ -58,7 +58,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<TranslationDto>
                 {
                     Items = translationDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };

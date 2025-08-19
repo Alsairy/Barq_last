@@ -5,6 +5,7 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SystemTask = System.Threading.Tasks.Task;
 
 namespace BARQ.Application.Services
 {
@@ -54,7 +55,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<AccessibilityAuditDto>
                 {
                     Items = auditDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -380,7 +381,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<AccessibilityIssueDto>
                 {
                     Items = issueDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -676,7 +677,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task UpdateAuditStatisticsAsync(Guid auditId)
+        private async SystemTask UpdateAuditStatisticsAsync(Guid auditId)
         {
             var audit = await _context.AccessibilityAudits.FindAsync(auditId);
             if (audit == null) return;
