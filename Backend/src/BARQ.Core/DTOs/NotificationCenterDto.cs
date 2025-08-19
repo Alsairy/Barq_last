@@ -19,30 +19,4 @@ namespace BARQ.Core.DTOs
         public string? SourceEntityId { get; set; }
     }
 
-    public class NotificationCenterRequest
-    {
-        public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 20;
-        public string? Category { get; set; }
-        public string? Type { get; set; }
-        public bool? IsRead { get; set; }
-        public string? Priority { get; set; }
-        public DateTime? FromDate { get; set; }
-        public DateTime? ToDate { get; set; }
-    }
-
-    public class MarkNotificationRequest
-    {
-        public List<string> NotificationIds { get; set; } = new();
-        public bool IsRead { get; set; } = true;
-    }
-
-    public class NotificationStatsDto
-    {
-        public int TotalUnread { get; set; }
-        public int TotalToday { get; set; }
-        public int RequiringAction { get; set; }
-        public Dictionary<string, int> ByCategory { get; set; } = new();
-        public Dictionary<string, int> ByPriority { get; set; } = new();
-    }
 }

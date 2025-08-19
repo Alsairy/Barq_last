@@ -36,6 +36,10 @@ namespace BARQ.Infrastructure.Data
         public DbSet<Integration> Integrations { get; set; }
         public DbSet<AdminConfiguration> AdminConfigurations { get; set; }
         public DbSet<AdminConfigurationHistory> AdminConfigurationHistory { get; set; }
+        
+        public DbSet<NotificationPreference> NotificationPreferences { get; set; }
+        public DbSet<EmailTemplate> EmailTemplates { get; set; }
+        public DbSet<NotificationHistory> NotificationHistory { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

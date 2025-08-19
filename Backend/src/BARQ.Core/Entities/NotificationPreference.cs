@@ -5,7 +5,7 @@ namespace BARQ.Core.Entities
     public class NotificationPreference : BaseEntity
     {
         [Required]
-        public string UserId { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
         
         [Required]
         [MaxLength(100)]

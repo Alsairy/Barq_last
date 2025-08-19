@@ -5,6 +5,7 @@ using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace BARQ.Application.Services
 {
@@ -33,18 +34,19 @@ namespace BARQ.Application.Services
 
         public async Task<NotificationPreferencesResponse> GetUserPreferencesAsync(string userId)
         {
+            var userGuid = Guid.Parse(userId);
             var preferences = await _context.NotificationPreferences
-                .Where(p => p.UserId == userId)
+                .Where(p => p.UserId == userGuid)
                 .Select(p => new NotificationPreferenceDto
                 {
-                    Id = p.Id,
-                    UserId = p.UserId,
+                    Id = p.Id.ToString(),
+                    UserId = p.UserId.ToString(),
                     NotificationType = p.NotificationType,
                     Channel = p.Channel,
                     IsEnabled = p.IsEnabled,
                     Settings = p.Settings,
                     CreatedAt = p.CreatedAt,
-                    UpdatedAt = p.UpdatedAt
+                    UpdatedAt = p.UpdatedAt ?? DateTime.UtcNow
                 })
                 .ToListAsync();
 
@@ -58,8 +60,9 @@ namespace BARQ.Application.Services
 
         public async Task<NotificationPreferenceDto> CreatePreferenceAsync(string userId, CreateNotificationPreferenceRequest request)
         {
+            var userGuid = Guid.Parse(userId);
             var existing = await _context.NotificationPreferences
-                .FirstOrDefaultAsync(p => p.UserId == userId && 
+                .FirstOrDefaultAsync(p => p.UserId == userGuid && 
                                         p.NotificationType == request.NotificationType && 
                                         p.Channel == request.Channel);
 
@@ -70,8 +73,8 @@ namespace BARQ.Application.Services
 
             var preference = new NotificationPreference
             {
-                Id = Guid.NewGuid().ToString(),
-                UserId = userId,
+                Id = Guid.NewGuid(),
+                UserId = userGuid,
                 NotificationType = request.NotificationType,
                 Channel = request.Channel,
                 IsEnabled = request.IsEnabled,
@@ -88,21 +91,23 @@ namespace BARQ.Application.Services
 
             return new NotificationPreferenceDto
             {
-                Id = preference.Id,
-                UserId = preference.UserId,
+                Id = preference.Id.ToString(),
+                UserId = preference.UserId.ToString(),
                 NotificationType = preference.NotificationType,
                 Channel = preference.Channel,
                 IsEnabled = preference.IsEnabled,
                 Settings = preference.Settings,
                 CreatedAt = preference.CreatedAt,
-                UpdatedAt = preference.UpdatedAt
+                UpdatedAt = preference.UpdatedAt ?? DateTime.UtcNow
             };
         }
 
         public async Task<NotificationPreferenceDto> UpdatePreferenceAsync(string userId, string preferenceId, UpdateNotificationPreferenceRequest request)
         {
+            var userGuid = Guid.Parse(userId);
+            var preferenceGuid = Guid.Parse(preferenceId);
             var preference = await _context.NotificationPreferences
-                .FirstOrDefaultAsync(p => p.Id == preferenceId && p.UserId == userId);
+                .FirstOrDefaultAsync(p => p.Id == preferenceGuid && p.UserId == userGuid);
 
             if (preference == null)
             {
@@ -120,21 +125,23 @@ namespace BARQ.Application.Services
 
             return new NotificationPreferenceDto
             {
-                Id = preference.Id,
-                UserId = preference.UserId,
+                Id = preference.Id.ToString(),
+                UserId = preference.UserId.ToString(),
                 NotificationType = preference.NotificationType,
                 Channel = preference.Channel,
                 IsEnabled = preference.IsEnabled,
                 Settings = preference.Settings,
                 CreatedAt = preference.CreatedAt,
-                UpdatedAt = preference.UpdatedAt
+                UpdatedAt = preference.UpdatedAt ?? DateTime.UtcNow
             };
         }
 
         public async Task<bool> DeletePreferenceAsync(string userId, string preferenceId)
         {
+            var userGuid = Guid.Parse(userId);
+            var preferenceGuid = Guid.Parse(preferenceId);
             var preference = await _context.NotificationPreferences
-                .FirstOrDefaultAsync(p => p.Id == preferenceId && p.UserId == userId);
+                .FirstOrDefaultAsync(p => p.Id == preferenceGuid && p.UserId == userGuid);
 
             if (preference == null)
             {
@@ -152,8 +159,9 @@ namespace BARQ.Application.Services
 
         public async Task<bool> ShouldSendNotificationAsync(string userId, string notificationType, string channel)
         {
+            var userGuid = Guid.Parse(userId);
             var preference = await _context.NotificationPreferences
-                .FirstOrDefaultAsync(p => p.UserId == userId && 
+                .FirstOrDefaultAsync(p => p.UserId == userGuid && 
                                         p.NotificationType == notificationType && 
                                         p.Channel == channel);
 
@@ -186,10 +194,11 @@ namespace BARQ.Application.Services
             return enabledChannels;
         }
 
-        public async Task SetDefaultPreferencesAsync(string userId)
+        public async System.Threading.Tasks.Task SetDefaultPreferencesAsync(string userId)
         {
+            var userGuid = Guid.Parse(userId);
             var existingPreferences = await _context.NotificationPreferences
-                .Where(p => p.UserId == userId)
+                .Where(p => p.UserId == userGuid)
                 .ToListAsync();
 
             if (existingPreferences.Any())
@@ -203,8 +212,8 @@ namespace BARQ.Application.Services
             {
                 defaultPreferences.Add(new NotificationPreference
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    UserId = userId,
+                    Id = Guid.NewGuid(),
+                    UserId = userGuid,
                     NotificationType = notificationType,
                     Channel = "InApp",
                     IsEnabled = true,
@@ -214,8 +223,8 @@ namespace BARQ.Application.Services
 
                 defaultPreferences.Add(new NotificationPreference
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    UserId = userId,
+                    Id = Guid.NewGuid(),
+                    UserId = userGuid,
                     NotificationType = notificationType,
                     Channel = "Email",
                     IsEnabled = IsImportantNotificationType(notificationType),
@@ -225,8 +234,8 @@ namespace BARQ.Application.Services
 
                 defaultPreferences.Add(new NotificationPreference
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    UserId = userId,
+                    Id = Guid.NewGuid(),
+                    UserId = userGuid,
                     NotificationType = notificationType,
                     Channel = "SMS",
                     IsEnabled = false,
@@ -243,8 +252,9 @@ namespace BARQ.Application.Services
 
         public async Task<Dictionary<string, object>> GetChannelSettingsAsync(string userId, string notificationType, string channel)
         {
+            var userGuid = Guid.Parse(userId);
             var preference = await _context.NotificationPreferences
-                .FirstOrDefaultAsync(p => p.UserId == userId && 
+                .FirstOrDefaultAsync(p => p.UserId == userGuid && 
                                         p.NotificationType == notificationType && 
                                         p.Channel == channel);
 
