@@ -162,7 +162,7 @@ namespace BARQ.Application.Services
                     CurrencyPosition = request.CurrencyPosition,
                     Notes = request.Notes,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = createdBy
+                    CreatedBy = null
                 };
 
                 _context.Languages.Add(language);
@@ -211,7 +211,7 @@ namespace BARQ.Application.Services
                 if (request.Notes != null) language.Notes = request.Notes;
 
                 language.UpdatedAt = DateTime.UtcNow;
-                language.UpdatedBy = updatedBy;
+                language.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -249,7 +249,7 @@ namespace BARQ.Application.Services
 
                 language.IsDeleted = true;
                 language.UpdatedAt = DateTime.UtcNow;
-                language.UpdatedBy = deletedBy;
+                language.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -278,7 +278,7 @@ namespace BARQ.Application.Services
 
                 language.IsDefault = true;
                 language.UpdatedAt = DateTime.UtcNow;
-                language.UpdatedBy = updatedBy;
+                language.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -310,7 +310,7 @@ namespace BARQ.Application.Services
 
                 language.IsEnabled = isEnabled;
                 language.UpdatedAt = DateTime.UtcNow;
-                language.UpdatedBy = updatedBy;
+                language.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -376,7 +376,7 @@ namespace BARQ.Application.Services
 
                 language.CompletionPercentage = totalKeys > 0 ? Math.Round((double)translatedKeys / totalKeys * 100, 2) : 0;
                 language.UpdatedAt = DateTime.UtcNow;
-                language.UpdatedBy = "System";
+                language.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -430,7 +430,7 @@ namespace BARQ.Application.Services
             {
                 currentDefault.IsDefault = false;
                 currentDefault.UpdatedAt = DateTime.UtcNow;
-                currentDefault.UpdatedBy = "System";
+                currentDefault.UpdatedBy = null;
             }
         }
 

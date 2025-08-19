@@ -154,7 +154,7 @@ namespace BARQ.Application.Services
                     CurrencyCode = language.CurrencySymbol,
                     UseRTL = language.Direction == "rtl",
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = createdBy
+                    CreatedBy = null
                 };
 
                 _context.UserLanguagePreferences.Add(preference);
@@ -223,7 +223,7 @@ namespace BARQ.Application.Services
                 if (request.KeyboardNavigation != null) preference.KeyboardNavigation = request.KeyboardNavigation;
 
                 preference.UpdatedAt = DateTime.UtcNow;
-                preference.UpdatedBy = updatedBy;
+                preference.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -257,13 +257,13 @@ namespace BARQ.Application.Services
                     {
                         otherPreference.IsDefault = true;
                         otherPreference.UpdatedAt = DateTime.UtcNow;
-                        otherPreference.UpdatedBy = deletedBy;
+                        otherPreference.UpdatedBy = null;
                     }
                 }
 
                 preference.IsDeleted = true;
                 preference.UpdatedAt = DateTime.UtcNow;
-                preference.UpdatedBy = deletedBy;
+                preference.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -294,7 +294,7 @@ namespace BARQ.Application.Services
 
                 preference.IsDefault = true;
                 preference.UpdatedAt = DateTime.UtcNow;
-                preference.UpdatedBy = updatedBy;
+                preference.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -358,7 +358,7 @@ namespace BARQ.Application.Services
                 if (request.KeyboardNavigation != null) defaultPreference.KeyboardNavigation = request.KeyboardNavigation;
 
                 defaultPreference.UpdatedAt = DateTime.UtcNow;
-                defaultPreference.UpdatedBy = updatedBy;
+                defaultPreference.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -464,7 +464,7 @@ namespace BARQ.Application.Services
             {
                 currentDefault.IsDefault = false;
                 currentDefault.UpdatedAt = DateTime.UtcNow;
-                currentDefault.UpdatedBy = "System";
+                currentDefault.UpdatedBy = null;
             }
         }
 

@@ -164,7 +164,7 @@ namespace BARQ.Application.Services
                     TranslatedBy = createdBy,
                     TranslatedAt = DateTime.UtcNow,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = createdBy
+                    CreatedBy = null
                 };
 
                 _context.Translations.Add(translation);
@@ -207,7 +207,7 @@ namespace BARQ.Application.Services
                 if (request.Priority.HasValue) translation.Priority = request.Priority.Value;
 
                 translation.UpdatedAt = DateTime.UtcNow;
-                translation.UpdatedBy = updatedBy;
+                translation.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -237,7 +237,7 @@ namespace BARQ.Application.Services
 
                 translation.IsDeleted = true;
                 translation.UpdatedAt = DateTime.UtcNow;
-                translation.UpdatedBy = deletedBy;
+                translation.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -281,7 +281,7 @@ namespace BARQ.Application.Services
                             TranslatedBy = createdBy,
                             TranslatedAt = DateTime.UtcNow,
                             CreatedAt = DateTime.UtcNow,
-                            CreatedBy = createdBy
+                            CreatedBy = null
                         };
 
                         translations.Add(translation);
@@ -323,7 +323,7 @@ namespace BARQ.Application.Services
                 translation.ApprovedBy = approvedBy;
                 translation.ApprovedAt = DateTime.UtcNow;
                 translation.UpdatedAt = DateTime.UtcNow;
-                translation.UpdatedBy = approvedBy;
+                translation.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -353,7 +353,7 @@ namespace BARQ.Application.Services
                 translation.IsApproved = false;
                 translation.Notes = $"Rejected by {rejectedBy}: {reason}";
                 translation.UpdatedAt = DateTime.UtcNow;
-                translation.UpdatedBy = rejectedBy;
+                translation.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -610,7 +610,7 @@ namespace BARQ.Application.Services
                     TranslatedBy = syncedBy,
                     TranslatedAt = DateTime.UtcNow,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = syncedBy
+                    CreatedBy = null
                 }).ToList();
 
                 if (newTranslations.Any())

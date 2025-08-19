@@ -22,7 +22,7 @@ namespace BARQ.Core.Entities
         public bool IsActive { get; set; } = true;
         
         [MaxLength(255)]
-        public string? ValidatedBy { get; set; }
+        public Guid? ValidatedBy { get; set; }
         
         public DateTime? ValidatedAt { get; set; }
         

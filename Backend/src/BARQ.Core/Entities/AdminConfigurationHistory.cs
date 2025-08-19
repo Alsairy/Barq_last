@@ -20,7 +20,7 @@ namespace BARQ.Core.Entities
         public string? ChangeReason { get; set; }
         
         [MaxLength(255)]
-        public string? ChangedBy { get; set; }
+        public Guid? ChangedBy { get; set; }
         
         public DateTime ChangeDate { get; set; } = DateTime.UtcNow;
         

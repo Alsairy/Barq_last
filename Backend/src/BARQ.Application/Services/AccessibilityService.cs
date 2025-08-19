@@ -124,7 +124,7 @@ namespace BARQ.Application.Services
                     Notes = request.Notes,
                     IsPublic = request.IsPublic,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = createdBy
+                    CreatedBy = null
                 };
 
                 _context.AccessibilityAudits.Add(audit);
@@ -163,7 +163,7 @@ namespace BARQ.Application.Services
                 audit.Notes = request.Notes;
                 audit.IsPublic = request.IsPublic;
                 audit.UpdatedAt = DateTime.UtcNow;
-                audit.UpdatedBy = updatedBy;
+                audit.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -190,7 +190,7 @@ namespace BARQ.Application.Services
 
                 audit.IsDeleted = true;
                 audit.UpdatedAt = DateTime.UtcNow;
-                audit.UpdatedBy = deletedBy;
+                audit.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -233,7 +233,7 @@ namespace BARQ.Application.Services
                     RequiresScreenReaderTesting = request.RequiresScreenReaderTesting,
                     UserImpact = request.UserImpact,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = createdBy
+                    CreatedBy = null
                 };
 
                 if (!string.IsNullOrEmpty(request.AssignedTo))
@@ -290,7 +290,7 @@ namespace BARQ.Application.Services
                 issue.RequiresScreenReaderTesting = request.RequiresScreenReaderTesting;
                 issue.UserImpact = request.UserImpact;
                 issue.UpdatedAt = DateTime.UtcNow;
-                issue.UpdatedBy = updatedBy;
+                issue.UpdatedBy = null;
 
                 if (!string.IsNullOrEmpty(request.AssignedTo) && issue.AssignedTo != request.AssignedTo)
                 {
@@ -330,7 +330,7 @@ namespace BARQ.Application.Services
 
                 issue.IsDeleted = true;
                 issue.UpdatedAt = DateTime.UtcNow;
-                issue.UpdatedBy = deletedBy;
+                issue.UpdatedBy = null;
 
                 await UpdateAuditStatisticsAsync(auditId);
                 await _context.SaveChangesAsync();
@@ -443,7 +443,7 @@ namespace BARQ.Application.Services
                 issue.AssignedAt = DateTime.UtcNow;
                 issue.Status = "In Progress";
                 issue.UpdatedAt = DateTime.UtcNow;
-                issue.UpdatedBy = assignedBy;
+                issue.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -474,7 +474,7 @@ namespace BARQ.Application.Services
                 issue.FixedBy = resolvedBy;
                 issue.FixNotes = fixNotes;
                 issue.UpdatedAt = DateTime.UtcNow;
-                issue.UpdatedBy = resolvedBy;
+                issue.UpdatedBy = null;
 
                 await UpdateAuditStatisticsAsync(issue.AccessibilityAuditId);
                 await _context.SaveChangesAsync();
@@ -504,7 +504,7 @@ namespace BARQ.Application.Services
                 issue.VerifiedBy = verifiedBy;
                 issue.TestingNotes = testingNotes;
                 issue.UpdatedAt = DateTime.UtcNow;
-                issue.UpdatedBy = verifiedBy;
+                issue.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -648,7 +648,7 @@ namespace BARQ.Application.Services
                 {
                     issue.Status = status;
                     issue.UpdatedAt = DateTime.UtcNow;
-                    issue.UpdatedBy = updatedBy;
+                    issue.UpdatedBy = null;
 
                     if (status == "Fixed")
                     {
@@ -713,7 +713,7 @@ namespace BARQ.Application.Services
             }
 
             audit.UpdatedAt = DateTime.UtcNow;
-            audit.UpdatedBy = "System";
+            audit.UpdatedBy = null;
         }
 
         private static AccessibilityAuditDto MapToDto(AccessibilityAudit audit)
