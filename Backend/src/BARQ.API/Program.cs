@@ -63,7 +63,7 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("SecurePolicy", policy =>
+    options.AddPolicy("Default", policy =>
     {
         policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
               .AllowAnyHeader()
@@ -73,7 +73,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHealthChecks()
-    .AddCheck("database", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
+    .AddDbContextCheck<BarqDbContext>();
 
 var app = builder.Build();
 
@@ -84,7 +84,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("SecurePolicy");
+app.UseCors("Default");
 app.UseAuthentication();
 app.UseAuthorization();
 
