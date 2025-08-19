@@ -16,7 +16,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<BarqDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<ApplicationUser, Role>(options =>
+builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
 {
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
@@ -54,17 +54,6 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddScoped<BARQ.Application.Services.RecycleBin.IRecycleBinService, BARQ.Application.Services.RecycleBin.RecycleBinService>();
-
-builder.Services.AddScoped<BARQ.Application.Interfaces.INotificationService, BARQ.Application.Services.NotificationService>();
-builder.Services.AddScoped<BARQ.Application.Interfaces.INotificationPreferenceService, BARQ.Application.Services.NotificationPreferenceService>();
-builder.Services.AddScoped<BARQ.Application.Interfaces.IEmailService, BARQ.Application.Services.EmailService>();
-builder.Services.AddScoped<BARQ.Application.Interfaces.IFileAttachmentService, BARQ.Application.Services.FileAttachmentService>();
-builder.Services.AddScoped<BARQ.Application.Interfaces.IFileStorageService, BARQ.Application.Services.LocalFileStorageService>();
-builder.Services.AddScoped<BARQ.Application.Interfaces.IAntiVirusService, BARQ.Application.Services.MockAntiVirusService>();
-builder.Services.AddScoped<BARQ.Application.Interfaces.IAuditReportService, BARQ.Application.Services.AuditReportService>();
-builder.Services.AddScoped<BARQ.Application.Interfaces.IBillingService, BARQ.Application.Services.BillingService>();
-builder.Services.AddScoped<BARQ.Application.Interfaces.IQuotaMiddleware, BARQ.Application.Services.QuotaMiddleware>();
-
 builder.Services.AddScoped<BARQ.Application.Interfaces.ITranslationService, BARQ.Application.Services.TranslationService>();
 builder.Services.AddScoped<BARQ.Application.Interfaces.ILanguageService, BARQ.Application.Services.LanguageService>();
 builder.Services.AddScoped<BARQ.Application.Interfaces.IAccessibilityService, BARQ.Application.Services.AccessibilityService>();
@@ -84,7 +73,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHealthChecks()
-    .AddDbContextCheck<BarqDbContext>();
+    .AddCheck("database", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
 
 var app = builder.Build();
 

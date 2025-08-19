@@ -29,7 +29,18 @@ namespace BARQ.Application.Services.RecycleBin
         {
             var (set, type) = GetSet(entity);
             if (set is null) return false;
-            var e = await ((IQueryable<object>)set).Cast<dynamic>().FirstOrDefaultAsync(x => x.Id == id);
+            
+            var idProperty = type.GetProperty("Id");
+            object? e = null;
+            foreach (var item in (IQueryable<object>)set)
+            {
+                var entityId = idProperty?.GetValue(item);
+                if (entityId != null && entityId.Equals(id))
+                {
+                    e = item;
+                    break;
+                }
+            }
             if (e is null) return false;
             var propIsDeleted = type.GetProperty("IsDeleted");
             var propDeletedAt = type.GetProperty("DeletedAt");

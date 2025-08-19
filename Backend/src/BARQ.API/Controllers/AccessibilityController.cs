@@ -3,6 +3,7 @@ using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BARQ.API.Controllers
 {
@@ -20,8 +21,22 @@ namespace BARQ.API.Controllers
             _logger = logger;
         }
 
+        private string GetCurrentUserId()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? 
+                        User.FindFirst("sub")?.Value ?? 
+                        User.FindFirst("id")?.Value;
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new UnauthorizedAccessException("User ID not found in claims");
+            }
+            
+            return userId;
+        }
+
         [HttpGet("audits")]
-        public async Task<ActionResult<PagedResult<AccessibilityAuditDto>>> GetAccessibilityAudits([FromQuery] ListRequest request)
+        public async Task<ActionResult<PagedResult<AccessibilityAuditDto>>> GetAccessibilityAudits([FromQuery] ListRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -36,7 +51,7 @@ namespace BARQ.API.Controllers
         }
 
         [HttpGet("audits/{id}")]
-        public async Task<ActionResult<AccessibilityAuditDto>> GetAccessibilityAudit(Guid id)
+        public async Task<ActionResult<AccessibilityAuditDto>> GetAccessibilityAudit(Guid id, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -72,11 +87,11 @@ namespace BARQ.API.Controllers
 
         [HttpPost("audits")]
         [Authorize(Roles = "Admin,SuperAdmin,AccessibilityAuditor")]
-        public async Task<ActionResult<AccessibilityAuditDto>> CreateAccessibilityAudit([FromBody] CreateAccessibilityAuditRequest request)
+        public async Task<ActionResult<AccessibilityAuditDto>> CreateAccessibilityAudit([FromBody] CreateAccessibilityAuditRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var userId = User.Identity?.Name ?? "Unknown";
+                var userId = GetCurrentUserId();
                 var audit = await _accessibilityService.CreateAccessibilityAuditAsync(request, userId);
                 return CreatedAtAction(nameof(GetAccessibilityAudit), new { id = audit.Id }, audit);
             }
@@ -89,11 +104,11 @@ namespace BARQ.API.Controllers
 
         [HttpPut("audits/{id}")]
         [Authorize(Roles = "Admin,SuperAdmin,AccessibilityAuditor")]
-        public async Task<ActionResult<AccessibilityAuditDto>> UpdateAccessibilityAudit(Guid id, [FromBody] CreateAccessibilityAuditRequest request)
+        public async Task<ActionResult<AccessibilityAuditDto>> UpdateAccessibilityAudit(Guid id, [FromBody] CreateAccessibilityAuditRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var userId = User.Identity?.Name ?? "Unknown";
+                var userId = GetCurrentUserId();
                 var audit = await _accessibilityService.UpdateAccessibilityAuditAsync(id, request, userId);
                 if (audit == null)
                 {
@@ -111,11 +126,11 @@ namespace BARQ.API.Controllers
 
         [HttpDelete("audits/{id}")]
         [Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<ActionResult> DeleteAccessibilityAudit(Guid id)
+        public async Task<ActionResult> DeleteAccessibilityAudit(Guid id, CancellationToken cancellationToken = default)
         {
             try
             {
-                var userId = User.Identity?.Name ?? "Unknown";
+                var userId = GetCurrentUserId();
                 var success = await _accessibilityService.DeleteAccessibilityAuditAsync(id, userId);
                 if (!success)
                 {
@@ -133,11 +148,11 @@ namespace BARQ.API.Controllers
 
         [HttpPost("issues")]
         [Authorize(Roles = "Admin,SuperAdmin,AccessibilityAuditor")]
-        public async Task<ActionResult<AccessibilityIssueDto>> CreateAccessibilityIssue([FromBody] CreateAccessibilityIssueRequest request)
+        public async Task<ActionResult<AccessibilityIssueDto>> CreateAccessibilityIssue([FromBody] CreateAccessibilityIssueRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var userId = User.Identity?.Name ?? "Unknown";
+                var userId = GetCurrentUserId();
                 var issue = await _accessibilityService.CreateAccessibilityIssueAsync(request, userId);
                 return CreatedAtAction(nameof(GetAccessibilityAudit), new { id = request.AccessibilityAuditId }, issue);
             }
@@ -150,11 +165,11 @@ namespace BARQ.API.Controllers
 
         [HttpPut("issues/{id}")]
         [Authorize(Roles = "Admin,SuperAdmin,AccessibilityAuditor")]
-        public async Task<ActionResult<AccessibilityIssueDto>> UpdateAccessibilityIssue(Guid id, [FromBody] CreateAccessibilityIssueRequest request)
+        public async Task<ActionResult<AccessibilityIssueDto>> UpdateAccessibilityIssue(Guid id, [FromBody] CreateAccessibilityIssueRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var userId = User.Identity?.Name ?? "Unknown";
+                var userId = GetCurrentUserId();
                 var issue = await _accessibilityService.UpdateAccessibilityIssueAsync(id, request, userId);
                 if (issue == null)
                 {
@@ -172,11 +187,11 @@ namespace BARQ.API.Controllers
 
         [HttpDelete("issues/{id}")]
         [Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<ActionResult> DeleteAccessibilityIssue(Guid id)
+        public async Task<ActionResult> DeleteAccessibilityIssue(Guid id, CancellationToken cancellationToken = default)
         {
             try
             {
-                var userId = User.Identity?.Name ?? "Unknown";
+                var userId = GetCurrentUserId();
                 var success = await _accessibilityService.DeleteAccessibilityIssueAsync(id, userId);
                 if (!success)
                 {
@@ -239,11 +254,11 @@ namespace BARQ.API.Controllers
 
         [HttpPost("issues/{id}/assign")]
         [Authorize(Roles = "Admin,SuperAdmin,AccessibilityAuditor")]
-        public async Task<ActionResult> AssignAccessibilityIssue(Guid id, [FromBody] AssignIssueRequest request)
+        public async Task<ActionResult> AssignAccessibilityIssue(Guid id, [FromBody] AssignIssueRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var userId = User.Identity?.Name ?? "Unknown";
+                var userId = GetCurrentUserId();
                 var success = await _accessibilityService.AssignAccessibilityIssueAsync(id, request.AssignedTo, userId);
                 if (!success)
                 {
@@ -261,11 +276,11 @@ namespace BARQ.API.Controllers
 
         [HttpPost("issues/{id}/resolve")]
         [Authorize(Roles = "Admin,SuperAdmin,Developer")]
-        public async Task<ActionResult> ResolveAccessibilityIssue(Guid id, [FromBody] ResolveIssueRequest request)
+        public async Task<ActionResult> ResolveAccessibilityIssue(Guid id, [FromBody] ResolveIssueRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var userId = User.Identity?.Name ?? "Unknown";
+                var userId = GetCurrentUserId();
                 var success = await _accessibilityService.ResolveAccessibilityIssueAsync(id, request.FixNotes, userId);
                 if (!success)
                 {
@@ -283,11 +298,11 @@ namespace BARQ.API.Controllers
 
         [HttpPost("issues/{id}/verify")]
         [Authorize(Roles = "Admin,SuperAdmin,AccessibilityAuditor")]
-        public async Task<ActionResult> VerifyAccessibilityIssue(Guid id, [FromBody] VerifyIssueRequest request)
+        public async Task<ActionResult> VerifyAccessibilityIssue(Guid id, [FromBody] VerifyIssueRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var userId = User.Identity?.Name ?? "Unknown";
+                var userId = GetCurrentUserId();
                 var success = await _accessibilityService.VerifyAccessibilityIssueAsync(id, request.TestingNotes, userId);
                 if (!success)
                 {
@@ -352,11 +367,11 @@ namespace BARQ.API.Controllers
 
         [HttpPost("issues/bulk-update")]
         [Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<ActionResult> BulkUpdateAccessibilityIssues([FromBody] BulkUpdateIssuesRequest request)
+        public async Task<ActionResult> BulkUpdateAccessibilityIssues([FromBody] BulkUpdateIssuesRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var userId = User.Identity?.Name ?? "Unknown";
+                var userId = GetCurrentUserId();
                 var success = await _accessibilityService.BulkUpdateAccessibilityIssuesAsync(request.IssueIds, request.Status, userId);
                 if (!success)
                 {

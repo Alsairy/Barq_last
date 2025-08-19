@@ -428,11 +428,22 @@ namespace BARQ.Application.Services
                     })
                     .FirstOrDefaultAsync();
 
+                var accessibilityStatsDict = accessibilityStats != null 
+                    ? new Dictionary<string, object>
+                    {
+                        ["HighContrastUsers"] = accessibilityStats.HighContrastUsers,
+                        ["LargeTextUsers"] = accessibilityStats.LargeTextUsers,
+                        ["ReducedMotionUsers"] = accessibilityStats.ReducedMotionUsers,
+                        ["ScreenReaderUsers"] = accessibilityStats.ScreenReaderUsers,
+                        ["RTLUsers"] = accessibilityStats.RTLUsers
+                    }
+                    : new Dictionary<string, object>();
+
                 return new Dictionary<string, object>
                 {
                     ["TotalUsers"] = totalUsers,
                     ["LanguageUsage"] = languageUsage,
-                    ["AccessibilityStats"] = accessibilityStats ?? new { },
+                    ["AccessibilityStats"] = accessibilityStatsDict,
                     ["GeneratedAt"] = DateTime.UtcNow
                 };
             }
