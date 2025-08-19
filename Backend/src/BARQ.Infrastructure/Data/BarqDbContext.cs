@@ -40,6 +40,9 @@ namespace BARQ.Infrastructure.Data
         public DbSet<NotificationPreference> NotificationPreferences { get; set; }
         public DbSet<EmailTemplate> EmailTemplates { get; set; }
         public DbSet<NotificationHistory> NotificationHistory { get; set; }
+        public DbSet<FileAttachment> FileAttachments { get; set; }
+        public DbSet<FileAttachmentAccess> FileAttachmentAccesses { get; set; }
+        public DbSet<FileQuarantine> FileQuarantines { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -171,6 +174,15 @@ namespace BARQ.Infrastructure.Data
             modelBuilder.Entity<AdminConfiguration>()
                 .HasIndex(ac => new { ac.TenantId, ac.ConfigurationKey })
                 .IsUnique();
+
+            modelBuilder.Entity<FileAttachment>()
+                .HasIndex(fa => new { fa.TenantId, fa.Status });
+
+            modelBuilder.Entity<FileAttachment>()
+                .HasIndex(fa => fa.FileHash);
+
+            modelBuilder.Entity<FileAttachmentAccess>()
+                .HasIndex(faa => new { faa.FileAttachmentId, faa.AccessedAt });
         }
 
         public override int SaveChanges()
