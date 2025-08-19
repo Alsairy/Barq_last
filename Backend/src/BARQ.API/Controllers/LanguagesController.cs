@@ -3,6 +3,7 @@ using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BARQ.API.Controllers
 {
@@ -20,8 +21,18 @@ namespace BARQ.API.Controllers
             _logger = logger;
         }
 
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                throw new UnauthorizedAccessException("User ID not found in claims");
+            }
+            return userId;
+        }
+
         [HttpGet]
-        public async Task<ActionResult<PagedResult<LanguageDto>>> GetLanguages([FromQuery] ListRequest request)
+        public async Task<ActionResult<PagedResult<LanguageDto>>> GetLanguages([FromQuery] ListRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -36,7 +47,7 @@ namespace BARQ.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<LanguageDto>> GetLanguage(Guid id)
+        public async Task<ActionResult<LanguageDto>> GetLanguage(Guid id, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -112,12 +123,12 @@ namespace BARQ.API.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<ActionResult<LanguageDto>> CreateLanguage([FromBody] CreateLanguageRequest request)
+        public async Task<ActionResult<LanguageDto>> CreateLanguage([FromBody] CreateLanguageRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var userId = User.Identity?.Name ?? "Unknown";
-                var language = await _languageService.CreateLanguageAsync(request, userId);
+                var userId = GetCurrentUserId();
+                var language = await _languageService.CreateLanguageAsync(request, userId.ToString());
                 return CreatedAtAction(nameof(GetLanguage), new { id = language.Id }, language);
             }
             catch (InvalidOperationException ex)
@@ -133,7 +144,7 @@ namespace BARQ.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<ActionResult<LanguageDto>> UpdateLanguage(Guid id, [FromBody] UpdateLanguageRequest request)
+        public async Task<ActionResult<LanguageDto>> UpdateLanguage(Guid id, [FromBody] UpdateLanguageRequest request, CancellationToken cancellationToken = default)
         {
             try
             {

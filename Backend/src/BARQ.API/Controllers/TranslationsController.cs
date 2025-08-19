@@ -3,6 +3,7 @@ using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BARQ.API.Controllers
 {
@@ -20,8 +21,18 @@ namespace BARQ.API.Controllers
             _logger = logger;
         }
 
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                throw new UnauthorizedAccessException("User ID not found in claims");
+            }
+            return userId;
+        }
+
         [HttpGet]
-        public async Task<ActionResult<PagedResult<TranslationDto>>> GetTranslations([FromQuery] ListRequest request)
+        public async Task<ActionResult<PagedResult<TranslationDto>>> GetTranslations([FromQuery] ListRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -36,7 +47,7 @@ namespace BARQ.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<TranslationDto>> GetTranslation(Guid id)
+        public async Task<ActionResult<TranslationDto>> GetTranslation(Guid id, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -92,12 +103,12 @@ namespace BARQ.API.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin,SuperAdmin,Translator")]
-        public async Task<ActionResult<TranslationDto>> CreateTranslation([FromBody] CreateTranslationRequest request)
+        public async Task<ActionResult<TranslationDto>> CreateTranslation([FromBody] CreateTranslationRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var userId = User.Identity?.Name ?? "Unknown";
-                var translation = await _translationService.CreateTranslationAsync(request, userId);
+                var userId = GetCurrentUserId();
+                var translation = await _translationService.CreateTranslationAsync(request, userId.ToString());
                 return CreatedAtAction(nameof(GetTranslation), new { id = translation.Id }, translation);
             }
             catch (InvalidOperationException ex)
@@ -113,7 +124,7 @@ namespace BARQ.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,SuperAdmin,Translator")]
-        public async Task<ActionResult<TranslationDto>> UpdateTranslation(Guid id, [FromBody] UpdateTranslationRequest request)
+        public async Task<ActionResult<TranslationDto>> UpdateTranslation(Guid id, [FromBody] UpdateTranslationRequest request, CancellationToken cancellationToken = default)
         {
             try
             {

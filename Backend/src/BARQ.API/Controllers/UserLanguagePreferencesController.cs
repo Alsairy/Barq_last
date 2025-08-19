@@ -3,6 +3,7 @@ using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BARQ.API.Controllers
 {
@@ -20,8 +21,18 @@ namespace BARQ.API.Controllers
             _logger = logger;
         }
 
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                throw new UnauthorizedAccessException("User ID not found in claims");
+            }
+            return userId;
+        }
+
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<PagedResult<UserLanguagePreferenceDto>>> GetUserLanguagePreferences(Guid userId, [FromQuery] ListRequest request)
+        public async Task<ActionResult<PagedResult<UserLanguagePreferenceDto>>> GetUserLanguagePreferences(Guid userId, [FromQuery] ListRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -36,7 +47,7 @@ namespace BARQ.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserLanguagePreferenceDto>> GetUserLanguagePreference(Guid id)
+        public async Task<ActionResult<UserLanguagePreferenceDto>> GetUserLanguagePreference(Guid id, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -56,7 +67,7 @@ namespace BARQ.API.Controllers
         }
 
         [HttpGet("user/{userId}/default")]
-        public async Task<ActionResult<UserLanguagePreferenceDto>> GetUserDefaultLanguagePreference(Guid userId)
+        public async Task<ActionResult<UserLanguagePreferenceDto>> GetUserDefaultLanguagePreference(Guid userId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -76,7 +87,7 @@ namespace BARQ.API.Controllers
         }
 
         [HttpGet("user/{userId}/language/{languageCode}")]
-        public async Task<ActionResult<UserLanguagePreferenceDto>> GetUserLanguagePreferenceByCode(Guid userId, string languageCode)
+        public async Task<ActionResult<UserLanguagePreferenceDto>> GetUserLanguagePreferenceByCode(Guid userId, string languageCode, CancellationToken cancellationToken = default)
         {
             try
             {
