@@ -41,11 +41,11 @@ namespace BARQ.API.Controllers
                     request.UserId = GetCurrentUserId();
                     
                 var result = await _notificationService.GetNotificationsAsync(tenantId, request);
-                return Ok(ApiResponse<PagedResult<NotificationDto>>.SuccessResponse(result));
+                return Ok(ApiResponse<PagedResult<NotificationDto>>.Ok(result));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<PagedResult<NotificationDto>>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<PagedResult<NotificationDto>>.Fail(ex.Message));
             }
         }
 
@@ -56,11 +56,11 @@ namespace BARQ.API.Controllers
             {
                 var userId = GetCurrentUserId();
                 var count = await _notificationService.GetUnreadNotificationCountAsync(userId);
-                return Ok(ApiResponse<int>.SuccessResponse(count));
+                return Ok(ApiResponse<int>.Ok(count));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<int>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<int>.Fail(ex.Message));
             }
         }
 
@@ -71,11 +71,11 @@ namespace BARQ.API.Controllers
             {
                 var userId = GetCurrentUserId();
                 var notifications = await _notificationService.GetRecentNotificationsAsync(userId, count);
-                return Ok(ApiResponse<List<NotificationDto>>.SuccessResponse(notifications));
+                return Ok(ApiResponse<List<NotificationDto>>.Ok(notifications));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<List<NotificationDto>>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<List<NotificationDto>>.Fail(ex.Message));
             }
         }
 
@@ -87,11 +87,11 @@ namespace BARQ.API.Controllers
             {
                 var tenantId = GetCurrentTenantId();
                 var notification = await _notificationService.CreateNotificationAsync(tenantId, request);
-                return Ok(ApiResponse<NotificationDto>.SuccessResponse(notification, "Notification created successfully"));
+                return Ok(ApiResponse<NotificationDto>.Ok(notification, "Notification created successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<NotificationDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<NotificationDto>.Fail(ex.Message));
             }
         }
 
@@ -102,13 +102,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _notificationService.MarkNotificationAsReadAsync(id);
                 if (!result)
-                    return NotFound(ApiResponse<bool>.ErrorResponse("Notification not found"));
+                    return NotFound(ApiResponse<bool>.Fail("Notification not found"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Notification marked as read"));
+                return Ok(ApiResponse<bool>.Ok(true, "Notification marked as read"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -118,11 +118,11 @@ namespace BARQ.API.Controllers
             try
             {
                 var result = await _notificationService.MarkNotificationsAsReadAsync(request);
-                return Ok(ApiResponse<bool>.SuccessResponse(result, "Notifications marked as read"));
+                return Ok(ApiResponse<bool>.Ok(result, "Notifications marked as read"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -133,13 +133,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _notificationService.DeleteNotificationAsync(id);
                 if (!result)
-                    return NotFound(ApiResponse<bool>.ErrorResponse("Notification not found"));
+                    return NotFound(ApiResponse<bool>.Fail("Notification not found"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Notification deleted successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Notification deleted successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
     }

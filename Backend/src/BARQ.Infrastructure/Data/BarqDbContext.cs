@@ -1,15 +1,11 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using BARQ.Core.Entities;
 
 namespace BARQ.Infrastructure.Data
 {
-    public class BarqDbContext : IdentityDbContext<ApplicationUser, Role, Guid, 
-        Microsoft.AspNetCore.Identity.IdentityUserClaim<Guid>,
-        UserRole,
-        Microsoft.AspNetCore.Identity.IdentityUserLogin<Guid>,
-        Microsoft.AspNetCore.Identity.IdentityRoleClaim<Guid>,
-        Microsoft.AspNetCore.Identity.IdentityUserToken<Guid>>
+    public class BarqDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
         public BarqDbContext(DbContextOptions<BarqDbContext> options) : base(options)
         {
@@ -36,6 +32,12 @@ namespace BARQ.Infrastructure.Data
         public DbSet<Integration> Integrations { get; set; }
         public DbSet<AdminConfiguration> AdminConfigurations { get; set; }
         public DbSet<AdminConfigurationHistory> AdminConfigurationHistory { get; set; }
+        
+        public DbSet<Language> Languages { get; set; }
+        public DbSet<Translation> Translations { get; set; }
+        public DbSet<UserLanguagePreference> UserLanguagePreferences { get; set; }
+        public DbSet<AccessibilityAudit> AccessibilityAudits { get; set; }
+        public DbSet<AccessibilityIssue> AccessibilityIssues { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -58,20 +60,6 @@ namespace BARQ.Infrastructure.Data
                 entity.HasIndex(e => e.TenantId);
                 entity.HasIndex(e => e.Email).IsUnique();
                 entity.HasIndex(e => e.UserName).IsUnique();
-            });
-
-            modelBuilder.Entity<Role>(entity =>
-            {
-                entity.ToTable("Roles");
-                entity.HasIndex(e => e.TenantId);
-                entity.HasIndex(e => new { e.TenantId, e.Name }).IsUnique();
-            });
-
-            modelBuilder.Entity<UserRole>(entity =>
-            {
-                entity.ToTable("UserRoles");
-                entity.HasKey(e => e.Id);
-                entity.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();
             });
         }
 
@@ -118,6 +106,25 @@ namespace BARQ.Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(ach => ach.ChangedBy)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Translation>()
+                .HasOne<Language>()
+                .WithMany(l => l.Translations)
+                .HasForeignKey(t => t.LanguageCode)
+                .HasPrincipalKey(l => l.Code)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserLanguagePreference>()
+                .HasOne(ulp => ulp.User)
+                .WithMany(u => u.LanguagePreferences)
+                .HasForeignKey(ulp => ulp.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AccessibilityIssue>()
+                .HasOne<AccessibilityAudit>()
+                .WithMany(aa => aa.Issues)
+                .HasForeignKey(ai => ai.AccessibilityAuditId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         private void ConfigureIndexes(ModelBuilder modelBuilder)
@@ -167,6 +174,39 @@ namespace BARQ.Infrastructure.Data
             modelBuilder.Entity<AdminConfiguration>()
                 .HasIndex(ac => new { ac.TenantId, ac.ConfigurationKey })
                 .IsUnique();
+
+            modelBuilder.Entity<Language>()
+                .HasIndex(l => l.Code)
+                .IsUnique();
+
+            modelBuilder.Entity<Language>()
+                .HasIndex(l => new { l.TenantId, l.IsEnabled });
+
+            modelBuilder.Entity<Translation>()
+                .HasIndex(t => new { t.LanguageCode, t.Key })
+                .IsUnique();
+
+            modelBuilder.Entity<Translation>()
+                .HasIndex(t => new { t.TenantId, t.Category, t.IsActive });
+
+            modelBuilder.Entity<UserLanguagePreference>()
+                .HasIndex(ulp => new { ulp.UserId, ulp.LanguageCode })
+                .IsUnique();
+
+            modelBuilder.Entity<UserLanguagePreference>()
+                .HasIndex(ulp => new { ulp.TenantId, ulp.IsDefault });
+
+            modelBuilder.Entity<AccessibilityAudit>()
+                .HasIndex(aa => new { aa.TenantId, aa.Status });
+
+            modelBuilder.Entity<AccessibilityAudit>()
+                .HasIndex(aa => new { aa.AuditedBy, aa.AuditDate });
+
+            modelBuilder.Entity<AccessibilityIssue>()
+                .HasIndex(ai => new { ai.AccessibilityAuditId, ai.Severity });
+
+            modelBuilder.Entity<AccessibilityIssue>()
+                .HasIndex(ai => new { ai.TenantId, ai.Status, ai.Priority });
         }
 
         public override int SaveChanges()
