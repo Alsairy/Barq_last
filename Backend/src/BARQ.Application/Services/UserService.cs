@@ -63,7 +63,7 @@ namespace BARQ.Application.Services
             return new PagedResult<UserDto>
             {
                 Items = users,
-                TotalCount = totalCount,
+                Total = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };

@@ -53,7 +53,7 @@ namespace BARQ.Application.Services
             return new PagedResult<TenantDto>
             {
                 Items = tenants,
-                TotalCount = totalCount,
+                Total = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };
