@@ -5,6 +5,7 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace BARQ.Application.Services
 {
@@ -59,7 +60,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<ImpersonationSessionDto>
                 {
                     Items = sessionDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -135,7 +136,7 @@ namespace BARQ.Application.Services
                     IpAddress = ipAddress,
                     UserAgent = userAgent,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = adminUserId
+                    CreatedBy = Guid.TryParse(adminUserId, out var createdByGuid) ? createdByGuid : Guid.Empty
                 };
 
                 _context.ImpersonationSessions.Add(session);
@@ -172,7 +173,7 @@ namespace BARQ.Application.Services
                 session.EndedBy = endedBy;
                 session.EndReason = request.Reason;
                 session.UpdatedAt = DateTime.UtcNow;
-                session.UpdatedBy = endedBy;
+                session.UpdatedBy = Guid.TryParse(endedBy, out var updatedByGuid) ? updatedByGuid : Guid.Empty;
 
                 await _context.SaveChangesAsync();
 
@@ -226,7 +227,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task LogImpersonationActionAsync(Guid sessionId, string actionType, string entityType, string? entityId, string description, string httpMethod, string requestPath, int statusCode, long responseTimeMs, string? riskLevel = null)
+        public async System.Threading.Tasks.Task LogImpersonationActionAsync(Guid sessionId, string actionType, string entityType, string? entityId, string description, string httpMethod, string requestPath, int statusCode, long responseTimeMs, string? riskLevel = null)
         {
             try
             {
@@ -245,7 +246,7 @@ namespace BARQ.Application.Services
                     ResponseTimeMs = responseTimeMs,
                     RiskLevel = riskLevel ?? "Low",
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = "System"
+                    CreatedBy = Guid.Empty
                 };
 
                 _context.ImpersonationActions.Add(action);
@@ -323,7 +324,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<ImpersonationActionDto>
                 {
                     Items = actionDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -335,7 +336,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task ExpireOldSessionsAsync()
+        public async System.Threading.Tasks.Task ExpireOldSessionsAsync()
         {
             try
             {
@@ -349,7 +350,7 @@ namespace BARQ.Application.Services
                     session.EndedAt = DateTime.UtcNow;
                     session.EndReason = "Session expired";
                     session.UpdatedAt = DateTime.UtcNow;
-                    session.UpdatedBy = "System";
+                    session.UpdatedBy = Guid.Empty;
                 }
 
                 await _context.SaveChangesAsync();
@@ -376,11 +377,11 @@ namespace BARQ.Application.Services
                 }
 
                 var userRoles = await _context.UserRoles
-                    .Include(ur => ur.Role)
                     .Where(ur => ur.UserId == userId)
                     .ToListAsync();
 
-                var hasAdminRole = userRoles.Any(ur => ur.Role.Name == "Admin" || ur.Role.Name == "SuperAdmin");
+                var roles = await _context.Roles.Where(r => userRoles.Select(ur => ur.RoleId).Contains(r.Id)).ToListAsync();
+                var hasAdminRole = roles.Any(r => r.Name == "Admin" || r.Name == "SuperAdmin");
                 
                 return !hasAdminRole;
             }
