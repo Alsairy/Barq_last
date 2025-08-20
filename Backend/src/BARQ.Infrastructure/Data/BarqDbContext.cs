@@ -42,10 +42,13 @@ public sealed class BarqDbContext
     public DbSet<AdminConfiguration> AdminConfigurations => Set<AdminConfiguration>();
     public DbSet<AdminConfigurationHistory> AdminConfigurationHistory => Set<AdminConfigurationHistory>();
     
-    // PR #6 DbSets (Notifications & Preferences)
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
     public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
     public DbSet<NotificationHistory> NotificationHistory => Set<NotificationHistory>();
+    
+    public DbSet<FileAttachment> FileAttachments => Set<FileAttachment>();
+    public DbSet<FileAttachmentAccess> FileAttachmentAccesses => Set<FileAttachmentAccess>();
+    public DbSet<FileQuarantine> FileQuarantines => Set<FileQuarantine>();
     
     public DbSet<Language> Languages => Set<Language>();
     public DbSet<Translation> Translations => Set<Translation>();
@@ -80,20 +83,34 @@ public sealed class BarqDbContext
 
     private void SetTenantFilter<TEntity>(ModelBuilder modelBuilder, Guid tenantId) where TEntity : TenantEntity
     {
-        modelBuilder.Entity<TEntity>().HasQueryFilter(e => tenantId != Guid.Empty && e.TenantId == tenantId && !e.IsDeleted);
+        modelBuilder.Entity<TEntity>().HasQueryFilter(e => tenantId != Guid.Empty && e.TenantId == tenantId);
     }
 
     private void AddSoftDeleteFilter(ModelBuilder modelBuilder)
     {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType)
-                && !typeof(TenantEntity).IsAssignableFrom(entityType.ClrType))
+            var clr = entityType.ClrType;
+
+            var isIdentityTable =
+                typeof(IdentityUser<Guid>).IsAssignableFrom(clr) ||
+                typeof(IdentityRole<Guid>).IsAssignableFrom(clr) ||
+                typeof(IdentityUserClaim<Guid>).IsAssignableFrom(clr) ||
+                typeof(IdentityUserRole<Guid>).IsAssignableFrom(clr) ||
+                typeof(IdentityUserLogin<Guid>).IsAssignableFrom(clr) ||
+                typeof(IdentityRoleClaim<Guid>).IsAssignableFrom(clr) ||
+                typeof(IdentityUserToken<Guid>).IsAssignableFrom(clr);
+
+            var isAuditLog = typeof(AuditLog).IsAssignableFrom(clr); // if AuditLog exists and is immutable
+
+            if (isIdentityTable || isAuditLog) continue;
+
+            if (typeof(BaseEntity).IsAssignableFrom(clr))
             {
-                var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
-                var isDeletedProp = System.Linq.Expressions.Expression.PropertyOrField(parameter, nameof(BaseEntity.IsDeleted));
+                var param = System.Linq.Expressions.Expression.Parameter(clr, "e");
+                var isDeletedProp = System.Linq.Expressions.Expression.PropertyOrField(param, nameof(BaseEntity.IsDeleted));
                 var notDeleted = System.Linq.Expressions.Expression.Not(isDeletedProp);
-                var lambda = System.Linq.Expressions.Expression.Lambda(notDeleted, parameter);
+                var lambda = System.Linq.Expressions.Expression.Lambda(notDeleted, param);
                 entityType.SetQueryFilter(lambda);
             }
         }
@@ -124,6 +141,7 @@ public sealed class BarqDbContext
                 {
                     entry.Entity.CreatedAt = now;
                 }
+
                 if (entry.Entity is TenantEntity te && tenantId != Guid.Empty)
                 {
                     te.TenantId = te.TenantId == Guid.Empty ? tenantId : te.TenantId;
