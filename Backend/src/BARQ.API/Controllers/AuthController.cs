@@ -24,15 +24,15 @@ namespace BARQ.API.Controllers
             try
             {
                 var response = await _userService.LoginAsync(request);
-                return Ok(ApiResponse<LoginResponse>.SuccessResponse(response, "Login successful"));
+                return Ok(ApiResponse<LoginResponse>.Ok(response, "Login successful"));
             }
             catch (UnauthorizedAccessException)
             {
-                return Unauthorized(ApiResponse<LoginResponse>.ErrorResponse("Invalid username or password"));
+                return Unauthorized(ApiResponse<LoginResponse>.Fail("Invalid username or password"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<LoginResponse>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<LoginResponse>.Fail(ex.Message));
             }
         }
 
@@ -48,11 +48,11 @@ namespace BARQ.API.Controllers
                     await _userService.LogoutAsync(userId);
                 }
                 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Logout successful"));
+                return Ok(ApiResponse<bool>.Ok(true, "Logout successful"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -65,18 +65,18 @@ namespace BARQ.API.Controllers
                 var userIdClaim = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
                 if (!Guid.TryParse(userIdClaim, out var userId))
                 {
-                    return Unauthorized(ApiResponse<bool>.ErrorResponse("Invalid user"));
+                    return Unauthorized(ApiResponse<bool>.Fail("Invalid user"));
                 }
 
                 var result = await _userService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
                 if (!result)
-                    return BadRequest(ApiResponse<bool>.ErrorResponse("Failed to change password"));
+                    return BadRequest(ApiResponse<bool>.Fail("Failed to change password"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Password changed successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Password changed successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
     }
