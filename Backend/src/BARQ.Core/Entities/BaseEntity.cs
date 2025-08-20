@@ -9,9 +9,9 @@ namespace BARQ.Core.Entities
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedAt { get; set; }
         public Guid? DeletedById { get; set; }
-        public string? CreatedBy { get; set; }
-        public string? UpdatedBy { get; set; }
-        public string? DeletedBy { get; set; }
+        public Guid? CreatedBy { get; set; }
+        public Guid? UpdatedBy { get; set; }
+        public Guid? DeletedBy { get; set; }
         public int Version { get; set; } = 1;
     }
 
@@ -19,11 +19,11 @@ namespace BARQ.Core.Entities
     {
         DateTime CreatedAt { get; set; }
         DateTime? UpdatedAt { get; set; }
-        string? CreatedBy { get; set; }
-        string? UpdatedBy { get; set; }
+        Guid? CreatedBy { get; set; }
+        Guid? UpdatedBy { get; set; }
         bool IsDeleted { get; set; }
         DateTime? DeletedAt { get; set; }
-        string? DeletedBy { get; set; }
+        Guid? DeletedBy { get; set; }
         int Version { get; set; }
     }
 

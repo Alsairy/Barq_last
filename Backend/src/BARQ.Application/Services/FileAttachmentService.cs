@@ -157,7 +157,7 @@ namespace BARQ.Application.Services
             var result = new PagedResult<FileAttachmentDto>
             {
                 Items = files.Select(MapToDto).ToList(),
-                TotalCount = totalCount,
+                Total = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };

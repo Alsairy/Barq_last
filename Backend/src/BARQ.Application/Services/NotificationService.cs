@@ -76,7 +76,7 @@ namespace BARQ.Application.Services
             return new PagedResult<NotificationDto>
             {
                 Items = notifications,
-                TotalCount = totalCount,
+                Total = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize,
                 // TotalPages is calculated automatically by PagedResult
@@ -330,7 +330,7 @@ namespace BARQ.Application.Services
             return new PagedResult<NotificationCenterDto>
             {
                 Items = notifications,
-                TotalCount = totalCount,
+                Total = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize,
                 // TotalPages is calculated automatically by PagedResult

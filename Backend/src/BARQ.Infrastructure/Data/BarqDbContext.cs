@@ -1,237 +1,158 @@
+using System.Reflection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 
-namespace BARQ.Infrastructure.Data
+namespace BARQ.Infrastructure.Data;
+
+public sealed class BarqDbContext
+    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid,
+                        IdentityUserClaim<Guid>, IdentityUserRole<Guid>, IdentityUserLogin<Guid>,
+                        IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
 {
-    public class BarqDbContext : IdentityDbContext<ApplicationUser, Role, Guid, 
-        Microsoft.AspNetCore.Identity.IdentityUserClaim<Guid>,
-        UserRole,
-        Microsoft.AspNetCore.Identity.IdentityUserLogin<Guid>,
-        Microsoft.AspNetCore.Identity.IdentityRoleClaim<Guid>,
-        Microsoft.AspNetCore.Identity.IdentityUserToken<Guid>>
+    private readonly ITenantProvider _tenantProvider;
+
+    public BarqDbContext(DbContextOptions<BarqDbContext> options, ITenantProvider tenantProvider)
+        : base(options)
     {
-        public BarqDbContext(DbContextOptions<BarqDbContext> options) : base(options)
-        {
-        }
+        _tenantProvider = tenantProvider;
+    }
 
-        public DbSet<Tenant> Tenants { get; set; }
-        public DbSet<AIProvider> AIProviders { get; set; }
-        public DbSet<AIAgent> AIAgents { get; set; }
-        public DbSet<BARQ.Core.Entities.Task> Tasks { get; set; }
-        public DbSet<TaskExecution> TaskExecutions { get; set; }
-        public DbSet<Project> Projects { get; set; }
-        public DbSet<ProjectTask> ProjectTasks { get; set; }
-        public DbSet<Document> Documents { get; set; }
-        public DbSet<TaskDocument> TaskDocuments { get; set; }
-        public DbSet<Template> Templates { get; set; }
-        public DbSet<Workflow> Workflows { get; set; }
-        public DbSet<WorkflowInstance> WorkflowInstances { get; set; }
-        public DbSet<AuditLog> AuditLogs { get; set; }
-        public DbSet<SystemConfiguration> SystemConfigurations { get; set; }
-        public DbSet<PerformanceMetric> PerformanceMetrics { get; set; }
-        public DbSet<Notification> Notifications { get; set; }
-        public DbSet<SecurityEvent> SecurityEvents { get; set; }
-        public DbSet<Backup> Backups { get; set; }
-        public DbSet<Integration> Integrations { get; set; }
-        public DbSet<AdminConfiguration> AdminConfigurations { get; set; }
-        public DbSet<AdminConfigurationHistory> AdminConfigurationHistory { get; set; }
-        
-        public DbSet<NotificationPreference> NotificationPreferences { get; set; }
-        public DbSet<EmailTemplate> EmailTemplates { get; set; }
-        public DbSet<NotificationHistory> NotificationHistory { get; set; }
-        public DbSet<FileAttachment> FileAttachments { get; set; }
-        public DbSet<FileAttachmentAccess> FileAttachmentAccesses { get; set; }
-        public DbSet<FileQuarantine> FileQuarantines { get; set; }
-        public DbSet<AuditReport> AuditReports { get; set; }
-        public DbSet<ReportTemplate> ReportTemplates { get; set; }
+    public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<AIProvider> AIProviders => Set<AIProvider>();
+    public DbSet<AIAgent> AIAgents => Set<AIAgent>();
+    public DbSet<BARQ.Core.Entities.Task> Tasks => Set<BARQ.Core.Entities.Task>();
+    public DbSet<TaskExecution> TaskExecutions => Set<TaskExecution>();
+    public DbSet<Project> Projects => Set<Project>();
+    public DbSet<ProjectTask> ProjectTasks => Set<ProjectTask>();
+    public DbSet<Document> Documents => Set<Document>();
+    public DbSet<TaskDocument> TaskDocuments => Set<TaskDocument>();
+    public DbSet<Template> Templates => Set<Template>();
+    public DbSet<Workflow> Workflows => Set<Workflow>();
+    public DbSet<WorkflowInstance> WorkflowInstances => Set<WorkflowInstance>();
+    public DbSet<SystemConfiguration> SystemConfigurations => Set<SystemConfiguration>();
+    public DbSet<PerformanceMetric> PerformanceMetrics => Set<PerformanceMetric>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<SecurityEvent> SecurityEvents => Set<SecurityEvent>();
+    public DbSet<Backup> Backups => Set<Backup>();
+    public DbSet<Integration> Integrations => Set<Integration>();
+    public DbSet<AdminConfiguration> AdminConfigurations => Set<AdminConfiguration>();
+    public DbSet<AdminConfigurationHistory> AdminConfigurationHistory => Set<AdminConfigurationHistory>();
+    
+    // PR #6 DbSets (Notifications & Preferences)
+    public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
+    public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
+    public DbSet<NotificationHistory> NotificationHistory => Set<NotificationHistory>();
+    
+    public DbSet<FileAttachment> FileAttachments => Set<FileAttachment>();
+    public DbSet<FileAttachmentAccess> FileAttachmentAccesses => Set<FileAttachmentAccess>();
+    public DbSet<FileQuarantine> FileQuarantines => Set<FileQuarantine>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<AuditReport> AuditReports => Set<AuditReport>();
+    public DbSet<ReportTemplate> ReportTemplates => Set<ReportTemplate>();
+    
+    public DbSet<Language> Languages => Set<Language>();
+    public DbSet<Translation> Translations => Set<Translation>();
+    public DbSet<UserLanguagePreference> UserLanguagePreferences => Set<UserLanguagePreference>();
+    public DbSet<AccessibilityAudit> AccessibilityAudits => Set<AccessibilityAudit>();
+    public DbSet<AccessibilityIssue> AccessibilityIssues => Set<AccessibilityIssue>();
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-            
-            modelBuilder.AddSoftDeleteQueryFilter();
-            
-            ConfigureIdentityTables(modelBuilder);
-            ConfigureEntityRelationships(modelBuilder);
-            ConfigureIndexes(modelBuilder);
-            
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(BarqDbContext).Assembly);
-        }
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
 
-        private void ConfigureIdentityTables(ModelBuilder modelBuilder)
+        builder.ApplyConfigurationsFromAssembly(typeof(BarqDbContext).Assembly);
+
+        AddTenantFilter(builder);      // TenantEntity: TenantId == current tenant
+        AddSoftDeleteFilter(builder);  // BaseEntity: !IsDeleted (except special cases like AuditLog if not soft-deleted)
+    }
+
+    private void AddTenantFilter(ModelBuilder modelBuilder)
+    {
+        var tenantId = _tenantProvider.GetTenantId();
+        var setGlobalQuery = typeof(BarqDbContext).GetMethod(nameof(SetTenantFilter), BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            modelBuilder.Entity<ApplicationUser>(entity =>
+            if (typeof(TenantEntity).IsAssignableFrom(entityType.ClrType))
             {
-                entity.ToTable("Users");
-                entity.HasIndex(e => e.TenantId);
-                entity.HasIndex(e => e.Email).IsUnique();
-                entity.HasIndex(e => e.UserName).IsUnique();
-            });
+                var method = setGlobalQuery.MakeGenericMethod(entityType.ClrType);
+                method.Invoke(this, new object[] { modelBuilder, tenantId });
+            }
+        }
+    }
 
-            modelBuilder.Entity<Role>(entity =>
+    private void SetTenantFilter<TEntity>(ModelBuilder modelBuilder, Guid tenantId) where TEntity : TenantEntity
+    {
+        modelBuilder.Entity<TEntity>().HasQueryFilter(e => tenantId != Guid.Empty && e.TenantId == tenantId);
+    }
+
+    private void AddSoftDeleteFilter(ModelBuilder modelBuilder)
+    {
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            var clr = entityType.ClrType;
+
+            var isIdentityTable =
+                typeof(IdentityUser<Guid>).IsAssignableFrom(clr) ||
+                typeof(IdentityRole<Guid>).IsAssignableFrom(clr) ||
+                typeof(IdentityUserClaim<Guid>).IsAssignableFrom(clr) ||
+                typeof(IdentityUserRole<Guid>).IsAssignableFrom(clr) ||
+                typeof(IdentityUserLogin<Guid>).IsAssignableFrom(clr) ||
+                typeof(IdentityRoleClaim<Guid>).IsAssignableFrom(clr) ||
+                typeof(IdentityUserToken<Guid>).IsAssignableFrom(clr);
+
+            var isAuditLog = typeof(AuditLog).IsAssignableFrom(clr); // if AuditLog exists and is immutable
+
+            if (isIdentityTable || isAuditLog) continue;
+
+            if (typeof(BaseEntity).IsAssignableFrom(clr))
             {
-                entity.ToTable("Roles");
-                entity.HasIndex(e => e.TenantId);
-                entity.HasIndex(e => new { e.TenantId, e.Name }).IsUnique();
-            });
+                var param = System.Linq.Expressions.Expression.Parameter(clr, "e");
+                var isDeletedProp = System.Linq.Expressions.Expression.PropertyOrField(param, nameof(BaseEntity.IsDeleted));
+                var notDeleted = System.Linq.Expressions.Expression.Not(isDeletedProp);
+                var lambda = System.Linq.Expressions.Expression.Lambda(notDeleted, param);
+                entityType.SetQueryFilter(lambda);
+            }
+        }
+    }
 
-            modelBuilder.Entity<UserRole>(entity =>
+    public override int SaveChanges()
+    {
+        ApplyEntityAudits();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ApplyEntityAudits();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void ApplyEntityAudits()
+    {
+        var now = DateTime.UtcNow;
+        var tenantId = _tenantProvider.GetTenantId();
+
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            if (entry.State == EntityState.Added)
             {
-                entity.ToTable("UserRoles");
-                entity.HasKey(e => e.Id);
-                entity.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();
-            });
-        }
-
-        private void ConfigureEntityRelationships(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<BARQ.Core.Entities.Task>()
-                .HasOne(t => t.AssignedTo)
-                .WithMany(u => u.AssignedTasks)
-                .HasForeignKey(t => t.AssignedToId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            modelBuilder.Entity<BARQ.Core.Entities.Task>()
-                .HasOne(t => t.Creator)
-                .WithMany(u => u.CreatedTasks)
-                .HasForeignKey(t => t.CreatedBy)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            modelBuilder.Entity<BARQ.Core.Entities.Task>()
-                .HasOne(t => t.ParentTask)
-                .WithMany(t => t.SubTasks)
-                .HasForeignKey(t => t.ParentTaskId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Project>()
-                .HasOne(p => p.Template)
-                .WithMany(p => p.DerivedProjects)
-                .HasForeignKey(p => p.TemplateId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            modelBuilder.Entity<Template>()
-                .HasOne(t => t.ParentTemplate)
-                .WithMany(t => t.ChildTemplates)
-                .HasForeignKey(t => t.ParentTemplateId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<AdminConfiguration>()
-                .HasOne(ac => ac.ValidatedByUser)
-                .WithMany()
-                .HasForeignKey(ac => ac.ValidatedBy)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            modelBuilder.Entity<AdminConfigurationHistory>()
-                .HasOne(ach => ach.ChangedByUser)
-                .WithMany()
-                .HasForeignKey(ach => ach.ChangedBy)
-                .OnDelete(DeleteBehavior.SetNull);
-        }
-
-        private void ConfigureIndexes(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Tenant>()
-                .HasIndex(t => t.Name)
-                .IsUnique();
-
-            modelBuilder.Entity<AIProvider>()
-                .HasIndex(ap => new { ap.TenantId, ap.Name })
-                .IsUnique();
-
-            modelBuilder.Entity<AIAgent>()
-                .HasIndex(aa => new { aa.TenantId, aa.Name })
-                .IsUnique();
-
-            modelBuilder.Entity<BARQ.Core.Entities.Task>()
-                .HasIndex(t => new { t.TenantId, t.Status });
-
-            modelBuilder.Entity<BARQ.Core.Entities.Task>()
-                .HasIndex(t => new { t.TenantId, t.AssignedToId });
-
-            modelBuilder.Entity<Project>()
-                .HasIndex(p => new { p.TenantId, p.Status });
-
-            modelBuilder.Entity<Document>()
-                .HasIndex(d => new { d.TenantId, d.DocumentType });
-
-            modelBuilder.Entity<Workflow>()
-                .HasIndex(w => new { w.TenantId, w.WorkflowType });
-
-            modelBuilder.Entity<WorkflowInstance>()
-                .HasIndex(wi => new { wi.TenantId, wi.Status });
-
-            modelBuilder.Entity<AuditLog>()
-                .HasIndex(al => new { al.TenantId, al.EntityType, al.EntityId });
-
-            modelBuilder.Entity<AuditLog>()
-                .HasIndex(al => al.Timestamp);
-
-            modelBuilder.Entity<Notification>()
-                .HasIndex(n => new { n.TenantId, n.UserId, n.IsRead });
-
-            modelBuilder.Entity<SecurityEvent>()
-                .HasIndex(se => new { se.TenantId, se.EventType, se.Timestamp });
-
-            modelBuilder.Entity<AdminConfiguration>()
-                .HasIndex(ac => new { ac.TenantId, ac.ConfigurationKey })
-                .IsUnique();
-
-            modelBuilder.Entity<FileAttachment>()
-                .HasIndex(fa => new { fa.TenantId, fa.Status });
-
-            modelBuilder.Entity<FileAttachment>()
-                .HasIndex(fa => fa.FileHash);
-
-            modelBuilder.Entity<FileAttachmentAccess>()
-                .HasIndex(faa => new { faa.FileAttachmentId, faa.AccessedAt });
-
-            modelBuilder.Entity<AuditReport>()
-                .HasIndex(ar => new { ar.TenantId, ar.Status });
-
-            modelBuilder.Entity<AuditReport>()
-                .HasIndex(ar => new { ar.GeneratedBy, ar.GeneratedAt });
-
-            modelBuilder.Entity<ReportTemplate>()
-                .HasIndex(rt => new { rt.TenantId, rt.Type, rt.IsActive });
-        }
-
-        public override int SaveChanges()
-        {
-            UpdateTimestamps();
-            return base.SaveChanges();
-        }
-
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            UpdateTimestamps();
-            return await base.SaveChangesAsync(cancellationToken);
-        }
-
-        private void UpdateTimestamps()
-        {
-            var auditableEntries = ChangeTracker.Entries<IAuditable>();
-
-            foreach (var entry in auditableEntries)
-            {
-                switch (entry.State)
+                if (entry.Entity.CreatedAt == default(DateTime))
                 {
-                    case EntityState.Added:
-                        entry.Entity.CreatedAt = DateTime.UtcNow;
-                        entry.Entity.Version = 1;
-                        break;
-                    case EntityState.Modified:
-                        entry.Entity.UpdatedAt = DateTime.UtcNow;
-                        entry.Entity.Version++;
-                        break;
-                    case EntityState.Deleted:
-                        entry.State = EntityState.Modified;
-                        entry.Entity.IsDeleted = true;
-                        entry.Entity.DeletedAt = DateTime.UtcNow;
-                        entry.Entity.UpdatedAt = DateTime.UtcNow;
-                        entry.Entity.Version++;
-                        break;
+                    entry.Entity.CreatedAt = now;
                 }
+
+                if (entry.Entity is TenantEntity te && tenantId != Guid.Empty)
+                {
+                    te.TenantId = te.TenantId == Guid.Empty ? tenantId : te.TenantId;
+                }
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedAt = now;
             }
         }
     }

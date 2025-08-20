@@ -106,7 +106,7 @@ namespace BARQ.Application.Services
             return new PagedResult<TaskDto>
             {
                 Items = tasks,
-                TotalCount = totalCount,
+                Total = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };
