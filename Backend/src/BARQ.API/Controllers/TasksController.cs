@@ -32,11 +32,11 @@ namespace BARQ.API.Controllers
             {
                 var tenantId = GetCurrentTenantId();
                 var result = await _taskService.GetTasksAsync(tenantId, request);
-                return Ok(ApiResponse<PagedResult<TaskDto>>.SuccessResponse(result));
+                return Ok(ApiResponse<PagedResult<TaskDto>>.Ok(result));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<PagedResult<TaskDto>>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<PagedResult<TaskDto>>.Fail(ex.Message));
             }
         }
 
@@ -47,13 +47,13 @@ namespace BARQ.API.Controllers
             {
                 var task = await _taskService.GetTaskByIdAsync(id);
                 if (task == null)
-                    return NotFound(ApiResponse<TaskDto>.ErrorResponse("Task not found"));
+                    return NotFound(ApiResponse<TaskDto>.Fail("Task not found"));
 
-                return Ok(ApiResponse<TaskDto>.SuccessResponse(task));
+                return Ok(ApiResponse<TaskDto>.Ok(task));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<TaskDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<TaskDto>.Fail(ex.Message));
             }
         }
 
@@ -65,11 +65,11 @@ namespace BARQ.API.Controllers
                 var tenantId = GetCurrentTenantId();
                 var task = await _taskService.CreateTaskAsync(tenantId, request);
                 return CreatedAtAction(nameof(GetTask), new { id = task.Id }, 
-                    ApiResponse<TaskDto>.SuccessResponse(task, "Task created successfully"));
+                    ApiResponse<TaskDto>.Ok(task, "Task created successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<TaskDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<TaskDto>.Fail(ex.Message));
             }
         }
 
@@ -79,11 +79,11 @@ namespace BARQ.API.Controllers
             try
             {
                 var task = await _taskService.UpdateTaskAsync(id, request);
-                return Ok(ApiResponse<TaskDto>.SuccessResponse(task, "Task updated successfully"));
+                return Ok(ApiResponse<TaskDto>.Ok(task, "Task updated successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<TaskDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<TaskDto>.Fail(ex.Message));
             }
         }
 
@@ -94,13 +94,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _taskService.DeleteTaskAsync(id);
                 if (!result)
-                    return NotFound(ApiResponse<bool>.ErrorResponse("Task not found"));
+                    return NotFound(ApiResponse<bool>.Fail("Task not found"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Task deleted successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Task deleted successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -111,13 +111,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _taskService.AssignTaskAsync(id, request.UserId);
                 if (!result)
-                    return BadRequest(ApiResponse<bool>.ErrorResponse("Failed to assign task"));
+                    return BadRequest(ApiResponse<bool>.Fail("Failed to assign task"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Task assigned successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Task assigned successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -128,13 +128,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _taskService.UpdateTaskStatusAsync(id, request.Status);
                 if (!result)
-                    return BadRequest(ApiResponse<bool>.ErrorResponse("Failed to update task status"));
+                    return BadRequest(ApiResponse<bool>.Fail("Failed to update task status"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Task status updated successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Task status updated successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -144,11 +144,11 @@ namespace BARQ.API.Controllers
             try
             {
                 var result = await _taskService.BulkDeleteTasksAsync(request);
-                return Ok(ApiResponse<BulkOperationResult>.SuccessResponse(result, "Bulk delete completed"));
+                return Ok(ApiResponse<BulkOperationResult>.Ok(result, "Bulk delete completed"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<BulkOperationResult>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<BulkOperationResult>.Fail(ex.Message));
             }
         }
     }

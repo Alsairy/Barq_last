@@ -43,9 +43,9 @@ namespace BARQ.Core.Entities
         public DateTime? UpdatedAt { get; set; }
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedAt { get; set; }
-        public string? CreatedBy { get; set; }
-        public string? UpdatedBy { get; set; }
-        public string? DeletedBy { get; set; }
+        public Guid? CreatedBy { get; set; }
+        public Guid? UpdatedBy { get; set; }
+        public Guid? DeletedBy { get; set; }
         public int Version { get; set; } = 1;
 
         [ForeignKey("TenantId")]

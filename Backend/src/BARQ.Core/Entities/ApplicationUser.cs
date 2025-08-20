@@ -46,13 +46,16 @@ namespace BARQ.Core.Entities
         [MaxLength(10)]
         public string? Language { get; set; }
         
+        [MaxLength(10)]
+        public string? PreferredLanguage { get; set; }
+        
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedAt { get; set; }
-        public string? CreatedBy { get; set; }
-        public string? UpdatedBy { get; set; }
-        public string? DeletedBy { get; set; }
+        public Guid? CreatedBy { get; set; }
+        public Guid? UpdatedBy { get; set; }
+        public Guid? DeletedBy { get; set; }
         public int Version { get; set; } = 1;
 
         [ForeignKey("TenantId")]
@@ -63,5 +66,8 @@ namespace BARQ.Core.Entities
         public virtual ICollection<Task> AssignedTasks { get; set; } = new List<Task>();
         public virtual ICollection<Project> OwnedProjects { get; set; } = new List<Project>();
         public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+        public virtual ICollection<UserLanguagePreference> LanguagePreferences { get; set; } = new List<UserLanguagePreference>();
+        
+        public string FullName => $"{FirstName} {LastName}".Trim();
     }
 }

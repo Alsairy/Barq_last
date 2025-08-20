@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-export default function NotificationBell() {
+export function NotificationBell() {
   const [unread, setUnread] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
@@ -16,3 +16,5 @@ export default function NotificationBell() {
     </button>
   );
 }
+
+export default NotificationBell;
