@@ -41,7 +41,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<BillingPlanDto>
                 {
                     Items = planDtos,
-                    TotalCount = planDtos.Count,
+                    Total = planDtos.Count,
                     Page = 1,
                     PageSize = planDtos.Count
                 };
@@ -391,7 +391,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<UsageQuotaDto>
                 {
                     Items = quotaDtos,
-                    TotalCount = quotaDtos.Count,
+                    Total = quotaDtos.Count,
                     Page = 1,
                     PageSize = quotaDtos.Count
                 };
@@ -534,7 +534,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<InvoiceDto>
                 {
                     Items = invoiceDtos,
-                    TotalCount = invoiceDtos.Count,
+                    Total = invoiceDtos.Count,
                     Page = 1,
                     PageSize = invoiceDtos.Count
                 };
@@ -671,7 +671,7 @@ namespace BARQ.Application.Services
                 return new BillingDashboardDto
                 {
                     CurrentSubscription = subscription,
-                    UsageQuotas = quotas.Items,
+                    UsageQuotas = quotas.Items.ToList(),
                     RecentInvoices = recentInvoices.Items.Take(5).ToList(),
                     MonthlySpend = monthlySpend,
                     ProjectedSpend = monthlySpend * 1.1m, // Simple projection
@@ -714,7 +714,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<UsageRecordDto>
                 {
                     Items = recordDtos,
-                    TotalCount = recordDtos.Count,
+                    Total = recordDtos.Count,
                     Page = 1,
                     PageSize = recordDtos.Count
                 };

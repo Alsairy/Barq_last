@@ -133,7 +133,7 @@ namespace BARQ.Application.Services
             return new PagedResult<AuditReportDto>
             {
                 Items = reportDtos,
-                TotalCount = totalCount,
+                Total = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };
@@ -296,7 +296,7 @@ namespace BARQ.Application.Services
             return new PagedResult<AuditLogViewDto>
             {
                 Items = auditLogDtos,
-                TotalCount = totalCount,
+                Total = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };
@@ -321,15 +321,15 @@ namespace BARQ.Application.Services
             
             if (request.Format.ToUpper() == "CSV")
             {
-                await GenerateCsvExport(stream, auditLogs.Items, request);
+                await GenerateCsvExport(stream, auditLogs.Items.ToList(), request);
             }
             else if (request.Format.ToUpper() == "EXCEL")
             {
-                await GenerateExcelExport(stream, auditLogs.Items, request);
+                await GenerateExcelExport(stream, auditLogs.Items.ToList(), request);
             }
             else if (request.Format.ToUpper() == "PDF")
             {
-                await GeneratePdfExport(stream, auditLogs.Items, request);
+                await GeneratePdfExport(stream, auditLogs.Items.ToList(), request);
             }
 
             stream.Position = 0;
