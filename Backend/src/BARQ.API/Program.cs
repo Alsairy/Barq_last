@@ -82,14 +82,14 @@ builder.Services
                     !string.IsNullOrWhiteSpace(cookieToken))
                 {
                     ctx.Token = cookieToken;
-                    return Task.CompletedTask;
+                    return System.Threading.Tasks.Task.CompletedTask;
                 }
 
                 var h = ctx.Request.Headers["Authorization"].ToString();
                 if (h?.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) == true)
                     ctx.Token = h.Substring("Bearer ".Length).Trim();
 
-                return Task.CompletedTask;
+                return System.Threading.Tasks.Task.CompletedTask;
             }
         };
     });
