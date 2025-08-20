@@ -32,7 +32,6 @@ public sealed class BarqDbContext
     public DbSet<Template> Templates => Set<Template>();
     public DbSet<Workflow> Workflows => Set<Workflow>();
     public DbSet<WorkflowInstance> WorkflowInstances => Set<WorkflowInstance>();
-    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<SystemConfiguration> SystemConfigurations => Set<SystemConfiguration>();
     public DbSet<PerformanceMetric> PerformanceMetrics => Set<PerformanceMetric>();
     public DbSet<Notification> Notifications => Set<Notification>();
@@ -50,6 +49,7 @@ public sealed class BarqDbContext
     public DbSet<FileAttachmentAccess> FileAttachmentAccesses => Set<FileAttachmentAccess>();
     public DbSet<FileQuarantine> FileQuarantines => Set<FileQuarantine>();
     
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<AuditReport> AuditReports => Set<AuditReport>();
     public DbSet<ReportTemplate> ReportTemplates => Set<ReportTemplate>();
     
@@ -72,8 +72,8 @@ public sealed class BarqDbContext
 
         builder.ApplyConfigurationsFromAssembly(typeof(BarqDbContext).Assembly);
 
-        AddTenantFilter(builder);
-        AddSoftDeleteFilter(builder);
+        AddTenantFilter(builder);      // TenantEntity: TenantId == current tenant
+        AddSoftDeleteFilter(builder);  // BaseEntity: !IsDeleted (except special cases like AuditLog if not soft-deleted)
     }
 
     private void AddTenantFilter(ModelBuilder modelBuilder)
