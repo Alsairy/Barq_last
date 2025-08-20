@@ -120,7 +120,10 @@ public sealed class BarqDbContext
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedAt ??= now;
+                if (entry.Entity.CreatedAt == default(DateTime))
+                {
+                    entry.Entity.CreatedAt = now;
+                }
                 if (entry.Entity is TenantEntity te && tenantId != Guid.Empty)
                 {
                     te.TenantId = te.TenantId == Guid.Empty ? tenantId : te.TenantId;
