@@ -41,7 +41,6 @@ public sealed class BarqDbContext
     public DbSet<AdminConfiguration> AdminConfigurations => Set<AdminConfiguration>();
     public DbSet<AdminConfigurationHistory> AdminConfigurationHistory => Set<AdminConfigurationHistory>();
     
-    // PR #6 DbSets (Notifications & Preferences)
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
     public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
     public DbSet<NotificationHistory> NotificationHistory => Set<NotificationHistory>();
@@ -49,6 +48,7 @@ public sealed class BarqDbContext
     public DbSet<FileAttachment> FileAttachments => Set<FileAttachment>();
     public DbSet<FileAttachmentAccess> FileAttachmentAccesses => Set<FileAttachmentAccess>();
     public DbSet<FileQuarantine> FileQuarantines => Set<FileQuarantine>();
+    
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<AuditReport> AuditReports => Set<AuditReport>();
     public DbSet<ReportTemplate> ReportTemplates => Set<ReportTemplate>();
