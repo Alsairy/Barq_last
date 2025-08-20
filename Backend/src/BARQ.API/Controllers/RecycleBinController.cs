@@ -18,15 +18,15 @@ namespace BARQ.API.Controllers
         public async Task<IActionResult> List([FromQuery] string entity, [FromQuery] int page = 1, [FromQuery] int pageSize = 25)
         {
             var result = await _svc.ListDeletedAsync(entity, page, pageSize);
-            return Ok(ApiResponse<object>.SuccessResponse(result, "Recycle bin list fetched"));
+            return Ok(ApiResponse<object>.Ok(result, "Recycle bin list fetched"));
         }
 
         [HttpPost("{entity}/{id:guid}/restore")]
         public async Task<IActionResult> Restore([FromRoute] string entity, [FromRoute] Guid id)
         {
             var ok = await _svc.RestoreAsync(entity, id);
-            if (!ok) return NotFound(ApiResponse<object>.ErrorResponse("Item not found or cannot be restored"));
-            return Ok(ApiResponse<object>.SuccessResponse(null, "Restored"));
+            if (!ok) return NotFound(ApiResponse<object>.Fail("Item not found or cannot be restored"));
+            return Ok(ApiResponse<object>.Ok(null, "Restored"));
         }
     }
 }

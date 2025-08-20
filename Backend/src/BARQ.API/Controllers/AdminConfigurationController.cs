@@ -39,11 +39,11 @@ namespace BARQ.API.Controllers
             {
                 var tenantId = GetCurrentTenantId();
                 var result = await _adminConfigurationService.GetConfigurationsAsync(tenantId, request);
-                return Ok(ApiResponse<PagedResult<AdminConfigurationDto>>.SuccessResponse(result));
+                return Ok(ApiResponse<PagedResult<AdminConfigurationDto>>.Ok(result));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<PagedResult<AdminConfigurationDto>>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<PagedResult<AdminConfigurationDto>>.Fail(ex.Message));
             }
         }
 
@@ -54,13 +54,13 @@ namespace BARQ.API.Controllers
             {
                 var configuration = await _adminConfigurationService.GetConfigurationByIdAsync(id);
                 if (configuration == null)
-                    return NotFound(ApiResponse<AdminConfigurationDto>.ErrorResponse("Configuration not found"));
+                    return NotFound(ApiResponse<AdminConfigurationDto>.Fail("Configuration not found"));
 
-                return Ok(ApiResponse<AdminConfigurationDto>.SuccessResponse(configuration));
+                return Ok(ApiResponse<AdminConfigurationDto>.Ok(configuration));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<AdminConfigurationDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<AdminConfigurationDto>.Fail(ex.Message));
             }
         }
 
@@ -72,13 +72,13 @@ namespace BARQ.API.Controllers
                 var tenantId = GetCurrentTenantId();
                 var configuration = await _adminConfigurationService.GetConfigurationByKeyAsync(tenantId, key);
                 if (configuration == null)
-                    return NotFound(ApiResponse<AdminConfigurationDto>.ErrorResponse("Configuration not found"));
+                    return NotFound(ApiResponse<AdminConfigurationDto>.Fail("Configuration not found"));
 
-                return Ok(ApiResponse<AdminConfigurationDto>.SuccessResponse(configuration));
+                return Ok(ApiResponse<AdminConfigurationDto>.Ok(configuration));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<AdminConfigurationDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<AdminConfigurationDto>.Fail(ex.Message));
             }
         }
 
@@ -89,11 +89,11 @@ namespace BARQ.API.Controllers
             {
                 var tenantId = GetCurrentTenantId();
                 var configurations = await _adminConfigurationService.GetConfigurationsByCategoryAsync(tenantId, category);
-                return Ok(ApiResponse<List<AdminConfigurationDto>>.SuccessResponse(configurations));
+                return Ok(ApiResponse<List<AdminConfigurationDto>>.Ok(configurations));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<List<AdminConfigurationDto>>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<List<AdminConfigurationDto>>.Fail(ex.Message));
             }
         }
 
@@ -104,11 +104,11 @@ namespace BARQ.API.Controllers
             {
                 var tenantId = GetCurrentTenantId();
                 var configurations = await _adminConfigurationService.GetConfigurationsByTypeAsync(tenantId, type);
-                return Ok(ApiResponse<List<AdminConfigurationDto>>.SuccessResponse(configurations));
+                return Ok(ApiResponse<List<AdminConfigurationDto>>.Ok(configurations));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<List<AdminConfigurationDto>>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<List<AdminConfigurationDto>>.Fail(ex.Message));
             }
         }
 
@@ -120,11 +120,11 @@ namespace BARQ.API.Controllers
                 var tenantId = GetCurrentTenantId();
                 var configuration = await _adminConfigurationService.CreateConfigurationAsync(tenantId, request);
                 return CreatedAtAction(nameof(GetConfiguration), new { id = configuration.Id }, 
-                    ApiResponse<AdminConfigurationDto>.SuccessResponse(configuration, "Configuration created successfully"));
+                    ApiResponse<AdminConfigurationDto>.Ok(configuration, "Configuration created successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<AdminConfigurationDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<AdminConfigurationDto>.Fail(ex.Message));
             }
         }
 
@@ -134,11 +134,11 @@ namespace BARQ.API.Controllers
             try
             {
                 var configuration = await _adminConfigurationService.UpdateConfigurationAsync(id, request);
-                return Ok(ApiResponse<AdminConfigurationDto>.SuccessResponse(configuration, "Configuration updated successfully"));
+                return Ok(ApiResponse<AdminConfigurationDto>.Ok(configuration, "Configuration updated successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<AdminConfigurationDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<AdminConfigurationDto>.Fail(ex.Message));
             }
         }
 
@@ -149,13 +149,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _adminConfigurationService.DeleteConfigurationAsync(id);
                 if (!result)
-                    return NotFound(ApiResponse<bool>.ErrorResponse("Configuration not found"));
+                    return NotFound(ApiResponse<bool>.Fail("Configuration not found"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Configuration deleted successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Configuration deleted successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -167,13 +167,13 @@ namespace BARQ.API.Controllers
                 var userId = GetCurrentUserId();
                 var result = await _adminConfigurationService.ValidateConfigurationAsync(id, userId);
                 if (!result)
-                    return BadRequest(ApiResponse<bool>.ErrorResponse("Failed to validate configuration"));
+                    return BadRequest(ApiResponse<bool>.Fail("Failed to validate configuration"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Configuration validated successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Configuration validated successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -183,11 +183,11 @@ namespace BARQ.API.Controllers
             try
             {
                 var result = await _adminConfigurationService.TestConfigurationAsync(id);
-                return Ok(ApiResponse<bool>.SuccessResponse(result, result ? "Configuration test passed" : "Configuration test failed"));
+                return Ok(ApiResponse<bool>.Ok(result, result ? "Configuration test passed" : "Configuration test failed"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
     }

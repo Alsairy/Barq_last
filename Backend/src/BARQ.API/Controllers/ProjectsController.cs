@@ -32,11 +32,11 @@ namespace BARQ.API.Controllers
             {
                 var tenantId = GetCurrentTenantId();
                 var result = await _projectService.GetProjectsAsync(tenantId, request);
-                return Ok(ApiResponse<PagedResult<ProjectDto>>.SuccessResponse(result));
+                return Ok(ApiResponse<PagedResult<ProjectDto>>.Ok(result));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<PagedResult<ProjectDto>>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<PagedResult<ProjectDto>>.Fail(ex.Message));
             }
         }
 
@@ -47,13 +47,13 @@ namespace BARQ.API.Controllers
             {
                 var project = await _projectService.GetProjectByIdAsync(id);
                 if (project == null)
-                    return NotFound(ApiResponse<ProjectDto>.ErrorResponse("Project not found"));
+                    return NotFound(ApiResponse<ProjectDto>.Fail("Project not found"));
 
-                return Ok(ApiResponse<ProjectDto>.SuccessResponse(project));
+                return Ok(ApiResponse<ProjectDto>.Ok(project));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<ProjectDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<ProjectDto>.Fail(ex.Message));
             }
         }
 
@@ -65,11 +65,11 @@ namespace BARQ.API.Controllers
                 var tenantId = GetCurrentTenantId();
                 var project = await _projectService.CreateProjectAsync(tenantId, request);
                 return CreatedAtAction(nameof(GetProject), new { id = project.Id }, 
-                    ApiResponse<ProjectDto>.SuccessResponse(project, "Project created successfully"));
+                    ApiResponse<ProjectDto>.Ok(project, "Project created successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<ProjectDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<ProjectDto>.Fail(ex.Message));
             }
         }
 
@@ -79,11 +79,11 @@ namespace BARQ.API.Controllers
             try
             {
                 var project = await _projectService.UpdateProjectAsync(id, request);
-                return Ok(ApiResponse<ProjectDto>.SuccessResponse(project, "Project updated successfully"));
+                return Ok(ApiResponse<ProjectDto>.Ok(project, "Project updated successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<ProjectDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<ProjectDto>.Fail(ex.Message));
             }
         }
 
@@ -94,13 +94,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _projectService.DeleteProjectAsync(id);
                 if (!result)
-                    return NotFound(ApiResponse<bool>.ErrorResponse("Project not found"));
+                    return NotFound(ApiResponse<bool>.Fail("Project not found"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Project deleted successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Project deleted successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -111,11 +111,11 @@ namespace BARQ.API.Controllers
             {
                 var tenantId = GetCurrentTenantId();
                 var templates = await _projectService.GetProjectTemplatesAsync(tenantId);
-                return Ok(ApiResponse<List<ProjectDto>>.SuccessResponse(templates));
+                return Ok(ApiResponse<List<ProjectDto>>.Ok(templates));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<List<ProjectDto>>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<List<ProjectDto>>.Fail(ex.Message));
             }
         }
 
@@ -127,11 +127,11 @@ namespace BARQ.API.Controllers
                 var tenantId = GetCurrentTenantId();
                 var project = await _projectService.CreateProjectFromTemplateAsync(tenantId, request.TemplateId, request.Name);
                 return CreatedAtAction(nameof(GetProject), new { id = project.Id }, 
-                    ApiResponse<ProjectDto>.SuccessResponse(project, "Project created from template successfully"));
+                    ApiResponse<ProjectDto>.Ok(project, "Project created from template successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<ProjectDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<ProjectDto>.Fail(ex.Message));
             }
         }
     }
