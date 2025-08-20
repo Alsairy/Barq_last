@@ -59,7 +59,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<FeatureFlagDto>
                 {
                     Items = flagDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -139,7 +139,7 @@ namespace BARQ.Application.Services
                     RequiresRestart = request.RequiresRestart,
                     Priority = request.Priority,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = createdBy
+                    CreatedBy = Guid.TryParse(createdBy, out var createdByGuid) ? createdByGuid : (Guid?)null
                 };
 
                 _context.FeatureFlags.Add(flag);
@@ -234,7 +234,7 @@ namespace BARQ.Application.Services
                 if (hasChanges)
                 {
                     flag.UpdatedAt = DateTime.UtcNow;
-                    flag.UpdatedBy = updatedBy;
+                    flag.UpdatedBy = Guid.TryParse(updatedBy, out var updatedByGuid) ? updatedByGuid : (Guid?)null;
                     await _context.SaveChangesAsync();
 
                     await LogFeatureFlagHistoryAsync(flag.Id, "Updated", previousEnabled, flag.IsEnabled, updatedBy, request.Reason);
@@ -303,7 +303,7 @@ namespace BARQ.Application.Services
                 flag.EnabledBy = isEnabled ? changedBy : flag.EnabledBy;
                 flag.DisabledBy = !isEnabled ? changedBy : flag.DisabledBy;
                 flag.UpdatedAt = DateTime.UtcNow;
-                flag.UpdatedBy = changedBy;
+                flag.UpdatedBy = Guid.TryParse(changedBy, out var changedByGuid) ? changedByGuid : (Guid?)null;
 
                 await _context.SaveChangesAsync();
 
@@ -390,7 +390,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task RefreshFeatureFlagCacheAsync()
+        public async System.Threading.Tasks.Task RefreshFeatureFlagCacheAsync()
         {
             try
             {
@@ -410,7 +410,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task LogFeatureFlagHistoryAsync(Guid featureFlagId, string action, bool previousValue, bool newValue, string changedBy, string? reason)
+        private async System.Threading.Tasks.Task LogFeatureFlagHistoryAsync(Guid featureFlagId, string action, bool previousValue, bool newValue, string changedBy, string? reason)
         {
             try
             {
@@ -425,7 +425,7 @@ namespace BARQ.Application.Services
                     Reason = reason,
                     ChangedAt = DateTime.UtcNow,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = changedBy
+                    CreatedBy = Guid.TryParse(changedBy, out var changedByGuid) ? changedByGuid : (Guid?)null
                 };
 
                 _context.FeatureFlagHistory.Add(history);

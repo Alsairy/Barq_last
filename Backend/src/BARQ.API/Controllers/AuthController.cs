@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.Models.Responses;
@@ -11,10 +12,12 @@ namespace BARQ.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly AuthCookieOptions _cookieOptions;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, IOptions<AuthCookieOptions> cookieOptions)
         {
             _userService = userService;
+            _cookieOptions = cookieOptions.Value;
         }
 
         [HttpPost("login")]
@@ -24,6 +27,18 @@ namespace BARQ.API.Controllers
             try
             {
                 var response = await _userService.LoginAsync(request);
+                
+                if (_cookieOptions.Enabled && !string.IsNullOrWhiteSpace(response.Token))
+                {
+                    Response.Cookies.Append(_cookieOptions.Name, response.Token, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = _cookieOptions.Secure,
+                        SameSite = Enum.Parse<SameSiteMode>(_cookieOptions.SameSite),
+                        Path = _cookieOptions.Path
+                    });
+                }
+                
                 return Ok(ApiResponse<LoginResponse>.Ok(response, "Login successful"));
             }
             catch (UnauthorizedAccessException)
@@ -46,6 +61,17 @@ namespace BARQ.API.Controllers
                 if (Guid.TryParse(userIdClaim, out var userId))
                 {
                     await _userService.LogoutAsync(userId);
+                }
+                
+                if (_cookieOptions.Enabled)
+                {
+                    Response.Cookies.Delete(_cookieOptions.Name, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = _cookieOptions.Secure,
+                        SameSite = Enum.Parse<SameSiteMode>(_cookieOptions.SameSite),
+                        Path = _cookieOptions.Path
+                    });
                 }
                 
                 return Ok(ApiResponse<bool>.Ok(true, "Logout successful"));
@@ -77,6 +103,26 @@ namespace BARQ.API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ApiResponse<bool>.Fail(ex.Message));
+            }
+        }
+
+        [HttpPost("rotate-token")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<LoginResponse>>> RotateToken()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+                if (!Guid.TryParse(userIdClaim, out var userId))
+                {
+                    return Unauthorized(ApiResponse<LoginResponse>.Fail("Invalid user"));
+                }
+
+                return BadRequest(ApiResponse<LoginResponse>.Fail("Refresh token functionality not yet implemented"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<LoginResponse>.Fail(ex.Message));
             }
         }
     }

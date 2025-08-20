@@ -124,6 +124,8 @@ builder.Services.AddScoped<BARQ.Application.Interfaces.IBillingService, BARQ.App
 builder.Services.AddScoped<BARQ.Application.Interfaces.IQuotaMiddleware, BARQ.Application.Services.QuotaMiddleware>();
 
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<BARQ.Core.Services.ITenantProvider, BARQ.Infrastructure.Services.TenantProvider>();
 
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<BarqDbContext>();

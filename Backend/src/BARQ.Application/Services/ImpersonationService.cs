@@ -59,7 +59,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<ImpersonationSessionDto>
                 {
                     Items = sessionDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -135,7 +135,7 @@ namespace BARQ.Application.Services
                     IpAddress = ipAddress,
                     UserAgent = userAgent,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = adminUserId
+                    CreatedBy = Guid.TryParse(adminUserId.ToString(), out var createdByGuid) ? createdByGuid : (Guid?)null
                 };
 
                 _context.ImpersonationSessions.Add(session);
@@ -172,7 +172,7 @@ namespace BARQ.Application.Services
                 session.EndedBy = endedBy;
                 session.EndReason = request.Reason;
                 session.UpdatedAt = DateTime.UtcNow;
-                session.UpdatedBy = endedBy;
+                session.UpdatedBy = Guid.TryParse(endedBy, out var updatedByGuid) ? updatedByGuid : (Guid?)null;
 
                 await _context.SaveChangesAsync();
 
@@ -226,7 +226,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task LogImpersonationActionAsync(Guid sessionId, string actionType, string entityType, string? entityId, string description, string httpMethod, string requestPath, int statusCode, long responseTimeMs, string? riskLevel = null)
+        public async System.Threading.Tasks.Task LogImpersonationActionAsync(Guid sessionId, string actionType, string entityType, string? entityId, string description, string httpMethod, string requestPath, int statusCode, long responseTimeMs, string? riskLevel = null)
         {
             try
             {
@@ -245,7 +245,7 @@ namespace BARQ.Application.Services
                     ResponseTimeMs = responseTimeMs,
                     RiskLevel = riskLevel ?? "Low",
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = "System"
+                    CreatedBy = null
                 };
 
                 _context.ImpersonationActions.Add(action);
@@ -323,7 +323,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<ImpersonationActionDto>
                 {
                     Items = actionDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -335,7 +335,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task ExpireOldSessionsAsync()
+        public async System.Threading.Tasks.Task ExpireOldSessionsAsync()
         {
             try
             {
@@ -349,7 +349,7 @@ namespace BARQ.Application.Services
                     session.EndedAt = DateTime.UtcNow;
                     session.EndReason = "Session expired";
                     session.UpdatedAt = DateTime.UtcNow;
-                    session.UpdatedBy = "System";
+                    session.UpdatedBy = null;
                 }
 
                 await _context.SaveChangesAsync();
@@ -376,11 +376,15 @@ namespace BARQ.Application.Services
                 }
 
                 var userRoles = await _context.UserRoles
-                    .Include(ur => ur.Role)
                     .Where(ur => ur.UserId == userId)
                     .ToListAsync();
 
-                var hasAdminRole = userRoles.Any(ur => ur.Role.Name == "Admin" || ur.Role.Name == "SuperAdmin");
+                var adminRoleIds = await _context.Roles
+                    .Where(r => r.Name == "Admin" || r.Name == "SuperAdmin")
+                    .Select(r => r.Id)
+                    .ToListAsync();
+
+                var hasAdminRole = userRoles.Any(ur => adminRoleIds.Contains(ur.RoleId));
                 
                 return !hasAdminRole;
             }
