@@ -53,6 +53,13 @@ public sealed class BarqDbContext
     public DbSet<AuditReport> AuditReports => Set<AuditReport>();
     public DbSet<ReportTemplate> ReportTemplates => Set<ReportTemplate>();
     
+    public DbSet<BillingPlan> BillingPlans => Set<BillingPlan>();
+    public DbSet<TenantSubscription> TenantSubscriptions => Set<TenantSubscription>();
+    public DbSet<UsageQuota> UsageQuotas => Set<UsageQuota>();
+    public DbSet<UsageRecord> UsageRecords => Set<UsageRecord>();
+    public DbSet<Invoice> Invoices => Set<Invoice>();
+    public DbSet<InvoiceLineItem> InvoiceLineItems => Set<InvoiceLineItem>();
+    
     public DbSet<Language> Languages => Set<Language>();
     public DbSet<Translation> Translations => Set<Translation>();
     public DbSet<UserLanguagePreference> UserLanguagePreferences => Set<UserLanguagePreference>();
@@ -104,7 +111,7 @@ public sealed class BarqDbContext
                 typeof(IdentityRoleClaim<Guid>).IsAssignableFrom(clr) ||
                 typeof(IdentityUserToken<Guid>).IsAssignableFrom(clr);
 
-            var isAuditLog = typeof(AuditLog).IsAssignableFrom(clr); // if AuditLog exists and is immutable
+            var isAuditLog = typeof(AuditLog).IsAssignableFrom(clr);
 
             if (isIdentityTable || isAuditLog) continue;
 
