@@ -124,11 +124,21 @@ builder.Services.AddScoped<BARQ.Application.Interfaces.IBillingService, BARQ.App
 builder.Services.AddScoped<BARQ.Application.Interfaces.IQuotaMiddleware, BARQ.Application.Services.QuotaMiddleware>();
 
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<BARQ.Core.Services.ITenantProvider, BARQ.Infrastructure.Services.TenantProvider>();
 
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<BarqDbContext>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<BarqDbContext>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+    await BARQ.Infrastructure.Data.DbSeeder.SeedAsync(context, userManager, roleManager);
+}
 
 app.Use(async (ctx, next) =>
 {
