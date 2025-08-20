@@ -68,7 +68,7 @@ namespace BARQ.Application.Services
             return new PagedResult<ProjectDto>
             {
                 Items = projects,
-                TotalCount = totalCount,
+                Total = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };

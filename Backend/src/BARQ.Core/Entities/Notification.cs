@@ -50,10 +50,19 @@ namespace BARQ.Core.Entities
         
         public DateTime? ExpiryDate { get; set; }
 
+        public bool RequiresAction { get; set; } = false;
+        public string? ActionData { get; set; } // JSON for action-specific data
+        
+        [MaxLength(100)]
+        public string? SourceEntity { get; set; } // e.g., "Task", "Project", "Workflow"
+        public string? SourceEntityId { get; set; }
+
         [ForeignKey("TenantId")]
         public virtual Tenant Tenant { get; set; } = null!;
         
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; } = null!;
+        
+        public virtual ICollection<NotificationHistory> History { get; set; } = new List<NotificationHistory>();
     }
 }
