@@ -95,7 +95,7 @@ namespace BARQ.Application.Services
             return new PagedResult<WorkflowDto>
             {
                 Items = workflows,
-                TotalCount = totalCount,
+                Total = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };

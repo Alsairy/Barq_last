@@ -26,11 +26,11 @@ namespace BARQ.API.Controllers
             try
             {
                 var result = await _tenantService.GetTenantsAsync(request);
-                return Ok(ApiResponse<PagedResult<TenantDto>>.SuccessResponse(result));
+                return Ok(ApiResponse<PagedResult<TenantDto>>.Ok(result));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<PagedResult<TenantDto>>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<PagedResult<TenantDto>>.Fail(ex.Message));
             }
         }
 
@@ -41,13 +41,13 @@ namespace BARQ.API.Controllers
             {
                 var tenant = await _tenantService.GetTenantByIdAsync(id);
                 if (tenant == null)
-                    return NotFound(ApiResponse<TenantDto>.ErrorResponse("Tenant not found"));
+                    return NotFound(ApiResponse<TenantDto>.Fail("Tenant not found"));
 
-                return Ok(ApiResponse<TenantDto>.SuccessResponse(tenant));
+                return Ok(ApiResponse<TenantDto>.Ok(tenant));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<TenantDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<TenantDto>.Fail(ex.Message));
             }
         }
 
@@ -59,11 +59,11 @@ namespace BARQ.API.Controllers
             {
                 var tenant = await _tenantService.CreateTenantAsync(request);
                 return CreatedAtAction(nameof(GetTenant), new { id = tenant.Id }, 
-                    ApiResponse<TenantDto>.SuccessResponse(tenant, "Tenant created successfully"));
+                    ApiResponse<TenantDto>.Ok(tenant, "Tenant created successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<TenantDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<TenantDto>.Fail(ex.Message));
             }
         }
 
@@ -74,11 +74,11 @@ namespace BARQ.API.Controllers
             try
             {
                 var tenant = await _tenantService.UpdateTenantAsync(id, request);
-                return Ok(ApiResponse<TenantDto>.SuccessResponse(tenant, "Tenant updated successfully"));
+                return Ok(ApiResponse<TenantDto>.Ok(tenant, "Tenant updated successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<TenantDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<TenantDto>.Fail(ex.Message));
             }
         }
 
@@ -90,13 +90,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _tenantService.DeleteTenantAsync(id);
                 if (!result)
-                    return NotFound(ApiResponse<bool>.ErrorResponse("Tenant not found"));
+                    return NotFound(ApiResponse<bool>.Fail("Tenant not found"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Tenant deleted successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Tenant deleted successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -108,13 +108,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _tenantService.ActivateTenantAsync(id);
                 if (!result)
-                    return NotFound(ApiResponse<bool>.ErrorResponse("Tenant not found"));
+                    return NotFound(ApiResponse<bool>.Fail("Tenant not found"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Tenant activated successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Tenant activated successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
 
@@ -126,13 +126,13 @@ namespace BARQ.API.Controllers
             {
                 var result = await _tenantService.DeactivateTenantAsync(id);
                 if (!result)
-                    return NotFound(ApiResponse<bool>.ErrorResponse("Tenant not found"));
+                    return NotFound(ApiResponse<bool>.Fail("Tenant not found"));
 
-                return Ok(ApiResponse<bool>.SuccessResponse(true, "Tenant deactivated successfully"));
+                return Ok(ApiResponse<bool>.Ok(true, "Tenant deactivated successfully"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<bool>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<bool>.Fail(ex.Message));
             }
         }
     }
