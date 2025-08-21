@@ -346,7 +346,7 @@ namespace BARQ.Application.Services
 
             return new NotificationStatsDto
             {
-                TotalCount = notifications.Count,
+                Total = notifications.Count,
                 UnreadCount = notifications.Count(n => !n.IsRead),
                 TodayCount = notifications.Count(n => n.CreatedAt.Date == today),
                 ActionRequiredCount = notifications.Count(n => n.RequiresAction && !n.IsRead),
