@@ -86,5 +86,56 @@ namespace BARQ.Application.Services
         {
             return System.Threading.Tasks.Task.CompletedTask;
         }
+
+        public System.Threading.Tasks.Task<Dictionary<string, object>> GetLivenessAsync()
+        {
+            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>
+            {
+                ["status"] = "healthy",
+                ["timestamp"] = DateTime.UtcNow
+            });
+        }
+
+        public System.Threading.Tasks.Task<Dictionary<string, object>> GetReadinessAsync()
+        {
+            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>
+            {
+                ["status"] = "ready",
+                ["timestamp"] = DateTime.UtcNow
+            });
+        }
+
+        public System.Threading.Tasks.Task<Dictionary<string, object>> GetFlowableHealthAsync()
+        {
+            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>
+            {
+                ["status"] = "healthy",
+                ["timestamp"] = DateTime.UtcNow
+            });
+        }
+
+        public System.Threading.Tasks.Task<Dictionary<string, object>> GetAiProvidersHealthAsync()
+        {
+            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>
+            {
+                ["status"] = "healthy",
+                ["timestamp"] = DateTime.UtcNow
+            });
+        }
+
+        public System.Threading.Tasks.Task<Dictionary<string, object>> GetMetricsAsync()
+        {
+            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>());
+        }
+
+        public System.Threading.Tasks.Task<Dictionary<string, object>> GetProviderPerformanceAsync()
+        {
+            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>());
+        }
+
+        public System.Threading.Tasks.Task<Dictionary<string, object>> GetSlaViolationMetricsAsync(DateTime? startDate, DateTime? endDate)
+        {
+            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>());
+        }
     }
 }
