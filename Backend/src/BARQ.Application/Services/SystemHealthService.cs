@@ -5,6 +5,7 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Task = System.Threading.Tasks.Task;
 
 namespace BARQ.Application.Services
 {
@@ -66,7 +67,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<SystemHealthDto>
                 {
                     Items = healthDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -144,7 +145,7 @@ namespace BARQ.Application.Services
                     existingHealth.ResponseTimeMs = responseTimeMs;
                     existingHealth.Details = details != null ? System.Text.Json.JsonSerializer.Serialize(details) : null;
                     existingHealth.UpdatedAt = DateTime.UtcNow;
-                    existingHealth.UpdatedBy = "System";
+                    existingHealth.UpdatedBy = null;
 
                     if (status == "Healthy")
                     {
@@ -182,7 +183,7 @@ namespace BARQ.Application.Services
                         ConsecutiveFailures = status == "Error" ? 1 : 0,
                         Environment = "Production",
                         CreatedAt = DateTime.UtcNow,
-                        CreatedBy = "System"
+                        CreatedBy = null
                     };
 
                     _context.SystemHealth.Add(existingHealth);

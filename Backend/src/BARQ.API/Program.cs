@@ -10,6 +10,9 @@ using BARQ.Infrastructure.Data;
 using BARQ.Core.Entities;
 using BARQ.Application.Interfaces;
 using BARQ.Application.Services;
+using BARQ.Application.Services.Workflow;
+using BARQ.Infrastructure.Services;
+using BARQ.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -122,6 +125,12 @@ builder.Services.AddScoped<BARQ.Application.Interfaces.IAntiVirusService, BARQ.A
 builder.Services.AddScoped<BARQ.Application.Interfaces.IAuditReportService, BARQ.Application.Services.AuditReportService>();
 builder.Services.AddScoped<BARQ.Application.Interfaces.IBillingService, BARQ.Application.Services.BillingService>();
 builder.Services.AddScoped<BARQ.Application.Interfaces.IQuotaMiddleware, BARQ.Application.Services.QuotaMiddleware>();
+
+builder.Services.Configure<FlowableOptions>(builder.Configuration.GetSection("Flowable"));
+builder.Services.AddHttpClient<IFlowableGateway, FlowableGateway>();
+builder.Services.AddScoped<IFlowableGateway, FlowableGateway>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 
 builder.Services.AddMemoryCache();
 
