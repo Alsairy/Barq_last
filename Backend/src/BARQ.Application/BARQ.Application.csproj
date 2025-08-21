@@ -18,4 +18,11 @@
     <ProjectReference Include="..\BARQ.Infrastructure\BARQ.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Services\FeatureFlagService.cs" />
+    <Compile Remove="Services\ImpersonationService.cs" />
+    <Compile Remove="Services\SystemHealthService.cs" />
+    <Compile Remove="Services\TenantStateService.cs" />
+  </ItemGroup>
+
 </Project>
