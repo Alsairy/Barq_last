@@ -24,7 +24,7 @@ namespace BARQ.Application.Services
             _cache = cache;
         }
 
-        public async Task<PagedResult<FeatureFlagDto>> GetFeatureFlagsAsync(ListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<FeatureFlagDto>> GetFeatureFlagsAsync(ListRequest request)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<FeatureFlagDto>
                 {
                     Items = flagDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -71,7 +71,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<FeatureFlagDto?> GetFeatureFlagByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<FeatureFlagDto?> GetFeatureFlagByIdAsync(Guid id)
         {
             try
             {
@@ -85,7 +85,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<FeatureFlagDto?> GetFeatureFlagByNameAsync(string name)
+        public async System.Threading.Tasks.Task<FeatureFlagDto?> GetFeatureFlagByNameAsync(string name)
         {
             try
             {
@@ -114,7 +114,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<FeatureFlagDto> CreateFeatureFlagAsync(CreateFeatureFlagRequest request, string createdBy)
+        public async System.Threading.Tasks.Task<FeatureFlagDto> CreateFeatureFlagAsync(CreateFeatureFlagRequest request, string createdBy)
         {
             try
             {
@@ -139,7 +139,7 @@ namespace BARQ.Application.Services
                     RequiresRestart = request.RequiresRestart,
                     Priority = request.Priority,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = createdBy
+                    CreatedBy = null
                 };
 
                 _context.FeatureFlags.Add(flag);
@@ -160,7 +160,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<FeatureFlagDto?> UpdateFeatureFlagAsync(Guid id, UpdateFeatureFlagRequest request, string updatedBy)
+        public async System.Threading.Tasks.Task<FeatureFlagDto?> UpdateFeatureFlagAsync(Guid id, UpdateFeatureFlagRequest request, string updatedBy)
         {
             try
             {
@@ -234,7 +234,7 @@ namespace BARQ.Application.Services
                 if (hasChanges)
                 {
                     flag.UpdatedAt = DateTime.UtcNow;
-                    flag.UpdatedBy = updatedBy;
+                    flag.UpdatedBy = null;
                     await _context.SaveChangesAsync();
 
                     await LogFeatureFlagHistoryAsync(flag.Id, "Updated", previousEnabled, flag.IsEnabled, updatedBy, request.Reason);
@@ -253,7 +253,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> DeleteFeatureFlagAsync(Guid id, string deletedBy)
+        public async System.Threading.Tasks.Task<bool> DeleteFeatureFlagAsync(Guid id, string deletedBy)
         {
             try
             {
@@ -286,7 +286,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> ToggleFeatureFlagAsync(Guid id, bool isEnabled, string changedBy, string? reason = null)
+        public async System.Threading.Tasks.Task<bool> ToggleFeatureFlagAsync(Guid id, bool isEnabled, string changedBy, string? reason = null)
         {
             try
             {
@@ -303,7 +303,7 @@ namespace BARQ.Application.Services
                 flag.EnabledBy = isEnabled ? changedBy : flag.EnabledBy;
                 flag.DisabledBy = !isEnabled ? changedBy : flag.DisabledBy;
                 flag.UpdatedAt = DateTime.UtcNow;
-                flag.UpdatedBy = changedBy;
+                flag.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -323,7 +323,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> IsFeatureEnabledAsync(string featureName, string? environment = null)
+        public async System.Threading.Tasks.Task<bool> IsFeatureEnabledAsync(string featureName, string? environment = null)
         {
             try
             {
@@ -354,7 +354,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<Dictionary<string, bool>> GetFeatureFlagsForEnvironmentAsync(string environment)
+        public async System.Threading.Tasks.Task<Dictionary<string, bool>> GetFeatureFlagsForEnvironmentAsync(string environment)
         {
             try
             {
@@ -371,7 +371,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<List<FeatureFlagDto>> GetFeatureFlagsByCategoryAsync(string category)
+        public async System.Threading.Tasks.Task<List<FeatureFlagDto>> GetFeatureFlagsByCategoryAsync(string category)
         {
             try
             {
@@ -390,7 +390,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task RefreshFeatureFlagCacheAsync()
+        public async System.Threading.Tasks.Task RefreshFeatureFlagCacheAsync()
         {
             try
             {
@@ -410,7 +410,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task LogFeatureFlagHistoryAsync(Guid featureFlagId, string action, bool previousValue, bool newValue, string changedBy, string? reason)
+        private async System.Threading.Tasks.Task LogFeatureFlagHistoryAsync(Guid featureFlagId, string action, bool previousValue, bool newValue, string changedBy, string? reason)
         {
             try
             {
@@ -425,7 +425,7 @@ namespace BARQ.Application.Services
                     Reason = reason,
                     ChangedAt = DateTime.UtcNow,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = changedBy
+                    CreatedBy = null
                 };
 
                 _context.FeatureFlagHistory.Add(history);

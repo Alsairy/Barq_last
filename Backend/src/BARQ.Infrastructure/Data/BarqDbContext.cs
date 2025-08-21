@@ -65,6 +65,21 @@ public sealed class BarqDbContext
     public DbSet<UserLanguagePreference> UserLanguagePreferences => Set<UserLanguagePreference>();
     public DbSet<AccessibilityAudit> AccessibilityAudits => Set<AccessibilityAudit>();
     public DbSet<AccessibilityIssue> AccessibilityIssues => Set<AccessibilityIssue>();
+    
+    public DbSet<FeatureFlag> FeatureFlags => Set<FeatureFlag>();
+    public DbSet<FeatureFlagHistory> FeatureFlagHistory => Set<FeatureFlagHistory>();
+    public DbSet<TenantState> TenantStates => Set<TenantState>();
+    public DbSet<TenantStateHistory> TenantStateHistory => Set<TenantStateHistory>();
+    public DbSet<ImpersonationSession> ImpersonationSessions => Set<ImpersonationSession>();
+    public DbSet<ImpersonationAction> ImpersonationActions => Set<ImpersonationAction>();
+    public DbSet<SystemHealth> SystemHealth => Set<SystemHealth>();
+    
+    public DbSet<BusinessCalendar> BusinessCalendars => Set<BusinessCalendar>();
+    public DbSet<BusinessCalendarHoliday> BusinessCalendarHolidays => Set<BusinessCalendarHoliday>();
+    public DbSet<SlaPolicy> SlaPolicies => Set<SlaPolicy>();
+    public DbSet<SlaViolation> SlaViolations => Set<SlaViolation>();
+    public DbSet<EscalationRule> EscalationRules => Set<EscalationRule>();
+    public DbSet<EscalationAction> EscalationActions => Set<EscalationAction>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

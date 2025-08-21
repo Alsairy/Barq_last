@@ -19,7 +19,7 @@ namespace BARQ.Application.Services
             _logger = logger;
         }
 
-        public async Task<PagedResult<TenantStateDto>> GetTenantStatesAsync(ListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<TenantStateDto>> GetTenantStatesAsync(ListRequest request)
         {
             try
             {
@@ -57,7 +57,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<TenantStateDto>
                 {
                     Items = tenantStateDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -69,7 +69,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<TenantStateDto?> GetTenantStateByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<TenantStateDto?> GetTenantStateByIdAsync(Guid id)
         {
             try
             {
@@ -86,7 +86,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<TenantStateDto?> GetTenantStateByTenantIdAsync(Guid tenantId)
+        public async System.Threading.Tasks.Task<TenantStateDto?> GetTenantStateByTenantIdAsync(Guid tenantId)
         {
             try
             {
@@ -103,7 +103,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<TenantStateDto?> UpdateTenantStateAsync(Guid tenantId, UpdateTenantStateRequest request, string updatedBy)
+        public async System.Threading.Tasks.Task<TenantStateDto?> UpdateTenantStateAsync(Guid tenantId, UpdateTenantStateRequest request, string updatedBy)
         {
             try
             {
@@ -122,7 +122,7 @@ namespace BARQ.Application.Services
                 tenantState.StatusChangedAt = DateTime.UtcNow;
                 tenantState.StatusChangedBy = updatedBy;
                 tenantState.UpdatedAt = DateTime.UtcNow;
-                tenantState.UpdatedBy = updatedBy;
+                tenantState.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -140,7 +140,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task RefreshTenantStateAsync(Guid tenantId)
+        public async System.Threading.Tasks.Task RefreshTenantStateAsync(Guid tenantId)
         {
             try
             {
@@ -162,7 +162,7 @@ namespace BARQ.Application.Services
                         Status = "Active",
                         IsHealthy = true,
                         CreatedAt = DateTime.UtcNow,
-                        CreatedBy = "System"
+                        CreatedBy = null
                     };
 
                     _context.TenantStates.Add(tenantState);
@@ -171,7 +171,7 @@ namespace BARQ.Application.Services
                 await UpdateTenantUsageStatsInternalAsync(tenantState);
                 tenantState.LastHealthCheck = DateTime.UtcNow;
                 tenantState.UpdatedAt = DateTime.UtcNow;
-                tenantState.UpdatedBy = "System";
+                tenantState.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -184,7 +184,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task RefreshAllTenantStatesAsync()
+        public async System.Threading.Tasks.Task RefreshAllTenantStatesAsync()
         {
             try
             {
@@ -204,7 +204,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<List<TenantStateDto>> GetTenantsRequiringAttentionAsync()
+        public async System.Threading.Tasks.Task<List<TenantStateDto>> GetTenantsRequiringAttentionAsync()
         {
             try
             {
@@ -223,7 +223,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<List<TenantStateDto>> GetUnhealthyTenantsAsync()
+        public async System.Threading.Tasks.Task<List<TenantStateDto>> GetUnhealthyTenantsAsync()
         {
             try
             {
@@ -242,7 +242,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<Dictionary<string, object>> GetTenantStatsSummaryAsync()
+        public async System.Threading.Tasks.Task<Dictionary<string, object>> GetTenantStatsSummaryAsync()
         {
             try
             {
@@ -278,7 +278,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task UpdateTenantUsageStatsAsync(Guid tenantId)
+        public async System.Threading.Tasks.Task UpdateTenantUsageStatsAsync(Guid tenantId)
         {
             try
             {
@@ -289,7 +289,7 @@ namespace BARQ.Application.Services
                 {
                     await UpdateTenantUsageStatsInternalAsync(tenantState);
                     tenantState.UpdatedAt = DateTime.UtcNow;
-                    tenantState.UpdatedBy = "System";
+                    tenantState.UpdatedBy = null;
                     await _context.SaveChangesAsync();
                 }
             }
@@ -300,7 +300,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task MarkTenantForAttentionAsync(Guid tenantId, string reason, string markedBy)
+        public async System.Threading.Tasks.Task MarkTenantForAttentionAsync(Guid tenantId, string reason, string markedBy)
         {
             try
             {
@@ -312,7 +312,7 @@ namespace BARQ.Application.Services
                     tenantState.RequiresAttention = true;
                     tenantState.AttentionReason = reason;
                     tenantState.UpdatedAt = DateTime.UtcNow;
-                    tenantState.UpdatedBy = markedBy;
+                    tenantState.UpdatedBy = null;
 
                     await _context.SaveChangesAsync();
 
@@ -327,7 +327,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task ClearTenantAttentionAsync(Guid tenantId, string clearedBy)
+        public async System.Threading.Tasks.Task ClearTenantAttentionAsync(Guid tenantId, string clearedBy)
         {
             try
             {
@@ -339,7 +339,7 @@ namespace BARQ.Application.Services
                     tenantState.RequiresAttention = false;
                     tenantState.AttentionReason = null;
                     tenantState.UpdatedAt = DateTime.UtcNow;
-                    tenantState.UpdatedBy = clearedBy;
+                    tenantState.UpdatedBy = null;
 
                     await _context.SaveChangesAsync();
 
@@ -354,7 +354,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task UpdateTenantUsageStatsInternalAsync(TenantState tenantState)
+        private async System.Threading.Tasks.Task UpdateTenantUsageStatsInternalAsync(TenantState tenantState)
         {
             var tenantId = tenantState.TenantId;
 
@@ -375,7 +375,7 @@ namespace BARQ.Application.Services
             if (lastActivity != null)
             {
                 tenantState.LastActivityAt = lastActivity.CreatedAt;
-                tenantState.LastActivityBy = lastActivity.UserId;
+                tenantState.LastActivityBy = lastActivity.UserId.ToString();
             }
 
             var currentMonth = DateTime.UtcNow.ToString("yyyy-MM");
@@ -393,7 +393,7 @@ namespace BARQ.Application.Services
 
             tenantState.StorageUsedBytes = await _context.FileAttachments
                 .Where(fa => fa.TenantId == tenantId && !fa.IsDeleted)
-                .SumAsync(fa => fa.FileSizeBytes);
+                .SumAsync(fa => fa.FileSize);
 
             var subscription = await _context.TenantSubscriptions
                 .Where(ts => ts.TenantId == tenantId && ts.Status == "Active")
@@ -417,7 +417,7 @@ namespace BARQ.Application.Services
                                   tenantState.BillingStatus != "Suspended";
         }
 
-        private async Task LogTenantStateHistoryAsync(Guid tenantStateId, Guid tenantId, string previousStatus, string newStatus, string reason, string changedBy)
+        private async System.Threading.Tasks.Task LogTenantStateHistoryAsync(Guid tenantStateId, Guid tenantId, string previousStatus, string newStatus, string reason, string changedBy)
         {
             try
             {
@@ -432,7 +432,7 @@ namespace BARQ.Application.Services
                     ChangedBy = changedBy,
                     ChangedAt = DateTime.UtcNow,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = changedBy
+                    CreatedBy = null
                 };
 
                 _context.TenantStateHistory.Add(history);
