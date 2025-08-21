@@ -5,6 +5,7 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Task = System.Threading.Tasks.Task;
 
 namespace BARQ.Application.Services
 {
@@ -120,9 +121,9 @@ namespace BARQ.Application.Services
                 tenantState.Status = request.Status;
                 tenantState.StatusReason = request.StatusReason;
                 tenantState.StatusChangedAt = DateTime.UtcNow;
-                tenantState.StatusChangedBy = updatedBy;
+                tenantState.StatusChangedBy = null;
                 tenantState.UpdatedAt = DateTime.UtcNow;
-                tenantState.UpdatedBy = updatedBy;
+                tenantState.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -162,7 +163,7 @@ namespace BARQ.Application.Services
                         Status = "Active",
                         IsHealthy = true,
                         CreatedAt = DateTime.UtcNow,
-                        CreatedBy = "System"
+                        CreatedBy = null
                     };
 
                     _context.TenantStates.Add(tenantState);
@@ -171,7 +172,7 @@ namespace BARQ.Application.Services
                 await UpdateTenantUsageStatsInternalAsync(tenantState);
                 tenantState.LastHealthCheck = DateTime.UtcNow;
                 tenantState.UpdatedAt = DateTime.UtcNow;
-                tenantState.UpdatedBy = "System";
+                tenantState.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -289,7 +290,7 @@ namespace BARQ.Application.Services
                 {
                     await UpdateTenantUsageStatsInternalAsync(tenantState);
                     tenantState.UpdatedAt = DateTime.UtcNow;
-                    tenantState.UpdatedBy = "System";
+                    tenantState.UpdatedBy = null;
                     await _context.SaveChangesAsync();
                 }
             }
@@ -312,7 +313,7 @@ namespace BARQ.Application.Services
                     tenantState.RequiresAttention = true;
                     tenantState.AttentionReason = reason;
                     tenantState.UpdatedAt = DateTime.UtcNow;
-                    tenantState.UpdatedBy = markedBy;
+                    tenantState.UpdatedBy = null;
 
                     await _context.SaveChangesAsync();
 
@@ -339,7 +340,7 @@ namespace BARQ.Application.Services
                     tenantState.RequiresAttention = false;
                     tenantState.AttentionReason = null;
                     tenantState.UpdatedAt = DateTime.UtcNow;
-                    tenantState.UpdatedBy = clearedBy;
+                    tenantState.UpdatedBy = null;
 
                     await _context.SaveChangesAsync();
 
@@ -375,7 +376,7 @@ namespace BARQ.Application.Services
             if (lastActivity != null)
             {
                 tenantState.LastActivityAt = lastActivity.CreatedAt;
-                tenantState.LastActivityBy = lastActivity.UserId;
+                tenantState.LastActivityBy = lastActivity.UserId?.ToString();
             }
 
             var currentMonth = DateTime.UtcNow.ToString("yyyy-MM");
@@ -429,10 +430,10 @@ namespace BARQ.Application.Services
                     PreviousStatus = previousStatus,
                     NewStatus = newStatus,
                     Reason = reason,
-                    ChangedBy = changedBy,
+                    ChangedBy = null,
                     ChangedAt = DateTime.UtcNow,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = changedBy
+                    CreatedBy = null
                 };
 
                 _context.TenantStateHistory.Add(history);

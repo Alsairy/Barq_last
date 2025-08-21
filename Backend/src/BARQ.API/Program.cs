@@ -122,6 +122,10 @@ builder.Services.AddScoped<BARQ.Application.Interfaces.IAntiVirusService, BARQ.A
 builder.Services.AddScoped<BARQ.Application.Interfaces.IAuditReportService, BARQ.Application.Services.AuditReportService>();
 builder.Services.AddScoped<BARQ.Application.Interfaces.IBillingService, BARQ.Application.Services.BillingService>();
 builder.Services.AddScoped<BARQ.Application.Interfaces.IQuotaMiddleware, BARQ.Application.Services.QuotaMiddleware>();
+builder.Services.AddScoped<BARQ.Application.Interfaces.ISystemHealthService, BARQ.Application.Services.SystemHealthService>();
+builder.Services.AddScoped<BARQ.Application.Interfaces.IFeatureFlagService, BARQ.Application.Services.FeatureFlagService>();
+builder.Services.AddScoped<BARQ.Application.Interfaces.ITenantStateService, BARQ.Application.Services.TenantStateService>();
+builder.Services.AddScoped<BARQ.Application.Interfaces.IImpersonationService, BARQ.Application.Services.ImpersonationService>();
 
 builder.Services.AddMemoryCache();
 
