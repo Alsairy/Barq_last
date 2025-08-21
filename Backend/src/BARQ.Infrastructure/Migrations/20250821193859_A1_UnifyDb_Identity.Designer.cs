@@ -4,6 +4,7 @@ using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BARQ.Infrastructure.Migrations
 {
     [DbContext(typeof(BarqDbContext))]
-    partial class BarqDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250821193859_A1_UnifyDb_Identity")]
+    partial class A1_UnifyDb_Identity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1255,134 +1258,6 @@ namespace BARQ.Infrastructure.Migrations
                     b.ToTable("BillingPlans");
                 });
 
-            modelBuilder.Entity("BARQ.Core.Entities.BusinessCalendar", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("DeletedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("TimeZone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
-                    b.Property<TimeSpan>("WorkDayEnd")
-                        .HasColumnType("time");
-
-                    b.Property<TimeSpan>("WorkDayStart")
-                        .HasColumnType("time");
-
-                    b.Property<string>("WorkDays")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BusinessCalendars");
-                });
-
-            modelBuilder.Entity("BARQ.Core.Entities.BusinessCalendarHoliday", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BusinessCalendarId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("DeletedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsRecurring")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RecurrencePattern")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BusinessCalendarId");
-
-                    b.ToTable("BusinessCalendarHoliday");
-                });
-
             modelBuilder.Entity("BARQ.Core.Entities.Document", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1569,155 +1444,6 @@ namespace BARQ.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EmailTemplates");
-                });
-
-            modelBuilder.Entity("BARQ.Core.Entities.EscalationAction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ActionConfig")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ActionType")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("DeletedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("EscalationRuleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ExecutedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("NextRetryAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Result")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RetryCount")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("SlaViolationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EscalationRuleId");
-
-                    b.HasIndex("SlaViolationId");
-
-                    b.HasIndex("TenantId", "NextRetryAt");
-
-                    b.HasIndex("TenantId", "SlaViolationId");
-
-                    b.HasIndex("TenantId", "Status");
-
-                    b.ToTable("EscalationActions");
-                });
-
-            modelBuilder.Entity("BARQ.Core.Entities.EscalationRule", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ActionConfig")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ActionType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("DeletedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("SlaPolicyId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("TriggerAfterMinutes")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SlaPolicyId");
-
-                    b.ToTable("EscalationRules");
                 });
 
             modelBuilder.Entity("BARQ.Core.Entities.FeatureFlag", b =>
@@ -3591,158 +3317,6 @@ namespace BARQ.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("SecurityEvents");
-                });
-
-            modelBuilder.Entity("BARQ.Core.Entities.SlaPolicy", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("BusinessCalendarId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("DeletedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Priority")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ResolutionTimeHours")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ResponseTimeHours")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TaskType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BusinessCalendarId");
-
-                    b.ToTable("SlaPolicies");
-                });
-
-            modelBuilder.Entity("BARQ.Core.Entities.SlaViolation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("DeletedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("EscalationLevel")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Resolution")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ResolvedTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("SlaPolicyId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<Guid>("TaskId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ViolationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ViolationType")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SlaPolicyId");
-
-                    b.HasIndex("TaskId");
-
-                    b.HasIndex("TenantId", "EscalationLevel");
-
-                    b.HasIndex("TenantId", "SlaPolicyId");
-
-                    b.HasIndex("TenantId", "Status");
-
-                    b.HasIndex("TenantId", "ViolationType");
-
-                    b.ToTable("SlaViolations");
                 });
 
             modelBuilder.Entity("BARQ.Core.Entities.SystemConfiguration", b =>
@@ -5636,17 +5210,6 @@ namespace BARQ.Infrastructure.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("BARQ.Core.Entities.BusinessCalendarHoliday", b =>
-                {
-                    b.HasOne("BARQ.Core.Entities.BusinessCalendar", "BusinessCalendar")
-                        .WithMany("Holidays")
-                        .HasForeignKey("BusinessCalendarId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BusinessCalendar");
-                });
-
             modelBuilder.Entity("BARQ.Core.Entities.Document", b =>
                 {
                     b.HasOne("BARQ.Core.Entities.Project", "Project")
@@ -5668,34 +5231,6 @@ namespace BARQ.Infrastructure.Migrations
                     b.Navigation("Template");
 
                     b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("BARQ.Core.Entities.EscalationAction", b =>
-                {
-                    b.HasOne("BARQ.Core.Entities.EscalationRule", "EscalationRule")
-                        .WithMany("EscalationActions")
-                        .HasForeignKey("EscalationRuleId");
-
-                    b.HasOne("BARQ.Core.Entities.SlaViolation", "SlaViolation")
-                        .WithMany("EscalationActions")
-                        .HasForeignKey("SlaViolationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EscalationRule");
-
-                    b.Navigation("SlaViolation");
-                });
-
-            modelBuilder.Entity("BARQ.Core.Entities.EscalationRule", b =>
-                {
-                    b.HasOne("BARQ.Core.Entities.SlaPolicy", "SlaPolicy")
-                        .WithMany("EscalationRules")
-                        .HasForeignKey("SlaPolicyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SlaPolicy");
                 });
 
             modelBuilder.Entity("BARQ.Core.Entities.FeatureFlagHistory", b =>
@@ -5997,34 +5532,6 @@ namespace BARQ.Infrastructure.Migrations
                     b.Navigation("Tenant");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BARQ.Core.Entities.SlaPolicy", b =>
-                {
-                    b.HasOne("BARQ.Core.Entities.BusinessCalendar", "BusinessCalendar")
-                        .WithMany("SlaPolicies")
-                        .HasForeignKey("BusinessCalendarId");
-
-                    b.Navigation("BusinessCalendar");
-                });
-
-            modelBuilder.Entity("BARQ.Core.Entities.SlaViolation", b =>
-                {
-                    b.HasOne("BARQ.Core.Entities.SlaPolicy", "SlaPolicy")
-                        .WithMany("SlaViolations")
-                        .HasForeignKey("SlaPolicyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("BARQ.Core.Entities.Task", "Task")
-                        .WithMany()
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SlaPolicy");
-
-                    b.Navigation("Task");
                 });
 
             modelBuilder.Entity("BARQ.Core.Entities.SystemConfiguration", b =>
@@ -6426,21 +5933,9 @@ namespace BARQ.Infrastructure.Migrations
                     b.Navigation("UsageQuotas");
                 });
 
-            modelBuilder.Entity("BARQ.Core.Entities.BusinessCalendar", b =>
-                {
-                    b.Navigation("Holidays");
-
-                    b.Navigation("SlaPolicies");
-                });
-
             modelBuilder.Entity("BARQ.Core.Entities.Document", b =>
                 {
                     b.Navigation("TaskDocuments");
-                });
-
-            modelBuilder.Entity("BARQ.Core.Entities.EscalationRule", b =>
-                {
-                    b.Navigation("EscalationActions");
                 });
 
             modelBuilder.Entity("BARQ.Core.Entities.FeatureFlag", b =>
@@ -6494,18 +5989,6 @@ namespace BARQ.Infrastructure.Migrations
             modelBuilder.Entity("BARQ.Core.Entities.Role", b =>
                 {
                     b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("BARQ.Core.Entities.SlaPolicy", b =>
-                {
-                    b.Navigation("EscalationRules");
-
-                    b.Navigation("SlaViolations");
-                });
-
-            modelBuilder.Entity("BARQ.Core.Entities.SlaViolation", b =>
-                {
-                    b.Navigation("EscalationActions");
                 });
 
             modelBuilder.Entity("BARQ.Core.Entities.Task", b =>

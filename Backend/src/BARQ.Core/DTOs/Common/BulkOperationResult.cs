@@ -9,7 +9,7 @@ namespace BARQ.Core.DTOs.Common
         public List<Guid> FailedIds { get; set; } = new();
         
         public bool IsSuccess => FailureCount == 0;
-        public int TotalCount => SuccessCount + FailureCount;
+        public int Total => SuccessCount + FailureCount;
     }
 
     public class BulkDeleteRequest
