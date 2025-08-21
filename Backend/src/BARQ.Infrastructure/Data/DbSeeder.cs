@@ -33,18 +33,18 @@ public static class DbSeeder
 
     private static async System.Threading.Tasks.Task SeedSystemTenantAsync(BarqDbContext context)
     {
-        if (!await context.Tenants.AnyAsync())
+        var systemTenant = await context.Tenants.FirstOrDefaultAsync(t => t.Name == "System");
+        if (systemTenant is null)
         {
-            var systemTenant = new Tenant
-            {
-                Id = Guid.NewGuid(),
-                Name = "System",
-                DisplayName = "System Tenant",
-                Description = "Default system tenant for administrative purposes",
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
+            systemTenant = new Tenant 
+            { 
+                Id = Guid.NewGuid(), 
+                Name = "System", 
+                DisplayName = "System Tenant", 
+                Description = "Default system tenant for administrative purposes", 
+                IsActive = true, 
+                CreatedAt = DateTime.UtcNow 
             };
-            
             context.Tenants.Add(systemTenant);
         }
     }

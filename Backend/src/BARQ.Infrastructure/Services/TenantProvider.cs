@@ -7,6 +7,8 @@ namespace BARQ.Infrastructure.Services;
 public class TenantProvider : ITenantProvider
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    
+    private static readonly System.Threading.AsyncLocal<Guid?> _overrideTenant = new();
 
     public TenantProvider(IHttpContextAccessor httpContextAccessor)
     {
@@ -15,7 +17,14 @@ public class TenantProvider : ITenantProvider
 
     public Guid GetTenantId()
     {
-        var user = _httpContextAccessor.HttpContext?.User;
+        var overrideId = _overrideTenant.Value;
+        if (overrideId.HasValue && overrideId.Value != Guid.Empty)
+        {
+            return overrideId.Value;
+        }
+
+        var http = _httpContextAccessor.HttpContext;
+        var user = http?.User;
         if (user?.Identity?.IsAuthenticated == true)
         {
             var tenantIdClaim = user.FindFirst("TenantId")?.Value;
@@ -24,13 +33,17 @@ public class TenantProvider : ITenantProvider
                 return tenantId;
             }
         }
-        
+
+        var hdr = http?.Request.Headers["X-Tenant-Id"].ToString();
+        if (!string.IsNullOrWhiteSpace(hdr) && Guid.TryParse(hdr, out var fromHeader))
+        {
+            return fromHeader;
+        }
+
         return Guid.Empty;
     }
 
-    public void SetTenantId(Guid tenantId)
-    {
-    }
+    public void SetTenantId(Guid tenantId) => _overrideTenant.Value = tenantId;
 
     public string GetTenantName()
     {

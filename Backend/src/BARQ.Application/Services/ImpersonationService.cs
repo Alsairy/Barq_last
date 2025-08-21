@@ -384,7 +384,9 @@ namespace BARQ.Application.Services
                     .Where(r => roleIds.Contains(r.Id))
                     .ToListAsync();
 
-                var hasAdminRole = roles.Any(r => r.Name == "Admin" || r.Name == "SuperAdmin");
+                var hasAdminRole = roles.Any(r =>
+                    string.Equals(r.NormalizedName, "ADMINISTRATOR", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(r.NormalizedName, "SUPERADMIN", StringComparison.OrdinalIgnoreCase));
                 
                 return !hasAdminRole;
             }
