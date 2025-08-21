@@ -6,3 +6,7 @@ Backend/src/BARQ.API/appsettings.Development.json:40
 README.md:sidekiq-secret
 README.md:aws-access-token
 docs/flowable-rest.md:generic-api-key
+
+# Ignore example credentials in runbooks and documentation
+docs/runbooks/key-rotation.md:generic-api-key
+docs/runbooks/key-rotation.md:159
