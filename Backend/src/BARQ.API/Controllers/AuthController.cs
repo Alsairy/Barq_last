@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.Models.Responses;
@@ -11,10 +12,12 @@ namespace BARQ.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IOptions<AuthCookieOptions> _cookieOptions;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, IOptions<AuthCookieOptions> cookieOptions)
         {
             _userService = userService;
+            _cookieOptions = cookieOptions;
         }
 
         [HttpPost("login")]
@@ -24,6 +27,21 @@ namespace BARQ.API.Controllers
             try
             {
                 var response = await _userService.LoginAsync(request);
+                
+                if (_cookieOptions.Value.Enabled && !string.IsNullOrEmpty(response.Token))
+                {
+                    var cookieOptions = new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.None,
+                        Path = _cookieOptions.Value.Path,
+                        Expires = DateTimeOffset.UtcNow.AddHours(24) // Match JWT expiry
+                    };
+                    
+                    Response.Cookies.Append(_cookieOptions.Value.Name, response.Token, cookieOptions);
+                }
+                
                 return Ok(ApiResponse<LoginResponse>.Ok(response, "Login successful"));
             }
             catch (UnauthorizedAccessException)
@@ -46,6 +64,20 @@ namespace BARQ.API.Controllers
                 if (Guid.TryParse(userIdClaim, out var userId))
                 {
                     await _userService.LogoutAsync(userId);
+                }
+                
+                if (_cookieOptions.Value.Enabled)
+                {
+                    var cookieOptions = new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.None,
+                        Path = _cookieOptions.Value.Path,
+                        Expires = DateTimeOffset.UtcNow.AddDays(-1) // Expire the cookie
+                    };
+                    
+                    Response.Cookies.Append(_cookieOptions.Value.Name, "", cookieOptions);
                 }
                 
                 return Ok(ApiResponse<bool>.Ok(true, "Logout successful"));
