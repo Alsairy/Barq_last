@@ -8,11 +8,13 @@ using BARQ.Core.Services;
 namespace BARQ.Infrastructure.Data;
 
 public sealed class BarqDbContext
-    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid,
+    : IdentityDbContext<ApplicationUser, Role, Guid,
                         IdentityUserClaim<Guid>, IdentityUserRole<Guid>, IdentityUserLogin<Guid>,
                         IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
 {
     private readonly ITenantProvider _tenantProvider;
+    
+    internal Guid CurrentTenantId => _tenantProvider.GetTenantId();
 
     public BarqDbContext(DbContextOptions<BarqDbContext> options, ITenantProvider tenantProvider)
         : base(options)
@@ -78,6 +80,18 @@ public sealed class BarqDbContext
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<BARQ.Core.Entities.Task>()
+            .HasOne(t => t.AssignedTo)
+            .WithMany(u => u.AssignedTasks)
+            .HasForeignKey(t => t.AssignedToId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.Entity<BARQ.Core.Entities.Task>()
+            .HasOne(t => t.Creator)
+            .WithMany(u => u.CreatedTasks)
+            .HasForeignKey(t => t.CreatedBy)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.ApplyConfigurationsFromAssembly(typeof(BarqDbContext).Assembly);
 
         AddTenantFilter(builder);      // TenantEntity: TenantId == current tenant
@@ -86,7 +100,6 @@ public sealed class BarqDbContext
 
     private void AddTenantFilter(ModelBuilder modelBuilder)
     {
-        var tenantId = _tenantProvider.GetTenantId();
         var setGlobalQuery = typeof(BarqDbContext).GetMethod(nameof(SetTenantFilter), BindingFlags.NonPublic | BindingFlags.Instance)!;
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -94,14 +107,14 @@ public sealed class BarqDbContext
             if (typeof(TenantEntity).IsAssignableFrom(entityType.ClrType))
             {
                 var method = setGlobalQuery.MakeGenericMethod(entityType.ClrType);
-                method.Invoke(this, new object[] { modelBuilder, tenantId });
+                method.Invoke(this, new object[] { modelBuilder });
             }
         }
     }
 
-    private void SetTenantFilter<TEntity>(ModelBuilder modelBuilder, Guid tenantId) where TEntity : TenantEntity
+    private void SetTenantFilter<TEntity>(ModelBuilder modelBuilder) where TEntity : TenantEntity
     {
-        modelBuilder.Entity<TEntity>().HasQueryFilter(e => tenantId != Guid.Empty && e.TenantId == tenantId);
+        modelBuilder.Entity<TEntity>().HasQueryFilter(e => CurrentTenantId != Guid.Empty && e.TenantId == CurrentTenantId);
     }
 
     private void AddSoftDeleteFilter(ModelBuilder modelBuilder)

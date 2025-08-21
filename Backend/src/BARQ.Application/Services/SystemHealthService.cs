@@ -208,7 +208,7 @@ namespace BARQ.Application.Services
                     .OrderBy(h => h.Component)
                     .ToListAsync();
 
-                var featureFlags = await _featureFlagService.GetFeatureFlagsAsync(new ListRequest { PageSize = 10 });
+                var testFlag = _featureFlagService.IsEnabled("HealthCheck");
                 
                 var tenantStates = await _tenantStateService.GetTenantStatesAsync(new ListRequest { PageSize = 10 });
                 
@@ -221,13 +221,13 @@ namespace BARQ.Application.Services
                 return new OpsDashboardDto
                 {
                     SystemHealth = systemHealth.Select(MapToDto).ToList(),
-                    FeatureFlags = featureFlags.Items.Take(5).ToList(),
+                    FeatureFlags = new List<BARQ.Core.DTOs.FeatureFlagDto>(),
                     TenantStates = tenantStates.Items.Where(ts => ts.RequiresAttention || !ts.IsHealthy).Take(5).ToList(),
                     ActiveImpersonations = activeImpersonations.Take(5).ToList(),
                     TotalTenants = (int)tenantStats.GetValueOrDefault("TotalTenants", 0),
                     HealthyTenants = (int)tenantStats.GetValueOrDefault("HealthyTenants", 0),
                     TenantsRequiringAttention = (int)tenantStats.GetValueOrDefault("TenantsRequiringAttention", 0),
-                    ActiveFeatureFlags = featureFlags.Items.Count(f => f.IsEnabled),
+                    ActiveFeatureFlags = testFlag ? 1 : 0,
                     SystemIssues = systemIssues,
                     LastUpdated = DateTime.UtcNow
                 };
@@ -416,7 +416,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task<double> CalculateUptimeAsync()
+        private async System.Threading.Tasks.Task<double> CalculateUptimeAsync()
         {
             try
             {

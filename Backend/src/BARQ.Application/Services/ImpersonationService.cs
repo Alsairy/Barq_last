@@ -380,8 +380,14 @@ namespace BARQ.Application.Services
                     .Where(ur => ur.UserId == userId)
                     .ToListAsync();
 
-                var roles = await _context.Roles.Where(r => userRoles.Select(ur => ur.RoleId).Contains(r.Id)).ToListAsync();
-                var hasAdminRole = roles.Any(r => r.Name == "Admin" || r.Name == "SuperAdmin");
+                var roleIds = userRoles.Select(ur => ur.RoleId).ToList();
+                var roles = await _context.Roles
+                    .Where(r => roleIds.Contains(r.Id))
+                    .ToListAsync();
+
+                var hasAdminRole = roles.Any(r =>
+                    string.Equals(r.NormalizedName, "ADMINISTRATOR", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(r.NormalizedName, "SUPERADMIN", StringComparison.OrdinalIgnoreCase));
                 
                 return !hasAdminRole;
             }
