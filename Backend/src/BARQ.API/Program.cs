@@ -10,6 +10,9 @@ using BARQ.Infrastructure.Data;
 using BARQ.Core.Entities;
 using BARQ.Application.Interfaces;
 using BARQ.Application.Services;
+using BARQ.Application.Services.Workflow;
+using BARQ.Infrastructure.Services;
+using BARQ.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -122,6 +125,21 @@ builder.Services.AddScoped<BARQ.Application.Interfaces.IAntiVirusService, BARQ.A
 builder.Services.AddScoped<BARQ.Application.Interfaces.IAuditReportService, BARQ.Application.Services.AuditReportService>();
 builder.Services.AddScoped<BARQ.Application.Interfaces.IBillingService, BARQ.Application.Services.BillingService>();
 builder.Services.AddScoped<BARQ.Application.Interfaces.IQuotaMiddleware, BARQ.Application.Services.QuotaMiddleware>();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantProvider, BARQ.Infrastructure.Services.TenantProvider>();
+builder.Services.AddScoped<ISlaService, SlaService>();
+builder.Services.AddScoped<IEscalationService, EscalationService>();
+builder.Services.AddHostedService<SlaMonitorWorker>();
+
+builder.Services.AddScoped<BARQ.Infrastructure.Services.AI.OpenAiProvider>();
+builder.Services.AddScoped<BARQ.Infrastructure.Services.AI.AzureOpenAiProvider>();
+builder.Services.AddScoped<BARQ.Core.Interfaces.IAiProviderFactory, BARQ.Infrastructure.Services.AI.AiProviderFactory>();
+builder.Services.AddScoped<BARQ.Core.Interfaces.IAiProviderSelector, BARQ.Infrastructure.Services.AI.AiProviderSelector>();
+builder.Services.AddScoped<BARQ.Application.Services.AI.IAiOrchestrationService, BARQ.Application.Services.AI.AiOrchestrationService>();
+
+builder.Services.AddHttpClient("OpenAI");
+builder.Services.AddHttpClient("AzureOpenAI");
 
 builder.Services.AddMemoryCache();
 
