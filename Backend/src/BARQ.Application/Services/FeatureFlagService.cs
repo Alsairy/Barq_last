@@ -6,6 +6,7 @@ using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Caching.Memory;
+using Task = System.Threading.Tasks.Task;
 
 namespace BARQ.Application.Services
 {
@@ -139,7 +140,7 @@ namespace BARQ.Application.Services
                     RequiresRestart = request.RequiresRestart,
                     Priority = request.Priority,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = createdBy
+                    CreatedBy = Guid.TryParse(createdBy, out var createdByGuid) ? createdByGuid : null
                 };
 
                 _context.FeatureFlags.Add(flag);
@@ -234,7 +235,7 @@ namespace BARQ.Application.Services
                 if (hasChanges)
                 {
                     flag.UpdatedAt = DateTime.UtcNow;
-                    flag.UpdatedBy = updatedBy;
+                    flag.UpdatedBy = Guid.TryParse(updatedBy, out var updatedByGuid) ? updatedByGuid : null;
                     await _context.SaveChangesAsync();
 
                     await LogFeatureFlagHistoryAsync(flag.Id, "Updated", previousEnabled, flag.IsEnabled, updatedBy, request.Reason);
@@ -300,10 +301,11 @@ namespace BARQ.Application.Services
                 flag.IsEnabled = isEnabled;
                 flag.EnabledAt = isEnabled ? DateTime.UtcNow : flag.EnabledAt;
                 flag.DisabledAt = !isEnabled ? DateTime.UtcNow : flag.DisabledAt;
+                var changedByGuid = Guid.TryParse(changedBy, out var parsedChangedBy) ? parsedChangedBy : (Guid?)null;
                 flag.EnabledBy = isEnabled ? changedBy : flag.EnabledBy;
                 flag.DisabledBy = !isEnabled ? changedBy : flag.DisabledBy;
                 flag.UpdatedAt = DateTime.UtcNow;
-                flag.UpdatedBy = changedBy;
+                flag.UpdatedBy = changedByGuid;
 
                 await _context.SaveChangesAsync();
 
@@ -425,7 +427,7 @@ namespace BARQ.Application.Services
                     Reason = reason,
                     ChangedAt = DateTime.UtcNow,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = changedBy
+                    CreatedBy = Guid.TryParse(changedBy, out var changedByHistoryGuid) ? changedByHistoryGuid : null
                 };
 
                 _context.FeatureFlagHistory.Add(history);
