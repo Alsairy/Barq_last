@@ -15,24 +15,29 @@ public class EscalationService : IEscalationService
     private readonly BarqDbContext _context;
     private readonly ITenantProvider _tenantProvider;
     private readonly INotificationService _notificationService;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<EscalationService> _logger;
 
     public EscalationService(
         BarqDbContext context, 
         ITenantProvider tenantProvider,
         INotificationService notificationService,
+        IHttpClientFactory httpClientFactory,
         ILogger<EscalationService> logger)
     {
         _context = context;
         _tenantProvider = tenantProvider;
         _notificationService = notificationService;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
     public async System.Threading.Tasks.Task<PagedResult<EscalationRule>> GetEscalationRulesAsync(Guid? slaPolicyId = null, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
     {
+        var tenantId = _tenantProvider.GetTenantId();
         var query = _context.EscalationRules
             .Include(r => r.SlaPolicy)
+            .Where(r => r.TenantId == tenantId)
             .AsQueryable();
 
         if (slaPolicyId.HasValue)
@@ -81,6 +86,8 @@ public class EscalationService : IEscalationService
         var existing = await _context.EscalationRules.FindAsync(rule.Id);
         if (existing == null)
             throw new InvalidOperationException($"Escalation rule {rule.Id} not found");
+        if (existing.TenantId != _tenantProvider.GetTenantId())
+            throw new UnauthorizedAccessException("Cross-tenant update blocked");
 
         existing.Level = rule.Level;
         existing.TriggerAfterMinutes = rule.TriggerAfterMinutes;
@@ -101,6 +108,8 @@ public class EscalationService : IEscalationService
         var rule = await _context.EscalationRules.FindAsync(id);
         if (rule != null)
         {
+            if (rule.TenantId != _tenantProvider.GetTenantId())
+                throw new UnauthorizedAccessException("Cross-tenant delete blocked");
             rule.IsDeleted = true;
             rule.UpdatedAt = DateTime.UtcNow;
             rule.UpdatedBy = null;
@@ -112,9 +121,11 @@ public class EscalationService : IEscalationService
 
     public async System.Threading.Tasks.Task<PagedResult<EscalationAction>> GetEscalationActionsAsync(Guid? violationId = null, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
     {
+        var tenantId = _tenantProvider.GetTenantId();
         var query = _context.EscalationActions
             .Include(a => a.SlaViolation)
             .Include(a => a.EscalationRule)
+            .Where(a => a.TenantId == tenantId)
             .AsQueryable();
 
         if (violationId.HasValue)
@@ -293,7 +304,6 @@ public class EscalationService : IEscalationService
                 EscalationRuleId = rule.Id,
                 ActionType = rule.ActionType,
                 ActionConfig = rule.ActionConfig,
-                ExecutedAt = DateTime.UtcNow,
                 Status = "Pending",
                 TenantId = violation.TenantId,
                 CreatedAt = DateTime.UtcNow,
@@ -334,11 +344,17 @@ public class EscalationService : IEscalationService
         var recipients = config.GetValueOrDefault("recipients", "").ToString()?.Split(',') ?? Array.Empty<string>();
         var message = config.GetValueOrDefault("message", "SLA violation escalation").ToString() ?? "SLA violation escalation";
 
-        foreach (var recipient in recipients.Where(r => !string.IsNullOrWhiteSpace(r)))
+        var validRecipientIds = recipients
+            .Where(r => !string.IsNullOrWhiteSpace(r))
+            .Select(r => Guid.TryParse(r.Trim(), out var g) ? g : Guid.Empty)
+            .Where(g => g != Guid.Empty)
+            .ToList();
+
+        foreach (var recipientId in validRecipientIds)
         {
-            await _notificationService.CreateNotificationAsync(Guid.Empty, new CreateNotificationRequest
+            await _notificationService.CreateNotificationAsync(recipientId, new CreateNotificationRequest
             {
-                UserId = Guid.Empty,
+                UserId = recipientId,
                 Type = "SlaEscalation",
                 Title = "SLA Violation Escalation",
                 Message = message,
@@ -347,7 +363,7 @@ public class EscalationService : IEscalationService
             });
         }
 
-        action.Result = $"Notified {recipients.Length} recipients";
+        action.Result = $"Notified {validRecipientIds.Count} recipients";
         return true;
     }
 
@@ -375,14 +391,18 @@ public class EscalationService : IEscalationService
         }
         else if (!string.IsNullOrEmpty(backupRole))
         {
+            var tenantId = action.SlaViolation.TenantId;
             var backupUser = await _context.Users
-                .Where(u => u.UserRoles.Any(ur => ur.Role.Name == backupRole))
+                .Where(u => u.TenantId == tenantId && u.UserRoles.Any(ur => ur.Role.Name == backupRole))
                 .FirstOrDefaultAsync(cancellationToken);
-            
-            if (backupUser != null)
+
+            if (backupUser == null)
             {
-                task.AssignedToId = backupUser.Id;
+                action.ErrorMessage = $"No user with role '{backupRole}' in tenant {tenantId}";
+                return false;
             }
+
+            task.AssignedToId = backupUser.Id;
         }
 
         task.UpdatedAt = DateTime.UtcNow;
@@ -429,7 +449,8 @@ public class EscalationService : IEscalationService
 
         try
         {
-            using var httpClient = new HttpClient();
+            using var httpClient = _httpClientFactory.CreateClient("SlaEscalations");
+            httpClient.Timeout = TimeSpan.FromSeconds(10);
             var payload = new
             {
                 ViolationId = action.SlaViolationId,

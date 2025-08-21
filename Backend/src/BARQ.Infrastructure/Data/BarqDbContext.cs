@@ -1,7 +1,9 @@
 using System.Reflection;
+using System.Linq.Expressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using BARQ.Core.Entities;
 using BARQ.Core.Services;
 
@@ -107,7 +109,6 @@ public sealed class BarqDbContext
     private void AddTenantFilter(ModelBuilder modelBuilder)
     {
         var setGlobalQuery = typeof(BarqDbContext).GetMethod(nameof(SetTenantFilter), BindingFlags.NonPublic | BindingFlags.Instance)!;
-
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(TenantEntity).IsAssignableFrom(entityType.ClrType))
@@ -120,7 +121,11 @@ public sealed class BarqDbContext
 
     private void SetTenantFilter<TEntity>(ModelBuilder modelBuilder) where TEntity : TenantEntity
     {
-        modelBuilder.Entity<TEntity>().HasQueryFilter(e => CurrentTenantId != Guid.Empty && e.TenantId == CurrentTenantId);
+        // tenant + soft-delete combined for TenantEntity
+        modelBuilder.Entity<TEntity>()
+            .HasQueryFilter(e => CurrentTenantId != Guid.Empty
+                                 && e.TenantId == CurrentTenantId
+                                 && !e.IsDeleted);
     }
 
     private void AddSoftDeleteFilter(ModelBuilder modelBuilder)
@@ -129,7 +134,7 @@ public sealed class BarqDbContext
         {
             var clr = entityType.ClrType;
 
-            var isIdentityTable =
+            var isIdentity =
                 typeof(IdentityUser<Guid>).IsAssignableFrom(clr) ||
                 typeof(IdentityRole<Guid>).IsAssignableFrom(clr) ||
                 typeof(IdentityUserClaim<Guid>).IsAssignableFrom(clr) ||
@@ -140,15 +145,25 @@ public sealed class BarqDbContext
 
             var isAuditLog = typeof(AuditLog).IsAssignableFrom(clr);
 
-            if (isIdentityTable || isAuditLog) continue;
+            if (isIdentity || isAuditLog) continue;
+
+            if (typeof(TenantEntity).IsAssignableFrom(clr)) continue;
 
             if (typeof(BaseEntity).IsAssignableFrom(clr))
             {
-                var param = System.Linq.Expressions.Expression.Parameter(clr, "e");
-                var isDeletedProp = System.Linq.Expressions.Expression.PropertyOrField(param, nameof(BaseEntity.IsDeleted));
-                var notDeleted = System.Linq.Expressions.Expression.Not(isDeletedProp);
-                var lambda = System.Linq.Expressions.Expression.Lambda(notDeleted, param);
-                entityType.SetQueryFilter(lambda);
+                var param = Expression.Parameter(clr, "e");
+                var isDeletedProp = Expression.PropertyOrField(param, nameof(BaseEntity.IsDeleted));
+                var notDeleted = Expression.Not(isDeletedProp);
+
+                var existing = entityType.GetQueryFilter();
+                Expression body = notDeleted;
+                if (existing != null)
+                {
+                    var replaced = ParameterReplacer.Replace(existing.Parameters[0], param, existing.Body);
+                    body = Expression.AndAlso(replaced!, notDeleted);
+                }
+
+                modelBuilder.Entity(clr).HasQueryFilter(Expression.Lambda(body, param));
             }
         }
     }
@@ -190,4 +205,15 @@ public sealed class BarqDbContext
             }
         }
     }
+}
+
+internal sealed class ParameterReplacer : ExpressionVisitor
+{
+    private readonly ParameterExpression _from;
+    private readonly ParameterExpression _to;
+    private ParameterReplacer(ParameterExpression from, ParameterExpression to) { _from = from; _to = to; }
+    public static Expression? Replace(ParameterExpression from, ParameterExpression to, Expression? node)
+        => node is null ? null : new ParameterReplacer(from, to).Visit(node);
+    protected override Expression VisitParameter(ParameterExpression node)
+        => node == _from ? _to : base.VisitParameter(node);
 }

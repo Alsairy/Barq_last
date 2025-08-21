@@ -32,7 +32,14 @@ public class SlaMonitorWorker : BackgroundService
                 _logger.LogError(ex, "Error occurred during SLA monitoring");
             }
 
-            await Task.Delay(_checkInterval, stoppingToken);
+            try 
+            { 
+                await Task.Delay(_checkInterval, stoppingToken); 
+            }
+            catch (OperationCanceledException) 
+            { 
+                break; 
+            }
         }
 
         _logger.LogInformation("SLA Monitor Worker stopped");

@@ -186,6 +186,7 @@ public class SlaController : ControllerBase
     }
 
     [HttpPost("escalation-actions/{id}/retry")]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> RetryEscalationAction(Guid id, CancellationToken cancellationToken = default)
     {
         await _escalationService.ExecuteEscalationActionAsync(id, cancellationToken);
