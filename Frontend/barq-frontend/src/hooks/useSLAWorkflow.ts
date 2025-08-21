@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import { slaApi } from '../services/api';
-import { useAutoRetry } from './useAutoRetry';
 import { toast } from 'sonner';
 
 export interface SLAViolation {
@@ -27,7 +26,20 @@ export function useSLAWorkflow() {
     loading: false
   });
 
-  const { executeWithRetry } = useAutoRetry();
+  const executeWithRetry = useCallback(async (fn: () => Promise<any>) => {
+    let lastError;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        lastError = error;
+        if (attempt < 2) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+        }
+      }
+    }
+    throw lastError;
+  }, []);
 
   useEffect(() => {
     loadViolations();

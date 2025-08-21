@@ -1,7 +1,5 @@
 import { useState, useCallback } from 'react';
 import { taskApi, approvalApi, aiApi, TaskRequest, Task, AIRunRequest } from '../services/api';
-import { useOptimisticUpdate } from './useOptimisticUpdate';
-import { useAutoRetry } from './useAutoRetry';
 import { toast } from 'sonner';
 
 export interface TaskWorkflowState {
@@ -20,8 +18,36 @@ export function useTaskWorkflow(taskId?: string) {
     isLoading: false
   });
 
-  const { executeWithOptimism } = useOptimisticUpdate();
-  const { executeWithRetry } = useAutoRetry();
+  const executeWithRetry = useCallback(async (fn: () => Promise<any>) => {
+    let lastError;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        lastError = error;
+        if (attempt < 2) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+        }
+      }
+    }
+    throw lastError;
+  }, []);
+
+  const executeWithOptimism = useCallback(async (fn: () => Promise<any>, optimisticUpdate?: () => void, rollback?: () => void) => {
+    if (optimisticUpdate) {
+      optimisticUpdate();
+    }
+    
+    try {
+      const result = await fn();
+      return result;
+    } catch (error) {
+      if (rollback) {
+        rollback();
+      }
+      throw error;
+    }
+  }, []);
 
   const createTaskWithApproval = useCallback(async (request: TaskRequest & { approverId?: string }) => {
     setState(prev => ({ ...prev, isLoading: true, error: undefined }));
@@ -154,15 +180,21 @@ export function useTaskWorkflow(taskId?: string) {
     try {
       const response = await executeWithOptimism(
         () => taskApi.updateTaskStatus(state.task!.id, 'completed'),
-        (currentTask: any) => ({ ...currentTask, status: 'completed' as const }),
-        state.task
+        () => {
+          setState(prev => ({ 
+            ...prev, 
+            task: { ...prev.task!, status: 'completed' }
+          }));
+        },
+        () => {
+          setState(prev => ({ 
+            ...prev, 
+            task: { ...prev.task!, status: state.task!.status }
+          }));
+        }
       );
 
       if (response.success) {
-        setState(prev => ({ 
-          ...prev, 
-          task: { ...prev.task!, status: 'completed' }
-        }));
         toast.success('Task completed successfully');
         return true;
       }
