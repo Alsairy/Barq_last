@@ -10,11 +10,13 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
+    <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BARQ.Core\BARQ.Core.csproj" />
     <ProjectReference Include="..\BARQ.Infrastructure\BARQ.Infrastructure.csproj" />
   </ItemGroup>
+
 
 </Project>
