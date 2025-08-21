@@ -65,6 +65,9 @@ public sealed class BarqDbContext
     public DbSet<UserLanguagePreference> UserLanguagePreferences => Set<UserLanguagePreference>();
     public DbSet<AccessibilityAudit> AccessibilityAudits => Set<AccessibilityAudit>();
     public DbSet<AccessibilityIssue> AccessibilityIssues => Set<AccessibilityIssue>();
+    public DbSet<TechnologyConstraint> TechnologyConstraints => Set<TechnologyConstraint>();
+    public DbSet<TemplateValidation> TemplateValidations => Set<TemplateValidation>();
+    public DbSet<ConstraintViolation> ConstraintViolations => Set<ConstraintViolation>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
