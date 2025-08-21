@@ -16,7 +16,7 @@ namespace BARQ.Application.Services
             _context = context;
         }
 
-        public async Task<PagedResult<ProjectDto>> GetProjectsAsync(Guid tenantId, ListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<ProjectDto>> GetProjectsAsync(Guid tenantId, ListRequest request)
         {
             var query = _context.Projects
                 .Where(p => p.TenantId == tenantId)
@@ -68,13 +68,13 @@ namespace BARQ.Application.Services
             return new PagedResult<ProjectDto>
             {
                 Items = projects,
-                Total = totalCount,
+                TotalCount = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };
         }
 
-        public async Task<ProjectDto?> GetProjectByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<ProjectDto?> GetProjectByIdAsync(Guid id)
         {
             var project = await _context.Projects
                 .Include(p => p.Owner)
@@ -125,7 +125,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<ProjectDto> CreateProjectAsync(Guid tenantId, CreateProjectRequest request)
+        public async System.Threading.Tasks.Task<ProjectDto> CreateProjectAsync(Guid tenantId, CreateProjectRequest request)
         {
             var project = new Project
             {
@@ -157,7 +157,7 @@ namespace BARQ.Application.Services
             return await GetProjectByIdAsync(project.Id) ?? throw new InvalidOperationException("Failed to retrieve created project");
         }
 
-        public async Task<ProjectDto> UpdateProjectAsync(Guid id, UpdateProjectRequest request)
+        public async System.Threading.Tasks.Task<ProjectDto> UpdateProjectAsync(Guid id, UpdateProjectRequest request)
         {
             var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == id);
             if (project == null)
@@ -191,7 +191,7 @@ namespace BARQ.Application.Services
             return await GetProjectByIdAsync(project.Id) ?? throw new InvalidOperationException("Failed to retrieve updated project");
         }
 
-        public async Task<bool> DeleteProjectAsync(Guid id)
+        public async System.Threading.Tasks.Task<bool> DeleteProjectAsync(Guid id)
         {
             var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == id);
             if (project == null) return false;
@@ -203,7 +203,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> UpdateProjectStatusAsync(Guid projectId, string status)
+        public async System.Threading.Tasks.Task<bool> UpdateProjectStatusAsync(Guid projectId, string status)
         {
             var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
             if (project == null) return false;
@@ -221,7 +221,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> UpdateProjectProgressAsync(Guid projectId, decimal progressPercentage)
+        public async System.Threading.Tasks.Task<bool> UpdateProjectProgressAsync(Guid projectId, decimal progressPercentage)
         {
             var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
             if (project == null) return false;
@@ -240,7 +240,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<List<ProjectDto>> GetProjectTemplatesAsync(Guid tenantId)
+        public async System.Threading.Tasks.Task<List<ProjectDto>> GetProjectTemplatesAsync(Guid tenantId)
         {
             var templates = await _context.Projects
                 .Where(p => p.TenantId == tenantId && p.IsTemplate)
@@ -271,7 +271,7 @@ namespace BARQ.Application.Services
             return templates;
         }
 
-        public async Task<ProjectDto> CreateProjectFromTemplateAsync(Guid tenantId, Guid templateId, string name)
+        public async System.Threading.Tasks.Task<ProjectDto> CreateProjectFromTemplateAsync(Guid tenantId, Guid templateId, string name)
         {
             var template = await _context.Projects
                 .Include(p => p.Tasks)
@@ -334,7 +334,7 @@ namespace BARQ.Application.Services
             return await GetProjectByIdAsync(project.Id) ?? throw new InvalidOperationException("Failed to retrieve created project");
         }
 
-        public async Task<BulkOperationResult> BulkDeleteProjectsAsync(BulkDeleteRequest request)
+        public async System.Threading.Tasks.Task<BulkOperationResult> BulkDeleteProjectsAsync(BulkDeleteRequest request)
         {
             var projects = await _context.Projects
                 .Where(p => request.Ids.Contains(p.Id))

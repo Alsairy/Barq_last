@@ -16,7 +16,7 @@ namespace BARQ.Application.Services
             _context = context;
         }
 
-        public async Task<PagedResult<TaskDto>> GetTasksAsync(Guid tenantId, TaskListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<TaskDto>> GetTasksAsync(Guid tenantId, TaskListRequest request)
         {
             var query = _context.Tasks
                 .Where(t => t.TenantId == tenantId)
@@ -106,13 +106,13 @@ namespace BARQ.Application.Services
             return new PagedResult<TaskDto>
             {
                 Items = tasks,
-                Total = totalCount,
+                TotalCount = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };
         }
 
-        public async Task<TaskDto?> GetTaskByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<TaskDto?> GetTaskByIdAsync(Guid id)
         {
             var task = await _context.Tasks
                 .Include(t => t.AssignedTo)
@@ -164,7 +164,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<TaskDto> CreateTaskAsync(Guid tenantId, CreateTaskRequest request)
+        public async System.Threading.Tasks.Task<TaskDto> CreateTaskAsync(Guid tenantId, CreateTaskRequest request)
         {
             var task = new Core.Entities.Task
             {
@@ -197,7 +197,7 @@ namespace BARQ.Application.Services
             return await GetTaskByIdAsync(task.Id) ?? throw new InvalidOperationException("Failed to retrieve created task");
         }
 
-        public async Task<TaskDto> UpdateTaskAsync(Guid id, UpdateTaskRequest request)
+        public async System.Threading.Tasks.Task<TaskDto> UpdateTaskAsync(Guid id, UpdateTaskRequest request)
         {
             var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
             if (task == null)
@@ -230,7 +230,7 @@ namespace BARQ.Application.Services
             return await GetTaskByIdAsync(task.Id) ?? throw new InvalidOperationException("Failed to retrieve updated task");
         }
 
-        public async Task<bool> DeleteTaskAsync(Guid id)
+        public async System.Threading.Tasks.Task<bool> DeleteTaskAsync(Guid id)
         {
             var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
             if (task == null) return false;
@@ -242,7 +242,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> AssignTaskAsync(Guid taskId, Guid userId)
+        public async System.Threading.Tasks.Task<bool> AssignTaskAsync(Guid taskId, Guid userId)
         {
             var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
             if (task == null) return false;
@@ -254,7 +254,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> UnassignTaskAsync(Guid taskId)
+        public async System.Threading.Tasks.Task<bool> UnassignTaskAsync(Guid taskId)
         {
             var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
             if (task == null) return false;
@@ -266,7 +266,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> UpdateTaskStatusAsync(Guid taskId, string status)
+        public async System.Threading.Tasks.Task<bool> UpdateTaskStatusAsync(Guid taskId, string status)
         {
             var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
             if (task == null) return false;
@@ -284,7 +284,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> UpdateTaskProgressAsync(Guid taskId, decimal progressPercentage)
+        public async System.Threading.Tasks.Task<bool> UpdateTaskProgressAsync(Guid taskId, decimal progressPercentage)
         {
             var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
             if (task == null) return false;
@@ -303,7 +303,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<List<TaskDto>> GetSubTasksAsync(Guid parentTaskId)
+        public async System.Threading.Tasks.Task<List<TaskDto>> GetSubTasksAsync(Guid parentTaskId)
         {
             var subTasks = await _context.Tasks
                 .Where(t => t.ParentTaskId == parentTaskId)
@@ -329,7 +329,7 @@ namespace BARQ.Application.Services
             return subTasks;
         }
 
-        public async Task<List<TaskDto>> GetTasksByProjectAsync(Guid projectId)
+        public async System.Threading.Tasks.Task<List<TaskDto>> GetTasksByProjectAsync(Guid projectId)
         {
             var tasks = await _context.Tasks
                 .Where(t => t.ProjectId == projectId)
@@ -355,7 +355,7 @@ namespace BARQ.Application.Services
             return tasks;
         }
 
-        public async Task<List<TaskDto>> GetTasksByUserAsync(Guid userId)
+        public async System.Threading.Tasks.Task<List<TaskDto>> GetTasksByUserAsync(Guid userId)
         {
             var tasks = await _context.Tasks
                 .Where(t => t.AssignedToId == userId)
@@ -381,7 +381,7 @@ namespace BARQ.Application.Services
             return tasks;
         }
 
-        public async Task<BulkOperationResult> BulkDeleteTasksAsync(BulkDeleteRequest request)
+        public async System.Threading.Tasks.Task<BulkOperationResult> BulkDeleteTasksAsync(BulkDeleteRequest request)
         {
             var tasks = await _context.Tasks
                 .Where(t => request.Ids.Contains(t.Id))

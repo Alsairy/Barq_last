@@ -29,7 +29,7 @@ namespace BARQ.Application.Services
             _logger = logger;
         }
 
-        public async Task<FileUploadResponse> UploadFileAsync(Guid userId, Guid? tenantId, FileUploadRequest request)
+        public async System.Threading.Tasks.Task<FileUploadResponse> UploadFileAsync(Guid userId, Guid? tenantId, FileUploadRequest request)
         {
             var fileId = Guid.NewGuid();
             var fileName = request.File.FileName;
@@ -100,7 +100,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<FileAttachmentDto?> GetFileAsync(string fileId, Guid userId)
+        public async System.Threading.Tasks.Task<FileAttachmentDto?> GetFileAsync(string fileId, Guid userId)
         {
             if (!Guid.TryParse(fileId, out var fileGuid))
                 return null;
@@ -117,7 +117,7 @@ namespace BARQ.Application.Services
             return MapToDto(file);
         }
 
-        public async Task<PagedResult<FileAttachmentDto>> GetFilesAsync(Guid userId, Guid? tenantId, FileListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<FileAttachmentDto>> GetFilesAsync(Guid userId, Guid? tenantId, FileListRequest request)
         {
             var query = _context.FileAttachments
                 .Include(f => f.UploadedByUser)
@@ -157,14 +157,14 @@ namespace BARQ.Application.Services
             var result = new PagedResult<FileAttachmentDto>
             {
                 Items = files.Select(MapToDto).ToList(),
-                Total = totalCount,
+                TotalCount = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };
             return result;
         }
 
-        public async Task<FileAccessResponse> GenerateAccessUrlAsync(string fileId, Guid userId, FileAccessRequest request)
+        public async System.Threading.Tasks.Task<FileAccessResponse> GenerateAccessUrlAsync(string fileId, Guid userId, FileAccessRequest request)
         {
             if (!Guid.TryParse(fileId, out var fileGuid))
                 throw new ArgumentException("Invalid file ID");
@@ -187,7 +187,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<bool> DeleteFileAsync(string fileId, Guid userId)
+        public async System.Threading.Tasks.Task<bool> DeleteFileAsync(string fileId, Guid userId)
         {
             if (!Guid.TryParse(fileId, out var fileGuid))
                 return false;
@@ -208,7 +208,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<FileScanResponse> ScanFileAsync(string fileId, Guid userId, FileScanRequest request)
+        public async System.Threading.Tasks.Task<FileScanResponse> ScanFileAsync(string fileId, Guid userId, FileScanRequest request)
         {
             if (!Guid.TryParse(fileId, out var fileGuid))
                 throw new ArgumentException("Invalid file ID");
@@ -253,7 +253,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<bool> QuarantineFileAsync(string fileId, Guid userId, FileQuarantineRequest request)
+        public async System.Threading.Tasks.Task<bool> QuarantineFileAsync(string fileId, Guid userId, FileQuarantineRequest request)
         {
             if (!Guid.TryParse(fileId, out var fileGuid))
                 return false;
@@ -268,7 +268,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> ReleaseFromQuarantineAsync(string fileId, Guid userId, string? reviewNotes = null)
+        public async System.Threading.Tasks.Task<bool> ReleaseFromQuarantineAsync(string fileId, Guid userId, string? reviewNotes = null)
         {
             if (!Guid.TryParse(fileId, out var fileGuid))
                 return false;
@@ -293,7 +293,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<Stream?> DownloadFileAsync(string fileId, Guid userId, string accessToken)
+        public async System.Threading.Tasks.Task<Stream?> DownloadFileAsync(string fileId, Guid userId, string accessToken)
         {
             if (!Guid.TryParse(fileId, out var fileGuid))
                 return null;
@@ -309,7 +309,7 @@ namespace BARQ.Application.Services
             return await _fileStorage.DownloadFileAsync(file.StoragePath);
         }
 
-        public async Task<Stream?> GetThumbnailAsync(string fileId, Guid userId)
+        public async System.Threading.Tasks.Task<Stream?> GetThumbnailAsync(string fileId, Guid userId)
         {
             if (!Guid.TryParse(fileId, out var fileGuid))
                 return null;
@@ -321,7 +321,7 @@ namespace BARQ.Application.Services
             return await _fileStorage.DownloadFileAsync(file.ThumbnailPath);
         }
 
-        public async Task<Stream?> GetPreviewAsync(string fileId, Guid userId)
+        public async System.Threading.Tasks.Task<Stream?> GetPreviewAsync(string fileId, Guid userId)
         {
             if (!Guid.TryParse(fileId, out var fileGuid))
                 return null;
@@ -333,7 +333,7 @@ namespace BARQ.Application.Services
             return await _fileStorage.DownloadFileAsync(file.PreviewPath);
         }
 
-        public async Task<bool> GenerateThumbnailAsync(string fileId)
+        public async System.Threading.Tasks.Task<bool> GenerateThumbnailAsync(string fileId)
         {
             return false;
         }

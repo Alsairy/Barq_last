@@ -13,7 +13,7 @@ namespace BARQ.Application.Services
             _logger = logger;
         }
 
-        public async Task<ScanResult> ScanFileAsync(Stream fileStream, string fileName)
+        public async System.Threading.Tasks.Task<ScanResult> ScanFileAsync(Stream fileStream, string fileName)
         {
             await Task.Delay(100); // Simulate scan time
             
@@ -35,24 +35,24 @@ namespace BARQ.Application.Services
             return result;
         }
 
-        public async Task<ScanResult> ScanFileAsync(string filePath)
+        public async System.Threading.Tasks.Task<ScanResult> ScanFileAsync(string filePath)
         {
             var fileName = Path.GetFileName(filePath);
             using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             return await ScanFileAsync(fileStream, fileName);
         }
 
-        public async Task<bool> IsServiceAvailableAsync()
+        public async System.Threading.Tasks.Task<bool> IsServiceAvailableAsync()
         {
             return true;
         }
 
-        public async Task<string> GetEngineVersionAsync()
+        public async System.Threading.Tasks.Task<string> GetEngineVersionAsync()
         {
             return "MockAV 1.0.0";
         }
 
-        public async Task<ScanResult> QuickScanAsync(string fileHash, long fileSize)
+        public async System.Threading.Tasks.Task<ScanResult> QuickScanAsync(string fileHash, long fileSize)
         {
             await Task.Delay(50);
             

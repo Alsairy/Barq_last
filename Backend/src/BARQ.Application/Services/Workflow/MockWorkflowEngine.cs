@@ -17,7 +17,7 @@ namespace BARQ.Application.Services.Workflow
             _logger = logger;
         }
 
-        public async Task<string> DeployProcessDefinitionAsync(string processDefinition, string processKey)
+        public async System.Threading.Tasks.Task<string> DeployProcessDefinitionAsync(string processDefinition, string processKey)
         {
             _logger.LogInformation("Mock: Deploying process definition with key {ProcessKey}", processKey);
             
@@ -30,7 +30,7 @@ namespace BARQ.Application.Services.Workflow
             return deploymentId;
         }
 
-        public async Task<WorkflowInstanceDto> StartProcessInstanceAsync(string processDefinitionKey, string businessKey, Dictionary<string, object> variables)
+        public async System.Threading.Tasks.Task<WorkflowInstanceDto> StartProcessInstanceAsync(string processDefinitionKey, string businessKey, Dictionary<string, object> variables)
         {
             _logger.LogInformation("Mock: Starting process instance for key {ProcessKey} with business key {BusinessKey}", 
                 processDefinitionKey, businessKey);
@@ -97,7 +97,7 @@ namespace BARQ.Application.Services.Workflow
             return instance;
         }
 
-        public async Task<WorkflowInstanceDto> GetProcessInstanceAsync(string processInstanceId)
+        public async System.Threading.Tasks.Task<WorkflowInstanceDto> GetProcessInstanceAsync(string processInstanceId)
         {
             _logger.LogDebug("Mock: Getting process instance {InstanceId}", processInstanceId);
             
@@ -111,7 +111,7 @@ namespace BARQ.Application.Services.Workflow
             throw new ArgumentException($"Process instance {processInstanceId} not found");
         }
 
-        public async Task<List<WorkflowInstanceDto>> GetProcessInstancesAsync(string processDefinitionKey)
+        public async System.Threading.Tasks.Task<List<WorkflowInstanceDto>> GetProcessInstancesAsync(string processDefinitionKey)
         {
             _logger.LogDebug("Mock: Getting process instances for key {ProcessKey}", processDefinitionKey);
             
@@ -124,7 +124,7 @@ namespace BARQ.Application.Services.Workflow
             return instances;
         }
 
-        public async Task<bool> CompleteTaskAsync(string taskId, Dictionary<string, object> variables)
+        public async System.Threading.Tasks.Task<bool> CompleteTaskAsync(string taskId, Dictionary<string, object> variables)
         {
             _logger.LogInformation("Mock: Completing task {TaskId}", taskId);
 
@@ -179,7 +179,7 @@ namespace BARQ.Application.Services.Workflow
             return false;
         }
 
-        public async Task<bool> CancelProcessInstanceAsync(string processInstanceId, string reason)
+        public async System.Threading.Tasks.Task<bool> CancelProcessInstanceAsync(string processInstanceId, string reason)
         {
             _logger.LogInformation("Mock: Cancelling process instance {InstanceId} with reason: {Reason}", 
                 processInstanceId, reason);
@@ -220,7 +220,7 @@ namespace BARQ.Application.Services.Workflow
             return false;
         }
 
-        public async Task<List<WorkflowTaskDto>> GetActiveTasksAsync(string processInstanceId)
+        public async System.Threading.Tasks.Task<List<WorkflowTaskDto>> GetActiveTasksAsync(string processInstanceId)
         {
             _logger.LogDebug("Mock: Getting active tasks for process instance {InstanceId}", processInstanceId);
             
@@ -234,7 +234,7 @@ namespace BARQ.Application.Services.Workflow
             return new List<WorkflowTaskDto>();
         }
 
-        public async Task<List<WorkflowTaskDto>> GetTasksForUserAsync(string userId)
+        public async System.Threading.Tasks.Task<List<WorkflowTaskDto>> GetTasksForUserAsync(string userId)
         {
             _logger.LogDebug("Mock: Getting tasks for user {UserId}", userId);
             
@@ -250,7 +250,7 @@ namespace BARQ.Application.Services.Workflow
             return userTasks;
         }
 
-        public async Task<bool> AssignTaskAsync(string taskId, string userId)
+        public async System.Threading.Tasks.Task<bool> AssignTaskAsync(string taskId, string userId)
         {
             _logger.LogInformation("Mock: Assigning task {TaskId} to user {UserId}", taskId, userId);
 
@@ -272,7 +272,7 @@ namespace BARQ.Application.Services.Workflow
             return false;
         }
 
-        public async Task<bool> ClaimTaskAsync(string taskId, string userId)
+        public async System.Threading.Tasks.Task<bool> ClaimTaskAsync(string taskId, string userId)
         {
             _logger.LogInformation("Mock: User {UserId} claiming task {TaskId}", userId, taskId);
 
@@ -294,7 +294,7 @@ namespace BARQ.Application.Services.Workflow
             return false;
         }
 
-        public async Task<WorkflowHistoryDto> GetProcessInstanceHistoryAsync(string processInstanceId)
+        public async System.Threading.Tasks.Task<WorkflowHistoryDto> GetProcessInstanceHistoryAsync(string processInstanceId)
         {
             _logger.LogDebug("Mock: Getting history for process instance {InstanceId}", processInstanceId);
             
@@ -308,7 +308,7 @@ namespace BARQ.Application.Services.Workflow
             throw new ArgumentException($"Process instance history {processInstanceId} not found");
         }
 
-        public async Task<bool> IsEngineHealthyAsync()
+        public async System.Threading.Tasks.Task<bool> IsEngineHealthyAsync()
         {
             _logger.LogDebug("Mock: Checking workflow engine health");
             

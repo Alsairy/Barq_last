@@ -28,7 +28,7 @@ namespace BARQ.Application.Services
             _emailService = emailService;
         }
 
-        public async Task<PagedResult<NotificationDto>> GetNotificationsAsync(Guid tenantId, NotificationListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<NotificationDto>> GetNotificationsAsync(Guid tenantId, NotificationListRequest request)
         {
             var query = _context.Notifications
                 .Where(n => n.TenantId == tenantId)
@@ -76,14 +76,14 @@ namespace BARQ.Application.Services
             return new PagedResult<NotificationDto>
             {
                 Items = notifications,
-                Total = totalCount,
+                TotalCount = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize,
                 // TotalPages is calculated automatically by PagedResult
             };
         }
 
-        public async Task<NotificationDto?> GetNotificationByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<NotificationDto?> GetNotificationByIdAsync(Guid id)
         {
             var notification = await _context.Notifications
                 .FirstOrDefaultAsync(n => n.Id == id);
@@ -110,7 +110,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<NotificationDto> CreateNotificationAsync(Guid tenantId, CreateNotificationRequest request)
+        public async System.Threading.Tasks.Task<NotificationDto> CreateNotificationAsync(Guid tenantId, CreateNotificationRequest request)
         {
             var notification = new Notification
             {
@@ -161,7 +161,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<bool> MarkNotificationAsReadAsync(Guid notificationId)
+        public async System.Threading.Tasks.Task<bool> MarkNotificationAsReadAsync(Guid notificationId)
         {
             var notification = await _context.Notifications
                 .FirstOrDefaultAsync(n => n.Id == notificationId);
@@ -177,7 +177,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> MarkNotificationsAsReadAsync(MarkNotificationReadRequest request)
+        public async System.Threading.Tasks.Task<bool> MarkNotificationsAsReadAsync(MarkNotificationReadRequest request)
         {
             var notifications = await _context.Notifications
                 .Where(n => request.NotificationIds.Contains(n.Id))
@@ -194,7 +194,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> DeleteNotificationAsync(Guid id)
+        public async System.Threading.Tasks.Task<bool> DeleteNotificationAsync(Guid id)
         {
             var notification = await _context.Notifications
                 .FirstOrDefaultAsync(n => n.Id == id);
@@ -207,14 +207,14 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<int> GetUnreadNotificationCountAsync(Guid userId)
+        public async System.Threading.Tasks.Task<int> GetUnreadNotificationCountAsync(Guid userId)
         {
             return await _context.Notifications
                 .Where(n => n.UserId == userId && !n.IsRead)
                 .CountAsync();
         }
 
-        public async Task<bool> SendEmailNotificationAsync(Guid notificationId)
+        public async System.Threading.Tasks.Task<bool> SendEmailNotificationAsync(Guid notificationId)
         {
             var notification = await _context.Notifications
                 .Include(n => n.User)
@@ -240,7 +240,7 @@ namespace BARQ.Application.Services
             return success;
         }
 
-        public async Task<List<NotificationDto>> GetRecentNotificationsAsync(Guid userId, int count = 10)
+        public async System.Threading.Tasks.Task<List<NotificationDto>> GetRecentNotificationsAsync(Guid userId, int count = 10)
         {
             return await _context.Notifications
                 .Where(n => n.UserId == userId)
@@ -266,7 +266,7 @@ namespace BARQ.Application.Services
                 .ToListAsync();
         }
 
-        public async Task<PagedResult<NotificationCenterDto>> GetNotificationCenterAsync(Guid userId, NotificationCenterRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<NotificationCenterDto>> GetNotificationCenterAsync(Guid userId, NotificationCenterRequest request)
         {
             var query = _context.Notifications
                 .Where(n => n.UserId == userId)
@@ -330,14 +330,14 @@ namespace BARQ.Application.Services
             return new PagedResult<NotificationCenterDto>
             {
                 Items = notifications,
-                Total = totalCount,
+                TotalCount = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize,
                 // TotalPages is calculated automatically by PagedResult
             };
         }
 
-        public async Task<NotificationStatsDto> GetNotificationStatsAsync(Guid userId)
+        public async System.Threading.Tasks.Task<NotificationStatsDto> GetNotificationStatsAsync(Guid userId)
         {
             var today = DateTime.UtcNow.Date;
             var notifications = await _context.Notifications
@@ -357,7 +357,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<bool> MarkNotificationsAsync(Guid userId, MarkNotificationRequest request)
+        public async System.Threading.Tasks.Task<bool> MarkNotificationsAsync(Guid userId, MarkNotificationRequest request)
         {
             var notificationIds = request.NotificationIds;
             var notifications = await _context.Notifications
@@ -375,7 +375,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> DeleteExpiredNotificationsAsync()
+        public async System.Threading.Tasks.Task<bool> DeleteExpiredNotificationsAsync()
         {
             var expiredNotifications = await _context.Notifications
                 .Where(n => n.ExpiryDate.HasValue && n.ExpiryDate.Value < DateTime.UtcNow)

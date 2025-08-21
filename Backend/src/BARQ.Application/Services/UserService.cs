@@ -21,7 +21,7 @@ namespace BARQ.Application.Services
             _roleManager = roleManager;
         }
 
-        public async Task<PagedResult<UserDto>> GetUsersAsync(Guid tenantId, ListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<UserDto>> GetUsersAsync(Guid tenantId, ListRequest request)
         {
             var query = _context.Users
                 .Where(u => u.TenantId == tenantId)
@@ -63,13 +63,13 @@ namespace BARQ.Application.Services
             return new PagedResult<UserDto>
             {
                 Items = users,
-                Total = totalCount,
+                TotalCount = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };
         }
 
-        public async Task<UserDto?> GetUserByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<UserDto?> GetUserByIdAsync(Guid id)
         {
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Id == id);
@@ -96,7 +96,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<UserDto> CreateUserAsync(Guid tenantId, CreateUserRequest request)
+        public async System.Threading.Tasks.Task<UserDto> CreateUserAsync(Guid tenantId, CreateUserRequest request)
         {
             var user = new ApplicationUser
             {
@@ -146,7 +146,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<UserDto> UpdateUserAsync(Guid id, UpdateUserRequest request)
+        public async System.Threading.Tasks.Task<UserDto> UpdateUserAsync(Guid id, UpdateUserRequest request)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
@@ -192,7 +192,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<bool> DeleteUserAsync(Guid id)
+        public async System.Threading.Tasks.Task<bool> DeleteUserAsync(Guid id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null) return false;
@@ -205,7 +205,7 @@ namespace BARQ.Application.Services
             return result.Succeeded;
         }
 
-        public async Task<bool> InviteUserAsync(Guid tenantId, InviteUserRequest request)
+        public async System.Threading.Tasks.Task<bool> InviteUserAsync(Guid tenantId, InviteUserRequest request)
         {
             var existingUser = await _userManager.FindByEmailAsync(request.Email);
             if (existingUser != null)
@@ -214,7 +214,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<List<string>> GetUserRolesAsync(Guid userId)
+        public async System.Threading.Tasks.Task<List<string>> GetUserRolesAsync(Guid userId)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null) return new List<string>();
@@ -223,7 +223,7 @@ namespace BARQ.Application.Services
             return roles.ToList();
         }
 
-        public async Task<bool> AssignRoleAsync(Guid userId, string roleName)
+        public async System.Threading.Tasks.Task<bool> AssignRoleAsync(Guid userId, string roleName)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null) return false;
@@ -232,7 +232,7 @@ namespace BARQ.Application.Services
             return result.Succeeded;
         }
 
-        public async Task<bool> RemoveRoleAsync(Guid userId, string roleName)
+        public async System.Threading.Tasks.Task<bool> RemoveRoleAsync(Guid userId, string roleName)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null) return false;
@@ -241,7 +241,7 @@ namespace BARQ.Application.Services
             return result.Succeeded;
         }
 
-        public async Task<UserDto?> GetUserByEmailAsync(string email)
+        public async System.Threading.Tasks.Task<UserDto?> GetUserByEmailAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null) return null;
@@ -266,7 +266,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<bool> ActivateUserAsync(Guid id)
+        public async System.Threading.Tasks.Task<bool> ActivateUserAsync(Guid id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null) return false;
@@ -278,7 +278,7 @@ namespace BARQ.Application.Services
             return result.Succeeded;
         }
 
-        public async Task<bool> DeactivateUserAsync(Guid id)
+        public async System.Threading.Tasks.Task<bool> DeactivateUserAsync(Guid id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null) return false;
@@ -290,7 +290,7 @@ namespace BARQ.Application.Services
             return result.Succeeded;
         }
 
-        public async Task<LoginResponse> LoginAsync(LoginRequest request)
+        public async System.Threading.Tasks.Task<LoginResponse> LoginAsync(LoginRequest request)
         {
             var user = await _userManager.FindByNameAsync(request.UserName);
             if (user == null || !user.IsActive)
@@ -331,7 +331,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<bool> LogoutAsync(Guid userId)
+        public async System.Threading.Tasks.Task<bool> LogoutAsync(Guid userId)
         {
             return true;
         }

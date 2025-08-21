@@ -5,7 +5,6 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SystemTask = System.Threading.Tasks.Task;
 
 namespace BARQ.Application.Services
 {
@@ -20,7 +19,7 @@ namespace BARQ.Application.Services
             _logger = logger;
         }
 
-        public async Task<PagedResult<UserLanguagePreferenceDto>> GetUserLanguagePreferencesAsync(Guid userId, ListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<UserLanguagePreferenceDto>> GetUserLanguagePreferencesAsync(Guid userId, ListRequest request)
         {
             try
             {
@@ -58,7 +57,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<UserLanguagePreferenceDto>
                 {
                     Items = preferenceDtos,
-                    Total = totalCount,
+                    TotalCount = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -70,7 +69,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<UserLanguagePreferenceDto?> GetUserLanguagePreferenceByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<UserLanguagePreferenceDto?> GetUserLanguagePreferenceByIdAsync(Guid id)
         {
             try
             {
@@ -87,7 +86,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<UserLanguagePreferenceDto?> GetUserDefaultLanguagePreferenceAsync(Guid userId)
+        public async System.Threading.Tasks.Task<UserLanguagePreferenceDto?> GetUserDefaultLanguagePreferenceAsync(Guid userId)
         {
             try
             {
@@ -104,7 +103,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<UserLanguagePreferenceDto?> GetUserLanguagePreferenceByCodeAsync(Guid userId, string languageCode)
+        public async System.Threading.Tasks.Task<UserLanguagePreferenceDto?> GetUserLanguagePreferenceByCodeAsync(Guid userId, string languageCode)
         {
             try
             {
@@ -121,7 +120,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<UserLanguagePreferenceDto> CreateUserLanguagePreferenceAsync(Guid userId, string languageId, string createdBy)
+        public async System.Threading.Tasks.Task<UserLanguagePreferenceDto> CreateUserLanguagePreferenceAsync(Guid userId, string languageId, string createdBy)
         {
             try
             {
@@ -174,7 +173,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<UserLanguagePreferenceDto?> UpdateUserLanguagePreferenceAsync(Guid id, UpdateUserLanguagePreferenceRequest request, string updatedBy)
+        public async System.Threading.Tasks.Task<UserLanguagePreferenceDto?> UpdateUserLanguagePreferenceAsync(Guid id, UpdateUserLanguagePreferenceRequest request, string updatedBy)
         {
             try
             {
@@ -238,7 +237,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> DeleteUserLanguagePreferenceAsync(Guid id, string deletedBy)
+        public async System.Threading.Tasks.Task<bool> DeleteUserLanguagePreferenceAsync(Guid id, string deletedBy)
         {
             try
             {
@@ -278,7 +277,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> SetDefaultLanguagePreferenceAsync(Guid userId, Guid preferenceId, string updatedBy)
+        public async System.Threading.Tasks.Task<bool> SetDefaultLanguagePreferenceAsync(Guid userId, Guid preferenceId, string updatedBy)
         {
             try
             {
@@ -310,7 +309,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<Dictionary<string, object>> GetUserAccessibilitySettingsAsync(Guid userId)
+        public async System.Threading.Tasks.Task<Dictionary<string, object>> GetUserAccessibilitySettingsAsync(Guid userId)
         {
             try
             {
@@ -339,7 +338,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> UpdateUserAccessibilitySettingsAsync(Guid userId, UpdateUserLanguagePreferenceRequest request, string updatedBy)
+        public async System.Threading.Tasks.Task<bool> UpdateUserAccessibilitySettingsAsync(Guid userId, UpdateUserLanguagePreferenceRequest request, string updatedBy)
         {
             try
             {
@@ -455,7 +454,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async SystemTask ClearDefaultLanguagePreferenceAsync(Guid userId)
+        private async System.Threading.Tasks.Task ClearDefaultLanguagePreferenceAsync(Guid userId)
         {
             var currentDefault = await _context.UserLanguagePreferences
                 .FirstOrDefaultAsync(ulp => ulp.UserId == userId && ulp.IsDefault);

@@ -5,7 +5,6 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SystemTask = System.Threading.Tasks.Task;
 
 namespace BARQ.Application.Services
 {
@@ -20,7 +19,7 @@ namespace BARQ.Application.Services
             _logger = logger;
         }
 
-        public async Task<PagedResult<LanguageDto>> GetLanguagesAsync(ListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<LanguageDto>> GetLanguagesAsync(ListRequest request)
         {
             try
             {
@@ -55,7 +54,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<LanguageDto>
                 {
                     Items = languageDtos,
-                    Total = totalCount,
+                    TotalCount = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -67,7 +66,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<LanguageDto?> GetLanguageByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<LanguageDto?> GetLanguageByIdAsync(Guid id)
         {
             try
             {
@@ -81,7 +80,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<LanguageDto?> GetLanguageByCodeAsync(string code)
+        public async System.Threading.Tasks.Task<LanguageDto?> GetLanguageByCodeAsync(string code)
         {
             try
             {
@@ -95,7 +94,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<List<LanguageDto>> GetEnabledLanguagesAsync()
+        public async System.Threading.Tasks.Task<List<LanguageDto>> GetEnabledLanguagesAsync()
         {
             try
             {
@@ -114,7 +113,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<LanguageDto?> GetDefaultLanguageAsync()
+        public async System.Threading.Tasks.Task<LanguageDto?> GetDefaultLanguageAsync()
         {
             try
             {
@@ -128,7 +127,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<LanguageDto> CreateLanguageAsync(CreateLanguageRequest request, string createdBy)
+        public async System.Threading.Tasks.Task<LanguageDto> CreateLanguageAsync(CreateLanguageRequest request, string createdBy)
         {
             try
             {
@@ -180,7 +179,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<LanguageDto?> UpdateLanguageAsync(Guid id, UpdateLanguageRequest request, string updatedBy)
+        public async System.Threading.Tasks.Task<LanguageDto?> UpdateLanguageAsync(Guid id, UpdateLanguageRequest request, string updatedBy)
         {
             try
             {
@@ -226,7 +225,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> DeleteLanguageAsync(Guid id, string deletedBy)
+        public async System.Threading.Tasks.Task<bool> DeleteLanguageAsync(Guid id, string deletedBy)
         {
             try
             {
@@ -264,7 +263,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> SetDefaultLanguageAsync(Guid id, string updatedBy)
+        public async System.Threading.Tasks.Task<bool> SetDefaultLanguageAsync(Guid id, string updatedBy)
         {
             try
             {
@@ -293,7 +292,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> ToggleLanguageAsync(Guid id, bool isEnabled, string updatedBy)
+        public async System.Threading.Tasks.Task<bool> ToggleLanguageAsync(Guid id, bool isEnabled, string updatedBy)
         {
             try
             {
@@ -325,7 +324,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<Dictionary<string, object>> GetLanguageStatsAsync()
+        public async System.Threading.Tasks.Task<Dictionary<string, object>> GetLanguageStatsAsync()
         {
             try
             {
@@ -361,7 +360,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async SystemTask RefreshLanguageCompletionAsync(string languageCode)
+        public async System.Threading.Tasks.Task RefreshLanguageCompletionAsync(string languageCode)
         {
             try
             {
@@ -423,7 +422,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async SystemTask ClearDefaultLanguageAsync()
+        private async System.Threading.Tasks.Task ClearDefaultLanguageAsync()
         {
             var currentDefault = await _context.Languages.FirstOrDefaultAsync(l => l.IsDefault);
             if (currentDefault != null)

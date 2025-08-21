@@ -165,7 +165,7 @@ namespace BARQ.Application.Services.Workflow
             _logger.LogInformation("Background job service stopped");
         }
 
-        private async Task ProcessJobQueue(CancellationToken cancellationToken)
+        private async System.Threading.Tasks.Task ProcessJobQueue(CancellationToken cancellationToken)
         {
             var jobsToProcess = new List<QueuedJob>();
             var now = DateTime.UtcNow;
@@ -192,7 +192,7 @@ namespace BARQ.Application.Services.Workflow
             }
         }
 
-        private async Task ProcessJob(QueuedJob queuedJob, CancellationToken cancellationToken)
+        private async System.Threading.Tasks.Task ProcessJob(QueuedJob queuedJob, CancellationToken cancellationToken)
         {
             if (!_jobs.TryGetValue(queuedJob.Id, out var jobInfo))
                 return;

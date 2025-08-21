@@ -20,7 +20,7 @@ namespace BARQ.Application.Services
             _logger = logger;
         }
 
-        public async Task<AuditReportDto> CreateReportAsync(Guid userId, Guid? tenantId, CreateAuditReportRequest request)
+        public async System.Threading.Tasks.Task<AuditReportDto> CreateReportAsync(Guid userId, Guid? tenantId, CreateAuditReportRequest request)
         {
             _logger.LogInformation("Creating audit report: {Name} by user {UserId}", request.Name, userId);
 
@@ -57,7 +57,7 @@ namespace BARQ.Application.Services
             return await MapToDto(report);
         }
 
-        public async Task<AuditReportDto?> GetReportAsync(string reportId, Guid userId, Guid? tenantId)
+        public async System.Threading.Tasks.Task<AuditReportDto?> GetReportAsync(string reportId, Guid userId, Guid? tenantId)
         {
             var report = await _context.AuditReports
                 .Include(r => r.GeneratedByUser)
@@ -73,7 +73,7 @@ namespace BARQ.Application.Services
             return await MapToDto(report);
         }
 
-        public async Task<PagedResult<AuditReportDto>> GetReportsAsync(Guid userId, Guid? tenantId, AuditReportListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<AuditReportDto>> GetReportsAsync(Guid userId, Guid? tenantId, AuditReportListRequest request)
         {
             var query = _context.AuditReports
                 .Include(r => r.GeneratedByUser)
@@ -133,13 +133,13 @@ namespace BARQ.Application.Services
             return new PagedResult<AuditReportDto>
             {
                 Items = reportDtos,
-                Total = totalCount,
+                TotalCount = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };
         }
 
-        public async Task<bool> DeleteReportAsync(string reportId, Guid userId, Guid? tenantId)
+        public async System.Threading.Tasks.Task<bool> DeleteReportAsync(string reportId, Guid userId, Guid? tenantId)
         {
             var report = await _context.AuditReports
                 .Where(r => r.Id == Guid.Parse(reportId))
@@ -171,7 +171,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<string> GenerateReportAsync(string reportId, Guid userId, Guid? tenantId)
+        public async System.Threading.Tasks.Task<string> GenerateReportAsync(string reportId, Guid userId, Guid? tenantId)
         {
             var report = await _context.AuditReports
                 .Where(r => r.Id == Guid.Parse(reportId))
@@ -198,7 +198,7 @@ namespace BARQ.Application.Services
             return "Report generation started";
         }
 
-        public async Task<Stream?> DownloadReportAsync(string reportId, Guid userId, Guid? tenantId)
+        public async System.Threading.Tasks.Task<Stream?> DownloadReportAsync(string reportId, Guid userId, Guid? tenantId)
         {
             var report = await _context.AuditReports
                 .Where(r => r.Id == Guid.Parse(reportId))
@@ -214,7 +214,7 @@ namespace BARQ.Application.Services
             return new FileStream(report.FilePath, FileMode.Open, FileAccess.Read);
         }
 
-        public async Task<PagedResult<AuditLogViewDto>> GetAuditLogsAsync(Guid userId, Guid? tenantId, AuditLogSearchRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<AuditLogViewDto>> GetAuditLogsAsync(Guid userId, Guid? tenantId, AuditLogSearchRequest request)
         {
             var query = _context.AuditLogs
                 .Include(a => a.User)
@@ -296,13 +296,13 @@ namespace BARQ.Application.Services
             return new PagedResult<AuditLogViewDto>
             {
                 Items = auditLogDtos,
-                Total = totalCount,
+                TotalCount = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };
         }
 
-        public async Task<Stream> ExportAuditLogsAsync(Guid userId, Guid? tenantId, AuditLogExportRequest request)
+        public async System.Threading.Tasks.Task<Stream> ExportAuditLogsAsync(Guid userId, Guid? tenantId, AuditLogExportRequest request)
         {
             var searchRequest = new AuditLogSearchRequest
             {

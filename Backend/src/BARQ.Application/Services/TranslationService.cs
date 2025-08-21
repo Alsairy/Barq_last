@@ -23,7 +23,7 @@ namespace BARQ.Application.Services
             _cache = cache;
         }
 
-        public async Task<PagedResult<TranslationDto>> GetTranslationsAsync(ListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<TranslationDto>> GetTranslationsAsync(ListRequest request)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<TranslationDto>
                 {
                     Items = translationDtos,
-                    Total = totalCount,
+                    TotalCount = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -70,7 +70,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<TranslationDto?> GetTranslationByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<TranslationDto?> GetTranslationByIdAsync(Guid id)
         {
             try
             {
@@ -84,7 +84,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<TranslationDto?> GetTranslationByKeyAsync(string languageCode, string key)
+        public async System.Threading.Tasks.Task<TranslationDto?> GetTranslationByKeyAsync(string languageCode, string key)
         {
             try
             {
@@ -100,7 +100,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<Dictionary<string, string>> GetTranslationsForLanguageAsync(string languageCode, string? category = null)
+        public async System.Threading.Tasks.Task<Dictionary<string, string>> GetTranslationsForLanguageAsync(string languageCode, string? category = null)
         {
             try
             {
@@ -135,7 +135,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<TranslationDto> CreateTranslationAsync(CreateTranslationRequest request, string createdBy)
+        public async System.Threading.Tasks.Task<TranslationDto> CreateTranslationAsync(CreateTranslationRequest request, string createdBy)
         {
             try
             {
@@ -184,7 +184,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<TranslationDto?> UpdateTranslationAsync(Guid id, UpdateTranslationRequest request, string updatedBy)
+        public async System.Threading.Tasks.Task<TranslationDto?> UpdateTranslationAsync(Guid id, UpdateTranslationRequest request, string updatedBy)
         {
             try
             {
@@ -225,7 +225,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> DeleteTranslationAsync(Guid id, string deletedBy)
+        public async System.Threading.Tasks.Task<bool> DeleteTranslationAsync(Guid id, string deletedBy)
         {
             try
             {
@@ -254,7 +254,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<List<TranslationDto>> BulkCreateTranslationsAsync(BulkTranslationRequest request, string createdBy)
+        public async System.Threading.Tasks.Task<List<TranslationDto>> BulkCreateTranslationsAsync(BulkTranslationRequest request, string createdBy)
         {
             try
             {
@@ -309,7 +309,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> ApproveTranslationAsync(Guid id, string approvedBy)
+        public async System.Threading.Tasks.Task<bool> ApproveTranslationAsync(Guid id, string approvedBy)
         {
             try
             {
@@ -340,7 +340,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> RejectTranslationAsync(Guid id, string rejectedBy, string reason)
+        public async System.Threading.Tasks.Task<bool> RejectTranslationAsync(Guid id, string rejectedBy, string reason)
         {
             try
             {
@@ -368,7 +368,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<List<TranslationDto>> GetTranslationsByCategoryAsync(string languageCode, string category)
+        public async System.Threading.Tasks.Task<List<TranslationDto>> GetTranslationsByCategoryAsync(string languageCode, string category)
         {
             try
             {
@@ -387,7 +387,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<List<TranslationDto>> GetPendingTranslationsAsync(string? languageCode = null)
+        public async System.Threading.Tasks.Task<List<TranslationDto>> GetPendingTranslationsAsync(string? languageCode = null)
         {
             try
             {

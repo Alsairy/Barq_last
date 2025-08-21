@@ -14,19 +14,19 @@ namespace BARQ.Application.Services.RecycleBin
         private readonly BarqDbContext _db;
         public RecycleBinService(BarqDbContext db) => _db = db;
 
-        public async Task<object> ListDeletedAsync(string entity, int page, int pageSize, CancellationToken cancellationToken = default)
+        public async System.Threading.Tasks.Task<object> ListDeletedAsync(string entity, int page, int pageSize, CancellationToken cancellationToken = default)
         {
             var (set, type) = GetSet(entity);
-            if (set is null) return new { Items = Array.Empty<object>(), Total = 0, Page = page, PageSize = pageSize };
+            if (set is null) return new { Items = Array.Empty<object>(), TotalCount = 0, Page = page, PageSize = pageSize };
 
             var propIsDeleted = type.GetProperty("IsDeleted");
             var query = ((IQueryable<object>)set).IgnoreQueryFilters().Where(e => (bool)(propIsDeleted!.GetValue(e) ?? false));
             var total = await query.CountAsync(cancellationToken);
             var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
-            return new { Items = items, Total = total, Page = page, PageSize = pageSize };
+            return new { Items = items, TotalCount = total, Page = page, PageSize = pageSize };
         }
 
-        public async Task<bool> RestoreAsync(string entity, Guid id, CancellationToken cancellationToken = default)
+        public async System.Threading.Tasks.Task<bool> RestoreAsync(string entity, Guid id, CancellationToken cancellationToken = default)
         {
             var (set, type) = GetSet(entity);
             if (set is null) return false;

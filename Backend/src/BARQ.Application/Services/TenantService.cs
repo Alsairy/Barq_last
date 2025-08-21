@@ -16,7 +16,7 @@ namespace BARQ.Application.Services
             _context = context;
         }
 
-        public async Task<PagedResult<TenantDto>> GetTenantsAsync(ListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<TenantDto>> GetTenantsAsync(ListRequest request)
         {
             var query = _context.Tenants.AsQueryable();
 
@@ -53,13 +53,13 @@ namespace BARQ.Application.Services
             return new PagedResult<TenantDto>
             {
                 Items = tenants,
-                Total = totalCount,
+                TotalCount = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };
         }
 
-        public async Task<TenantDto?> GetTenantByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<TenantDto?> GetTenantByIdAsync(Guid id)
         {
             var tenant = await _context.Tenants
                 .FirstOrDefaultAsync(t => t.Id == id);
@@ -84,7 +84,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<TenantDto?> GetTenantByDomainAsync(string domain)
+        public async System.Threading.Tasks.Task<TenantDto?> GetTenantByDomainAsync(string domain)
         {
             var tenant = await _context.Tenants
                 .FirstOrDefaultAsync(t => t.DisplayName == domain);
@@ -109,7 +109,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<TenantDto?> GetTenantByNameAsync(string name)
+        public async System.Threading.Tasks.Task<TenantDto?> GetTenantByNameAsync(string name)
         {
             var tenant = await _context.Tenants
                 .FirstOrDefaultAsync(t => t.Name == name);
@@ -134,7 +134,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<TenantDto> CreateTenantAsync(CreateTenantRequest request)
+        public async System.Threading.Tasks.Task<TenantDto> CreateTenantAsync(CreateTenantRequest request)
         {
             var tenant = new Tenant
             {
@@ -172,7 +172,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<TenantDto> UpdateTenantAsync(Guid id, UpdateTenantRequest request)
+        public async System.Threading.Tasks.Task<TenantDto> UpdateTenantAsync(Guid id, UpdateTenantRequest request)
         {
             var tenant = await _context.Tenants
                 .FirstOrDefaultAsync(t => t.Id == id);
@@ -209,7 +209,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<bool> ActivateTenantAsync(Guid id)
+        public async System.Threading.Tasks.Task<bool> ActivateTenantAsync(Guid id)
         {
             var tenant = await _context.Tenants
                 .FirstOrDefaultAsync(t => t.Id == id);
@@ -223,7 +223,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> DeactivateTenantAsync(Guid id)
+        public async System.Threading.Tasks.Task<bool> DeactivateTenantAsync(Guid id)
         {
             var tenant = await _context.Tenants
                 .FirstOrDefaultAsync(t => t.Id == id);
@@ -237,7 +237,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> DeleteTenantAsync(Guid id)
+        public async System.Threading.Tasks.Task<bool> DeleteTenantAsync(Guid id)
         {
             var tenant = await _context.Tenants
                 .FirstOrDefaultAsync(t => t.Id == id);

@@ -30,7 +30,7 @@ namespace BARQ.Application.Services
             _impersonationService = impersonationService;
         }
 
-        public async Task<PagedResult<SystemHealthDto>> GetSystemHealthAsync(ListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<SystemHealthDto>> GetSystemHealthAsync(ListRequest request)
         {
             try
             {
@@ -78,7 +78,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<SystemHealthDto?> GetSystemHealthByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<SystemHealthDto?> GetSystemHealthByIdAsync(Guid id)
         {
             try
             {
@@ -92,7 +92,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<SystemHealthDto?> GetSystemHealthByComponentAsync(string component)
+        public async System.Threading.Tasks.Task<SystemHealthDto?> GetSystemHealthByComponentAsync(string component)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<List<SystemHealthDto>> GetSystemHealthByStatusAsync(string status)
+        public async System.Threading.Tasks.Task<List<SystemHealthDto>> GetSystemHealthByStatusAsync(string status)
         {
             try
             {
@@ -128,7 +128,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<SystemHealthDto> UpdateSystemHealthAsync(string component, string status, string? statusMessage, long responseTimeMs, Dictionary<string, object>? details = null)
+        public async System.Threading.Tasks.Task<SystemHealthDto> UpdateSystemHealthAsync(string component, string status, string? statusMessage, long responseTimeMs, Dictionary<string, object>? details = null)
         {
             try
             {
@@ -144,7 +144,7 @@ namespace BARQ.Application.Services
                     existingHealth.ResponseTimeMs = responseTimeMs;
                     existingHealth.Details = details != null ? System.Text.Json.JsonSerializer.Serialize(details) : null;
                     existingHealth.UpdatedAt = DateTime.UtcNow;
-                    existingHealth.UpdatedBy = "System";
+                    existingHealth.UpdatedBy = null;
 
                     if (status == "Healthy")
                     {
@@ -182,7 +182,7 @@ namespace BARQ.Application.Services
                         ConsecutiveFailures = status == "Error" ? 1 : 0,
                         Environment = "Production",
                         CreatedAt = DateTime.UtcNow,
-                        CreatedBy = "System"
+                        CreatedBy = null
                     };
 
                     _context.SystemHealth.Add(existingHealth);
@@ -198,7 +198,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<OpsDashboardDto> GetOpsDashboardAsync()
+        public async System.Threading.Tasks.Task<OpsDashboardDto> GetOpsDashboardAsync()
         {
             try
             {
@@ -238,7 +238,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task RefreshAllHealthChecksAsync()
+        public async System.Threading.Tasks.Task RefreshAllHealthChecksAsync()
         {
             try
             {
@@ -256,7 +256,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> IsSystemHealthyAsync()
+        public async System.Threading.Tasks.Task<bool> IsSystemHealthyAsync()
         {
             try
             {
@@ -273,7 +273,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<Dictionary<string, object>> GetSystemMetricsAsync()
+        public async System.Threading.Tasks.Task<Dictionary<string, object>> GetSystemMetricsAsync()
         {
             try
             {
@@ -306,7 +306,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task CleanupOldHealthRecordsAsync(int daysToKeep = 30)
+        public async System.Threading.Tasks.Task CleanupOldHealthRecordsAsync(int daysToKeep = 30)
         {
             try
             {
@@ -332,7 +332,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task CheckDatabaseHealthAsync()
+        private async System.Threading.Tasks.Task CheckDatabaseHealthAsync()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
@@ -351,7 +351,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task CheckStorageHealthAsync()
+        private async System.Threading.Tasks.Task CheckStorageHealthAsync()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
@@ -381,7 +381,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task CheckQueueHealthAsync()
+        private async System.Threading.Tasks.Task CheckQueueHealthAsync()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
@@ -398,7 +398,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task CheckExternalServicesHealthAsync()
+        private async System.Threading.Tasks.Task CheckExternalServicesHealthAsync()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
@@ -415,7 +415,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task<double> CalculateUptimeAsync()
+        private async System.Threading.Tasks.Task<double> CalculateUptimeAsync()
         {
             try
             {

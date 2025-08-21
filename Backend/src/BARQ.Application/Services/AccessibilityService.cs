@@ -5,7 +5,6 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SystemTask = System.Threading.Tasks.Task;
 
 namespace BARQ.Application.Services
 {
@@ -20,7 +19,7 @@ namespace BARQ.Application.Services
             _logger = logger;
         }
 
-        public async Task<PagedResult<AccessibilityAuditDto>> GetAccessibilityAuditsAsync(ListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<AccessibilityAuditDto>> GetAccessibilityAuditsAsync(ListRequest request)
         {
             try
             {
@@ -55,7 +54,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<AccessibilityAuditDto>
                 {
                     Items = auditDtos,
-                    Total = totalCount,
+                    TotalCount = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -67,7 +66,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<AccessibilityAuditDto?> GetAccessibilityAuditByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<AccessibilityAuditDto?> GetAccessibilityAuditByIdAsync(Guid id)
         {
             try
             {
@@ -84,7 +83,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<List<AccessibilityAuditDto>> GetAccessibilityAuditsByPageAsync(string pageUrl)
+        public async System.Threading.Tasks.Task<List<AccessibilityAuditDto>> GetAccessibilityAuditsByPageAsync(string pageUrl)
         {
             try
             {
@@ -103,7 +102,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<AccessibilityAuditDto> CreateAccessibilityAuditAsync(CreateAccessibilityAuditRequest request, string createdBy)
+        public async System.Threading.Tasks.Task<AccessibilityAuditDto> CreateAccessibilityAuditAsync(CreateAccessibilityAuditRequest request, string createdBy)
         {
             try
             {
@@ -142,7 +141,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<AccessibilityAuditDto?> UpdateAccessibilityAuditAsync(Guid id, CreateAccessibilityAuditRequest request, string updatedBy)
+        public async System.Threading.Tasks.Task<AccessibilityAuditDto?> UpdateAccessibilityAuditAsync(Guid id, CreateAccessibilityAuditRequest request, string updatedBy)
         {
             try
             {
@@ -178,7 +177,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> DeleteAccessibilityAuditAsync(Guid id, string deletedBy)
+        public async System.Threading.Tasks.Task<bool> DeleteAccessibilityAuditAsync(Guid id, string deletedBy)
         {
             try
             {
@@ -205,7 +204,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<AccessibilityIssueDto> CreateAccessibilityIssueAsync(CreateAccessibilityIssueRequest request, string createdBy)
+        public async System.Threading.Tasks.Task<AccessibilityIssueDto> CreateAccessibilityIssueAsync(CreateAccessibilityIssueRequest request, string createdBy)
         {
             try
             {
@@ -259,7 +258,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<AccessibilityIssueDto?> UpdateAccessibilityIssueAsync(Guid id, CreateAccessibilityIssueRequest request, string updatedBy)
+        public async System.Threading.Tasks.Task<AccessibilityIssueDto?> UpdateAccessibilityIssueAsync(Guid id, CreateAccessibilityIssueRequest request, string updatedBy)
         {
             try
             {
@@ -316,7 +315,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> DeleteAccessibilityIssueAsync(Guid id, string deletedBy)
+        public async System.Threading.Tasks.Task<bool> DeleteAccessibilityIssueAsync(Guid id, string deletedBy)
         {
             try
             {
@@ -346,7 +345,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<PagedResult<AccessibilityIssueDto>> GetAccessibilityIssuesAsync(Guid auditId, ListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<AccessibilityIssueDto>> GetAccessibilityIssuesAsync(Guid auditId, ListRequest request)
         {
             try
             {
@@ -381,7 +380,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<AccessibilityIssueDto>
                 {
                     Items = issueDtos,
-                    Total = totalCount,
+                    TotalCount = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -677,7 +676,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async SystemTask UpdateAuditStatisticsAsync(Guid auditId)
+        private async System.Threading.Tasks.Task UpdateAuditStatisticsAsync(Guid auditId)
         {
             var audit = await _context.AccessibilityAudits.FindAsync(auditId);
             if (audit == null) return;

@@ -6,6 +6,7 @@ using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Caching.Memory;
+using Task = System.Threading.Tasks.Task;
 
 namespace BARQ.Application.Services
 {
@@ -139,7 +140,7 @@ namespace BARQ.Application.Services
                     RequiresRestart = request.RequiresRestart,
                     Priority = request.Priority,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = createdBy
+                    CreatedBy = null
                 };
 
                 _context.FeatureFlags.Add(flag);
@@ -234,7 +235,7 @@ namespace BARQ.Application.Services
                 if (hasChanges)
                 {
                     flag.UpdatedAt = DateTime.UtcNow;
-                    flag.UpdatedBy = updatedBy;
+                    flag.UpdatedBy = null;
                     await _context.SaveChangesAsync();
 
                     await LogFeatureFlagHistoryAsync(flag.Id, "Updated", previousEnabled, flag.IsEnabled, updatedBy, request.Reason);
@@ -303,7 +304,7 @@ namespace BARQ.Application.Services
                 flag.EnabledBy = isEnabled ? changedBy : flag.EnabledBy;
                 flag.DisabledBy = !isEnabled ? changedBy : flag.DisabledBy;
                 flag.UpdatedAt = DateTime.UtcNow;
-                flag.UpdatedBy = changedBy;
+                flag.UpdatedBy = null;
 
                 await _context.SaveChangesAsync();
 
@@ -425,7 +426,7 @@ namespace BARQ.Application.Services
                     Reason = reason,
                     ChangedAt = DateTime.UtcNow,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = changedBy
+                    CreatedBy = null
                 };
 
                 _context.FeatureFlagHistory.Add(history);

@@ -20,7 +20,7 @@ namespace BARQ.Application.Services
             _logger = logger;
         }
 
-        public async Task<PagedResult<BillingPlanDto>> GetBillingPlansAsync(bool includeInactive = false)
+        public async System.Threading.Tasks.Task<PagedResult<BillingPlanDto>> GetBillingPlansAsync(bool includeInactive = false)
         {
             try
             {
@@ -41,7 +41,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<BillingPlanDto>
                 {
                     Items = planDtos,
-                    Total = planDtos.Count,
+                    TotalCount = planDtos.Count,
                     Page = 1,
                     PageSize = planDtos.Count
                 };
@@ -53,7 +53,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<BillingPlanDto?> GetBillingPlanAsync(Guid planId)
+        public async System.Threading.Tasks.Task<BillingPlanDto?> GetBillingPlanAsync(Guid planId)
         {
             try
             {
@@ -69,7 +69,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<BillingPlanDto> CreateBillingPlanAsync(CreateBillingPlanRequest request)
+        public async System.Threading.Tasks.Task<BillingPlanDto> CreateBillingPlanAsync(CreateBillingPlanRequest request)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<BillingPlanDto?> UpdateBillingPlanAsync(Guid planId, UpdateBillingPlanRequest request)
+        public async System.Threading.Tasks.Task<BillingPlanDto?> UpdateBillingPlanAsync(Guid planId, UpdateBillingPlanRequest request)
         {
             try
             {
@@ -152,7 +152,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> DeleteBillingPlanAsync(Guid planId)
+        public async System.Threading.Tasks.Task<bool> DeleteBillingPlanAsync(Guid planId)
         {
             try
             {
@@ -188,7 +188,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<TenantSubscriptionDto?> GetTenantSubscriptionAsync(Guid tenantId)
+        public async System.Threading.Tasks.Task<TenantSubscriptionDto?> GetTenantSubscriptionAsync(Guid tenantId)
         {
             try
             {
@@ -206,7 +206,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<TenantSubscriptionDto> CreateSubscriptionAsync(Guid tenantId, Guid userId, CreateSubscriptionRequest request)
+        public async System.Threading.Tasks.Task<TenantSubscriptionDto> CreateSubscriptionAsync(Guid tenantId, Guid userId, CreateSubscriptionRequest request)
         {
             try
             {
@@ -259,7 +259,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<TenantSubscriptionDto?> UpdateSubscriptionAsync(Guid tenantId, UpdateSubscriptionRequest request)
+        public async System.Threading.Tasks.Task<TenantSubscriptionDto?> UpdateSubscriptionAsync(Guid tenantId, UpdateSubscriptionRequest request)
         {
             try
             {
@@ -303,7 +303,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> CancelSubscriptionAsync(Guid tenantId, CancelSubscriptionRequest request)
+        public async System.Threading.Tasks.Task<bool> CancelSubscriptionAsync(Guid tenantId, CancelSubscriptionRequest request)
         {
             try
             {
@@ -332,7 +332,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<TenantSubscriptionDto?> UpgradeDowngradeAsync(Guid tenantId, UpgradeDowngradeRequest request)
+        public async System.Threading.Tasks.Task<TenantSubscriptionDto?> UpgradeDowngradeAsync(Guid tenantId, UpgradeDowngradeRequest request)
         {
             try
             {
@@ -377,7 +377,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<PagedResult<UsageQuotaDto>> GetUsageQuotasAsync(Guid tenantId)
+        public async System.Threading.Tasks.Task<PagedResult<UsageQuotaDto>> GetUsageQuotasAsync(Guid tenantId)
         {
             try
             {
@@ -391,7 +391,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<UsageQuotaDto>
                 {
                     Items = quotaDtos,
-                    Total = quotaDtos.Count,
+                    TotalCount = quotaDtos.Count,
                     Page = 1,
                     PageSize = quotaDtos.Count
                 };
@@ -534,7 +534,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<InvoiceDto>
                 {
                     Items = invoiceDtos,
-                    Total = invoiceDtos.Count,
+                    TotalCount = invoiceDtos.Count,
                     Page = 1,
                     PageSize = invoiceDtos.Count
                 };
@@ -714,7 +714,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<UsageRecordDto>
                 {
                     Items = recordDtos,
-                    Total = recordDtos.Count,
+                    TotalCount = recordDtos.Count,
                     Page = 1,
                     PageSize = recordDtos.Count
                 };

@@ -32,7 +32,7 @@ namespace BARQ.Application.Services
             _logger = logger;
         }
 
-        public async Task<PagedResult<WorkflowDto>> GetWorkflowsAsync(Guid tenantId, ListRequest request)
+        public async System.Threading.Tasks.Task<PagedResult<WorkflowDto>> GetWorkflowsAsync(Guid tenantId, ListRequest request)
         {
             var query = _context.Workflows
                 .Where(w => w.TenantId == tenantId)
@@ -95,13 +95,13 @@ namespace BARQ.Application.Services
             return new PagedResult<WorkflowDto>
             {
                 Items = workflows,
-                Total = totalCount,
+                TotalCount = totalCount,
                 Page = request.Page,
                 PageSize = request.PageSize
             };
         }
 
-        public async Task<WorkflowDto?> GetWorkflowByIdAsync(Guid id)
+        public async System.Threading.Tasks.Task<WorkflowDto?> GetWorkflowByIdAsync(Guid id)
         {
             var workflow = await _context.Workflows
                 .Include(w => w.WorkflowInstances)
@@ -149,7 +149,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<WorkflowDto> CreateWorkflowAsync(Guid tenantId, CreateWorkflowRequest request)
+        public async System.Threading.Tasks.Task<WorkflowDto> CreateWorkflowAsync(Guid tenantId, CreateWorkflowRequest request)
         {
             var workflow = new Core.Entities.Workflow
             {
@@ -196,7 +196,7 @@ namespace BARQ.Application.Services
             return await GetWorkflowByIdAsync(workflow.Id) ?? throw new InvalidOperationException("Failed to retrieve created workflow");
         }
 
-        public async Task<WorkflowDto> UpdateWorkflowAsync(Guid id, CreateWorkflowRequest request)
+        public async System.Threading.Tasks.Task<WorkflowDto> UpdateWorkflowAsync(Guid id, CreateWorkflowRequest request)
         {
             var workflow = await _context.Workflows.FirstOrDefaultAsync(w => w.Id == id);
             if (workflow == null)
@@ -238,7 +238,7 @@ namespace BARQ.Application.Services
             return await GetWorkflowByIdAsync(workflow.Id) ?? throw new InvalidOperationException("Failed to retrieve updated workflow");
         }
 
-        public async Task<bool> DeleteWorkflowAsync(Guid id)
+        public async System.Threading.Tasks.Task<bool> DeleteWorkflowAsync(Guid id)
         {
             var workflow = await _context.Workflows.FirstOrDefaultAsync(w => w.Id == id);
             if (workflow == null) return false;
@@ -251,7 +251,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<WorkflowInstanceDto> StartWorkflowAsync(Guid tenantId, StartWorkflowRequest request)
+        public async System.Threading.Tasks.Task<WorkflowInstanceDto> StartWorkflowAsync(Guid tenantId, StartWorkflowRequest request)
         {
             var workflow = await _context.Workflows.FirstOrDefaultAsync(w => w.Id == request.WorkflowId && w.TenantId == tenantId);
             if (workflow == null)
@@ -308,7 +308,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<List<WorkflowInstanceDto>> GetWorkflowInstancesAsync(Guid workflowId)
+        public async System.Threading.Tasks.Task<List<WorkflowInstanceDto>> GetWorkflowInstancesAsync(Guid workflowId)
         {
             var instances = await _context.WorkflowInstances
                 .Where(i => i.WorkflowId == workflowId)
@@ -336,7 +336,7 @@ namespace BARQ.Application.Services
             return instances;
         }
 
-        public async Task<WorkflowInstanceDto?> GetWorkflowInstanceByIdAsync(Guid instanceId)
+        public async System.Threading.Tasks.Task<WorkflowInstanceDto?> GetWorkflowInstanceByIdAsync(Guid instanceId)
         {
             var instance = await _context.WorkflowInstances
                 .Include(i => i.Workflow)
@@ -364,7 +364,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<bool> CancelWorkflowInstanceAsync(Guid instanceId)
+        public async System.Threading.Tasks.Task<bool> CancelWorkflowInstanceAsync(Guid instanceId)
         {
             var instance = await _context.WorkflowInstances.FirstOrDefaultAsync(i => i.Id == instanceId);
             if (instance == null) return false;
@@ -397,7 +397,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> CompleteWorkflowStepAsync(Guid instanceId, string stepId, string output)
+        public async System.Threading.Tasks.Task<bool> CompleteWorkflowStepAsync(Guid instanceId, string stepId, string output)
         {
             var instance = await _context.WorkflowInstances.FirstOrDefaultAsync(i => i.Id == instanceId);
             if (instance == null) return false;

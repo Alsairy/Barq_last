@@ -24,7 +24,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType, string? folder = null)
+        public async System.Threading.Tasks.Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType, string? folder = null)
         {
             var sanitizedFileName = SanitizeFileName(fileName);
             var uniqueFileName = $"{Guid.NewGuid()}_{sanitizedFileName}";
@@ -45,7 +45,7 @@ namespace BARQ.Application.Services
             return relativePath.Replace('\\', '/');
         }
 
-        public async Task<Stream> DownloadFileAsync(string filePath)
+        public async System.Threading.Tasks.Task<Stream> DownloadFileAsync(string filePath)
         {
             var fullPath = Path.Combine(_basePath, filePath);
             
@@ -57,7 +57,7 @@ namespace BARQ.Application.Services
             return new FileStream(fullPath, FileMode.Open, FileAccess.Read);
         }
 
-        public async Task<bool> DeleteFileAsync(string filePath)
+        public async System.Threading.Tasks.Task<bool> DeleteFileAsync(string filePath)
         {
             var fullPath = Path.Combine(_basePath, filePath);
             
@@ -79,25 +79,25 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> FileExistsAsync(string filePath)
+        public async System.Threading.Tasks.Task<bool> FileExistsAsync(string filePath)
         {
             var fullPath = Path.Combine(_basePath, filePath);
             return File.Exists(fullPath);
         }
 
-        public async Task<string> GenerateSignedUrlAsync(string filePath, TimeSpan expiry, string accessType = "read")
+        public async System.Threading.Tasks.Task<string> GenerateSignedUrlAsync(string filePath, TimeSpan expiry, string accessType = "read")
         {
             var token = GenerateAccessToken(filePath, expiry, accessType);
             return $"{_baseUrl}/download/{Uri.EscapeDataString(filePath)}?token={token}&expires={DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds()}";
         }
 
-        public async Task<string> GenerateUploadUrlAsync(string fileName, string contentType, TimeSpan expiry)
+        public async System.Threading.Tasks.Task<string> GenerateUploadUrlAsync(string fileName, string contentType, TimeSpan expiry)
         {
             var token = GenerateAccessToken(fileName, expiry, "write");
             return $"{_baseUrl}/upload?filename={Uri.EscapeDataString(fileName)}&contentType={Uri.EscapeDataString(contentType)}&token={token}&expires={DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds()}";
         }
 
-        public async Task<long> GetFileSizeAsync(string filePath)
+        public async System.Threading.Tasks.Task<long> GetFileSizeAsync(string filePath)
         {
             var fullPath = Path.Combine(_basePath, filePath);
             
@@ -110,7 +110,7 @@ namespace BARQ.Application.Services
             return fileInfo.Length;
         }
 
-        public async Task<string> CopyFileAsync(string sourceFilePath, string destinationFilePath)
+        public async System.Threading.Tasks.Task<string> CopyFileAsync(string sourceFilePath, string destinationFilePath)
         {
             var sourcePath = Path.Combine(_basePath, sourceFilePath);
             var destPath = Path.Combine(_basePath, destinationFilePath);
@@ -132,7 +132,7 @@ namespace BARQ.Application.Services
             return destinationFilePath;
         }
 
-        public async Task<string> MoveFileAsync(string sourceFilePath, string destinationFilePath)
+        public async System.Threading.Tasks.Task<string> MoveFileAsync(string sourceFilePath, string destinationFilePath)
         {
             var sourcePath = Path.Combine(_basePath, sourceFilePath);
             var destPath = Path.Combine(_basePath, destinationFilePath);
@@ -154,7 +154,7 @@ namespace BARQ.Application.Services
             return destinationFilePath;
         }
 
-        public async Task<IEnumerable<string>> ListFilesAsync(string? folder = null, string? pattern = null)
+        public async System.Threading.Tasks.Task<IEnumerable<string>> ListFilesAsync(string? folder = null, string? pattern = null)
         {
             var searchPath = string.IsNullOrEmpty(folder) ? _basePath : Path.Combine(_basePath, folder);
             

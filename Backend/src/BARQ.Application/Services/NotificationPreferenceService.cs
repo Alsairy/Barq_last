@@ -32,7 +32,7 @@ namespace BARQ.Application.Services
             _logger = logger;
         }
 
-        public async Task<NotificationPreferencesResponse> GetUserPreferencesAsync(string userId)
+        public async System.Threading.Tasks.Task<NotificationPreferencesResponse> GetUserPreferencesAsync(string userId)
         {
             var userGuid = Guid.Parse(userId);
             var preferences = await _context.NotificationPreferences
@@ -58,7 +58,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<NotificationPreferenceDto> CreatePreferenceAsync(string userId, CreateNotificationPreferenceRequest request)
+        public async System.Threading.Tasks.Task<NotificationPreferenceDto> CreatePreferenceAsync(string userId, CreateNotificationPreferenceRequest request)
         {
             var userGuid = Guid.Parse(userId);
             var existing = await _context.NotificationPreferences
@@ -102,7 +102,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<NotificationPreferenceDto> UpdatePreferenceAsync(string userId, string preferenceId, UpdateNotificationPreferenceRequest request)
+        public async System.Threading.Tasks.Task<NotificationPreferenceDto> UpdatePreferenceAsync(string userId, string preferenceId, UpdateNotificationPreferenceRequest request)
         {
             var userGuid = Guid.Parse(userId);
             var preferenceGuid = Guid.Parse(preferenceId);
@@ -136,7 +136,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<bool> DeletePreferenceAsync(string userId, string preferenceId)
+        public async System.Threading.Tasks.Task<bool> DeletePreferenceAsync(string userId, string preferenceId)
         {
             var userGuid = Guid.Parse(userId);
             var preferenceGuid = Guid.Parse(preferenceId);
@@ -157,7 +157,7 @@ namespace BARQ.Application.Services
             return true;
         }
 
-        public async Task<bool> ShouldSendNotificationAsync(string userId, string notificationType, string channel)
+        public async System.Threading.Tasks.Task<bool> ShouldSendNotificationAsync(string userId, string notificationType, string channel)
         {
             var userGuid = Guid.Parse(userId);
             var preference = await _context.NotificationPreferences
@@ -179,7 +179,7 @@ namespace BARQ.Application.Services
             return preference.IsEnabled;
         }
 
-        public async Task<List<string>> GetEnabledChannelsAsync(string userId, string notificationType)
+        public async System.Threading.Tasks.Task<List<string>> GetEnabledChannelsAsync(string userId, string notificationType)
         {
             var enabledChannels = new List<string>();
 
@@ -250,7 +250,7 @@ namespace BARQ.Application.Services
             _logger.LogInformation("Created default notification preferences for user {UserId}", userId);
         }
 
-        public async Task<Dictionary<string, object>> GetChannelSettingsAsync(string userId, string notificationType, string channel)
+        public async System.Threading.Tasks.Task<Dictionary<string, object>> GetChannelSettingsAsync(string userId, string notificationType, string channel)
         {
             var userGuid = Guid.Parse(userId);
             var preference = await _context.NotificationPreferences
