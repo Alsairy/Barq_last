@@ -8,14 +8,24 @@ public static class DbSeeder
 {
     public static async System.Threading.Tasks.Task SeedAsync(BarqDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole<Guid>> roleManager)
     {
-        await SeedRolesAsync(roleManager);
-        await SeedSystemTenantAsync(context);
-        await SeedUsersAsync(userManager, context);
-        await SeedBillingPlansAsync(context);
-        await SeedSystemConfigurationsAsync(context);
-        await SeedLanguagesAsync(context);
-        
-        await context.SaveChangesAsync();
+        await using var tx = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await SeedRolesAsync(roleManager);
+            await SeedSystemTenantAsync(context);
+            await SeedUsersAsync(userManager, context);
+            await SeedBillingPlansAsync(context);
+            await SeedSystemConfigurationsAsync(context);
+            await SeedLanguagesAsync(context);
+            
+            await context.SaveChangesAsync();
+            await tx.CommitAsync();
+        }
+        catch
+        {
+            await tx.RollbackAsync();
+            throw;
+        }
     }
 
     private static async System.Threading.Tasks.Task SeedRolesAsync(RoleManager<IdentityRole<Guid>> roleManager)

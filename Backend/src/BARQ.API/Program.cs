@@ -137,7 +137,33 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<BarqDbContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    await BARQ.Infrastructure.Data.DbSeeder.SeedAsync(context, userManager, roleManager);
+    
+    try
+    {
+        await context.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Database migration failed");
+        throw;
+    }
+
+    var shouldSeed = app.Environment.IsDevelopment() ||
+                     string.Equals(Environment.GetEnvironmentVariable("BARQ_SEED"), "true", StringComparison.OrdinalIgnoreCase);
+    if (shouldSeed)
+    {
+        try
+        {
+            await BARQ.Infrastructure.Data.DbSeeder.SeedAsync(context, userManager, roleManager);
+        }
+        catch (Exception ex)
+        {
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "Database seeding failed");
+            throw;
+        }
+    }
 }
 
 app.Use(async (ctx, next) =>
