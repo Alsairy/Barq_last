@@ -5,7 +5,12 @@ Backend/src/BARQ.API/appsettings.Development.json:40
 # Ignore sample credentials in documentation
 README.md:sidekiq-secret
 README.md:aws-access-token
+README.md:42
+README.md:221
+README.md:223
+README.md:259
 docs/flowable-rest.md:generic-api-key
+docs/flowable-rest.md:304
 
 # Ignore example credentials in runbooks and documentation
 docs/runbooks/key-rotation.md:generic-api-key
