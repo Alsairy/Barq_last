@@ -5,6 +5,7 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace BARQ.Application.Services
 {
@@ -66,7 +67,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<SystemHealthDto>
                 {
                     Items = healthDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -144,7 +145,7 @@ namespace BARQ.Application.Services
                     existingHealth.ResponseTimeMs = responseTimeMs;
                     existingHealth.Details = details != null ? System.Text.Json.JsonSerializer.Serialize(details) : null;
                     existingHealth.UpdatedAt = DateTime.UtcNow;
-                    existingHealth.UpdatedBy = "System";
+                    existingHealth.UpdatedBy = Guid.Empty;
 
                     if (status == "Healthy")
                     {
@@ -182,7 +183,7 @@ namespace BARQ.Application.Services
                         ConsecutiveFailures = status == "Error" ? 1 : 0,
                         Environment = "Production",
                         CreatedAt = DateTime.UtcNow,
-                        CreatedBy = "System"
+                        CreatedBy = Guid.Empty
                     };
 
                     _context.SystemHealth.Add(existingHealth);
@@ -238,7 +239,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task RefreshAllHealthChecksAsync()
+        public async System.Threading.Tasks.Task RefreshAllHealthChecksAsync()
         {
             try
             {
@@ -306,7 +307,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task CleanupOldHealthRecordsAsync(int daysToKeep = 30)
+        public async System.Threading.Tasks.Task CleanupOldHealthRecordsAsync(int daysToKeep = 30)
         {
             try
             {
@@ -332,7 +333,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task CheckDatabaseHealthAsync()
+        private async System.Threading.Tasks.Task CheckDatabaseHealthAsync()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
@@ -351,7 +352,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task CheckStorageHealthAsync()
+        private async System.Threading.Tasks.Task CheckStorageHealthAsync()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
@@ -381,7 +382,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task CheckQueueHealthAsync()
+        private async System.Threading.Tasks.Task CheckQueueHealthAsync()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
@@ -398,7 +399,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task CheckExternalServicesHealthAsync()
+        private async System.Threading.Tasks.Task CheckExternalServicesHealthAsync()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
