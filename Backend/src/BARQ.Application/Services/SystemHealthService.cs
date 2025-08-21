@@ -6,6 +6,13 @@ namespace BARQ.Application.Services
 {
     public sealed class SystemHealthService : ISystemHealthService
     {
+        private readonly IHttpClientFactory _hcf;
+
+        public SystemHealthService(IHttpClientFactory hcf)
+        {
+            _hcf = hcf;
+        }
+
         public System.Threading.Tasks.Task<PagedResult<SystemHealthDto>> GetSystemHealthAsync(ListRequest request)
         {
             return System.Threading.Tasks.Task.FromResult(new PagedResult<SystemHealthDto>());
@@ -44,6 +51,30 @@ namespace BARQ.Application.Services
         public System.Threading.Tasks.Task<bool> IsSystemHealthyAsync()
         {
             return System.Threading.Tasks.Task.FromResult(true);
+        }
+
+        public async System.Threading.Tasks.Task<bool> DatabaseAsync(CancellationToken ct)
+        {
+            return true;
+        }
+
+        public async System.Threading.Tasks.Task<bool> FlowableAsync(CancellationToken ct)
+        {
+            try
+            {
+                var http = _hcf.CreateClient("flowable");
+                var res = await http.GetAsync("repository/deployments?size=1", ct);
+                return res.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async System.Threading.Tasks.Task<bool> AiProvidersAsync(CancellationToken ct)
+        {
+            return true;
         }
 
         public System.Threading.Tasks.Task<Dictionary<string, object>> GetSystemMetricsAsync()

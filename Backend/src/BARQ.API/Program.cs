@@ -11,6 +11,7 @@ using BARQ.Infrastructure.Data;
 using BARQ.Core.Entities;
 using BARQ.Application.Interfaces;
 using BARQ.Application.Services;
+using BARQ.Application.Services.Workflow;
 using BARQ.Core.Services;
 using BARQ.Infrastructure.Services;
 using Serilog;
@@ -126,6 +127,25 @@ builder.Services.AddScoped<BARQ.Application.Interfaces.ISystemHealthService, BAR
 builder.Services.AddScoped<BARQ.Application.Interfaces.ITenantStateService, BARQ.Application.Services.TenantStateService>();
 builder.Services.AddHttpContextAccessor(); // for TenantProvider
 builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+
+builder.Services.Configure<FlowableOptions>(builder.Configuration.GetSection("Flowable"));
+builder.Services.PostConfigure<FlowableOptions>(opt =>
+{
+    if (!string.IsNullOrWhiteSpace(opt.BaseUrl) && !opt.BaseUrl.EndsWith("/"))
+        opt.BaseUrl += "/";
+});
+builder.Services.AddHttpClient("flowable", (sp, http) =>
+{
+    var opt = sp.GetRequiredService<IOptions<FlowableOptions>>().Value;
+    http.BaseAddress = new Uri(opt.BaseUrl);
+    http.Timeout = TimeSpan.FromSeconds(10);
+});
+builder.Services.AddHttpClient<IFlowableGateway, FlowableGateway>("flowable-gateway", (sp, http) =>
+{
+    var opt = sp.GetRequiredService<IOptions<FlowableOptions>>().Value;
+    http.BaseAddress = new Uri(opt.BaseUrl);
+    http.Timeout = TimeSpan.FromSeconds(10);
+});
 
 builder.Services.AddMemoryCache();
 builder.Services.AddHealthChecks()
