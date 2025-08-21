@@ -18,6 +18,10 @@ namespace BARQ.Core.Entities
         public string ProviderType { get; set; } = string.Empty;
         
         [Required]
+        [MaxLength(100)]
+        public string Type { get; set; } = string.Empty;
+        
+        [Required]
         [MaxLength(1000)]
         public string ApiEndpoint { get; set; } = string.Empty;
         
