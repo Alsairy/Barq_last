@@ -12,9 +12,9 @@ namespace BARQ.Application.Services
     {
         private readonly BarqDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+        private readonly RoleManager<Role> _roleManager;
 
-        public UserService(BarqDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole<Guid>> roleManager)
+        public UserService(BarqDbContext context, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager)
         {
             _context = context;
             _userManager = userManager;

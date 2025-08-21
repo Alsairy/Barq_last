@@ -8,12 +8,12 @@ public sealed class DbSeeder
 {
 
 
-    public static async System.Threading.Tasks.Task SeedAsync(BarqDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole<Guid>> roleManager, CancellationToken ct = default)
+    public static async System.Threading.Tasks.Task SeedAsync(BarqDbContext context, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, CancellationToken ct = default)
     {
         await context.Database.EnsureCreatedAsync(ct);
 
         foreach (var r in new[] { "Admin", "Manager", "Viewer" })
-            if (!await roleManager.RoleExistsAsync(r)) await roleManager.CreateAsync(new IdentityRole<Guid>(r));
+            if (!await roleManager.RoleExistsAsync(r)) await roleManager.CreateAsync(new Role { Name = r, NormalizedName = r.ToUpper() });
 
         var admin = await userManager.FindByEmailAsync("admin@barq.local");
         if (admin is null)
