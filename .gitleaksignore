@@ -1,0 +1,7 @@
+# Development and sample keys - not real secrets
+Backend/src/BARQ.API/appsettings.Development.json:generic-api-key:40
+README.md:sidekiq-secret:42
+README.md:aws-access-token:221
+README.md:aws-access-token:223
+README.md:aws-access-token:259
+docs/flowable-rest.md:generic-api-key:304
