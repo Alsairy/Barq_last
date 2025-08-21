@@ -129,6 +129,11 @@ builder.Services.AddHttpContextAccessor(); // for TenantProvider
 builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 
 builder.Services.Configure<FlowableOptions>(builder.Configuration.GetSection("Flowable"));
+builder.Services.PostConfigure<FlowableOptions>(opt =>
+{
+    if (!string.IsNullOrWhiteSpace(opt.BaseUrl) && !opt.BaseUrl.EndsWith("/"))
+        opt.BaseUrl += "/";
+});
 builder.Services.AddHttpClient("flowable", (sp, http) =>
 {
     var opt = sp.GetRequiredService<IOptions<FlowableOptions>>().Value;
