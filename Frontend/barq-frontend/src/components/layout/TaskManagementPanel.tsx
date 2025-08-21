@@ -95,6 +95,7 @@ export function TaskManagementPanel({ collapsed }: TaskManagementPanelProps) {
         setRealTasks(prev => [newTask, ...prev]);
       }
     } catch (error) {
+      console.error('Failed to create task:', error);
     }
   };
 
@@ -102,6 +103,7 @@ export function TaskManagementPanel({ collapsed }: TaskManagementPanelProps) {
     try {
       await runAI('Process this task using AI assistance', 'openai');
     } catch (error) {
+      console.error('Failed to run AI:', error);
     }
   };
 
@@ -109,6 +111,7 @@ export function TaskManagementPanel({ collapsed }: TaskManagementPanelProps) {
     try {
       await uploadAndScanFile(file, taskId);
     } catch (error) {
+      console.error('Failed to upload file:', error);
     }
   };
 

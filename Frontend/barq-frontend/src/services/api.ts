@@ -142,9 +142,7 @@ export const fileApi = {
     formData.append('file', file);
     if (taskId) formData.append('taskId', taskId);
 
-    const response = await axios.post('/api/files/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    const response = await axios.post('/api/files/upload', formData);
     return response.data;
   },
 
