@@ -41,13 +41,6 @@ export function useSLAWorkflow() {
     throw lastError;
   }, []);
 
-  useEffect(() => {
-    loadViolations();
-    
-    const interval = setInterval(loadViolations, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
   const loadViolations = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true }));
 
@@ -100,6 +93,13 @@ export function useSLAWorkflow() {
       console.error('Failed to load SLA violations:', error);
     }
   }, [executeWithRetry]);
+
+  useEffect(() => {
+    loadViolations();
+    
+    const interval = setInterval(loadViolations, 30000);
+    return () => clearInterval(interval);
+  }, [loadViolations]);
 
   const acknowledgeViolation = useCallback(async (violationId: string) => {
     try {

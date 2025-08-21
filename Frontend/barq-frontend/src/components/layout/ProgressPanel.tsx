@@ -445,7 +445,7 @@ function SLAView({ violations, onAcknowledge }: SLAViewProps) {
 }
 
 interface BillingViewProps {
-  status?: any;
+  status?: BillingStatus;
   onUpgrade: () => void;
 }
 
