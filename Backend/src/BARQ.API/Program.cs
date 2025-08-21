@@ -147,6 +147,8 @@ builder.Services.AddHttpClient<IFlowableGateway, FlowableGateway>("flowable-gate
     http.Timeout = TimeSpan.FromSeconds(10);
 });
 
+builder.Services.AddScoped<BARQ.Application.Interfaces.ITemplateValidationService, BARQ.Application.Services.TemplateValidationService>();
+
 // builder.Services.AddHostedService<SlaMonitorHostedService>();
 // builder.Services.AddScoped<ISlaCalculator, SlaCalculator>();
 // builder.Services.AddScoped<IEscalationExecutor, EscalationExecutor>();

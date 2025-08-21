@@ -83,6 +83,10 @@ public sealed class BarqDbContext
     public DbSet<SlaViolation> SlaViolations => Set<SlaViolation>();
     public DbSet<EscalationRule> EscalationRules => Set<EscalationRule>();
     public DbSet<EscalationAction> EscalationActions => Set<EscalationAction>();
+    
+    public DbSet<TechnologyConstraint> TechnologyConstraints => Set<TechnologyConstraint>();
+    public DbSet<TemplateValidation> TemplateValidations => Set<TemplateValidation>();
+    public DbSet<ConstraintViolation> ConstraintViolations => Set<ConstraintViolation>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
