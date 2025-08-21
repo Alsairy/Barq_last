@@ -5,6 +5,7 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Task = System.Threading.Tasks.Task;
 
 namespace BARQ.Application.Services
 {
@@ -59,7 +60,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<ImpersonationSessionDto>
                 {
                     Items = sessionDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -135,7 +136,7 @@ namespace BARQ.Application.Services
                     IpAddress = ipAddress,
                     UserAgent = userAgent,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = adminUserId
+                    CreatedBy = Guid.TryParse(adminUserId.ToString(), out var adminUserGuid) ? adminUserGuid : null
                 };
 
                 _context.ImpersonationSessions.Add(session);
@@ -172,7 +173,7 @@ namespace BARQ.Application.Services
                 session.EndedBy = endedBy;
                 session.EndReason = request.Reason;
                 session.UpdatedAt = DateTime.UtcNow;
-                session.UpdatedBy = endedBy;
+                session.UpdatedBy = Guid.TryParse(endedBy, out var endedByGuid) ? endedByGuid : null;
 
                 await _context.SaveChangesAsync();
 
@@ -245,7 +246,7 @@ namespace BARQ.Application.Services
                     ResponseTimeMs = responseTimeMs,
                     RiskLevel = riskLevel ?? "Low",
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = "System"
+                    CreatedBy = null
                 };
 
                 _context.ImpersonationActions.Add(action);
@@ -323,7 +324,7 @@ namespace BARQ.Application.Services
                 return new PagedResult<ImpersonationActionDto>
                 {
                     Items = actionDtos,
-                    TotalCount = totalCount,
+                    Total = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize
                 };
@@ -349,7 +350,7 @@ namespace BARQ.Application.Services
                     session.EndedAt = DateTime.UtcNow;
                     session.EndReason = "Session expired";
                     session.UpdatedAt = DateTime.UtcNow;
-                    session.UpdatedBy = "System";
+                    session.UpdatedBy = null;
                 }
 
                 await _context.SaveChangesAsync();
@@ -376,11 +377,14 @@ namespace BARQ.Application.Services
                 }
 
                 var userRoles = await _context.UserRoles
-                    .Include(ur => ur.Role)
                     .Where(ur => ur.UserId == userId)
                     .ToListAsync();
 
-                var hasAdminRole = userRoles.Any(ur => ur.Role.Name == "Admin" || ur.Role.Name == "SuperAdmin");
+                var roleIds = userRoles.Select(ur => ur.RoleId).ToList();
+                var adminRoles = await _context.Roles
+                    .Where(r => roleIds.Contains(r.Id) && (r.Name == "Admin" || r.Name == "SuperAdmin"))
+                    .ToListAsync();
+                var hasAdminRole = adminRoles.Any();
                 
                 return !hasAdminRole;
             }

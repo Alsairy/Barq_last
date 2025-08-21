@@ -10,8 +10,36 @@ using BARQ.Infrastructure.Data;
 using BARQ.Core.Entities;
 using BARQ.Application.Interfaces;
 using BARQ.Application.Services;
+using Serilog;
+using Serilog.Events;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithProcessId()
+    .Enrich.WithThreadId()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+    .WriteTo.File("logs/barq-.log", 
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+    .WriteTo.File("logs/security-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 90,
+        restrictedToMinimumLevel: LogEventLevel.Warning,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] SECURITY: {Message:lj} {Properties:j}{NewLine}{Exception}")
+    .Filter.ByExcluding(logEvent => 
+        logEvent.MessageTemplate.Text.Contains("password", StringComparison.OrdinalIgnoreCase) ||
+        logEvent.MessageTemplate.Text.Contains("token", StringComparison.OrdinalIgnoreCase) ||
+        logEvent.MessageTemplate.Text.Contains("secret", StringComparison.OrdinalIgnoreCase))
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog();
 
 builder.Services.Configure<AuthCookieOptions>(builder.Configuration.GetSection("Auth:Cookie"));
 
@@ -26,6 +54,7 @@ builder.Services.AddCors(o =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -130,6 +159,24 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
+app.UseSerilogRequestLogging(options =>
+{
+    options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    {
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+        diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+        diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].FirstOrDefault());
+        if (httpContext.User.Identity?.IsAuthenticated == true)
+        {
+            diagnosticContext.Set("UserId", httpContext.User.FindFirst("sub")?.Value ?? httpContext.User.FindFirst("id")?.Value);
+        }
+    };
+});
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
 app.Use(async (ctx, next) =>
 {
     if (!ctx.Request.Cookies.ContainsKey("XSRF-TOKEN"))
@@ -192,7 +239,19 @@ app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
     }
 });
 
-app.Run();
+try
+{
+    Log.Information("Starting BARQ API application");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "BARQ API application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
 
 public sealed class AuthCookieOptions
 {
