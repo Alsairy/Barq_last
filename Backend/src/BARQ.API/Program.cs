@@ -13,13 +13,41 @@ using BARQ.Application.Interfaces;
 using BARQ.Application.Services;
 using BARQ.Core.Services;
 using BARQ.Infrastructure.Services;
+using Serilog;
+using Serilog.Events;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithProcessId()
+    .Enrich.WithThreadId()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+    .WriteTo.File("logs/barq-.log", 
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+    .WriteTo.File("logs/security-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 90,
+        restrictedToMinimumLevel: LogEventLevel.Warning,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] SECURITY: {Message:lj} {Properties:j}{NewLine}{Exception}")
+    .Filter.ByExcluding(logEvent => 
+        logEvent.MessageTemplate.Text.Contains("password", StringComparison.OrdinalIgnoreCase) ||
+        logEvent.MessageTemplate.Text.Contains("token", StringComparison.OrdinalIgnoreCase) ||
+        logEvent.MessageTemplate.Text.Contains("secret", StringComparison.OrdinalIgnoreCase))
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog();
 var allowed = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 builder.Services.AddCors(o => o.AddPolicy("Default", p => p.WithOrigins(allowed).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "BARQ API", Version = "v1" }));
 
@@ -92,10 +120,10 @@ builder.Services.AddScoped<BARQ.Application.Interfaces.IAntiVirusService, BARQ.A
 builder.Services.AddScoped<BARQ.Application.Interfaces.IAuditReportService, BARQ.Application.Services.AuditReportService>();
 builder.Services.AddScoped<BARQ.Application.Interfaces.IBillingService, BARQ.Application.Services.BillingService>();
 builder.Services.AddScoped<BARQ.Application.Interfaces.IQuotaMiddleware, BARQ.Application.Services.QuotaMiddleware>();
-builder.Services.AddScoped<BARQ.Application.Services.IFeatureFlagService, BARQ.Application.Services.FeatureFlagService>();
-builder.Services.AddScoped<IImpersonationService, ImpersonationService>();
-builder.Services.AddScoped<ISystemHealthService, SystemHealthService>();
-builder.Services.AddScoped<ITenantStateService, TenantStateService>();
+builder.Services.AddScoped<BARQ.Application.Interfaces.IFeatureFlagService, BARQ.Application.Services.FeatureFlagService>();
+builder.Services.AddScoped<BARQ.Application.Interfaces.IImpersonationService, BARQ.Application.Services.ImpersonationService>();
+builder.Services.AddScoped<BARQ.Application.Interfaces.ISystemHealthService, BARQ.Application.Services.SystemHealthService>();
+builder.Services.AddScoped<BARQ.Application.Interfaces.ITenantStateService, BARQ.Application.Services.TenantStateService>();
 builder.Services.AddHttpContextAccessor(); // for TenantProvider
 builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 
@@ -139,6 +167,23 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.UseSerilogRequestLogging(options =>
+{
+    options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    {
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+        diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+        diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].FirstOrDefault());
+        if (httpContext.User.Identity?.IsAuthenticated == true)
+        {
+            diagnosticContext.Set("UserId", httpContext.User.FindFirst("sub")?.Value ?? httpContext.User.FindFirst("id")?.Value);
+        }
+    };
+});
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 app.Use(async (ctx, next) =>
 {
     if (!ctx.Request.Cookies.ContainsKey("XSRF-TOKEN"))
@@ -186,7 +231,19 @@ app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
     }
 });
 
-app.Run();
+try
+{
+    Log.Information("Starting BARQ API application");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "BARQ API application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
 
 public sealed class AuthCookieOptions
 {
