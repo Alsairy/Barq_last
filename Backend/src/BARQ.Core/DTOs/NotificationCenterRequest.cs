@@ -15,7 +15,7 @@ namespace BARQ.Core.DTOs
 
     public class NotificationStatsDto
     {
-        public int TotalCount { get; set; }
+        public int Total { get; set; }
         public int UnreadCount { get; set; }
         public int ActionRequiredCount { get; set; }
         public int TodayCount { get; set; }
