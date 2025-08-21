@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
@@ -14,7 +14,10 @@ import {
   AlertCircle,
   Users,
   FolderOpen,
-  ListTodo
+  ListTodo,
+  Play,
+  Upload,
+  CreditCard
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -24,6 +27,12 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { cn } from '../../lib/utils';
+import { useTaskWorkflow } from '../../hooks/useTaskWorkflow';
+import { useFileWorkflow } from '../../hooks/useFileWorkflow';
+import { useBillingWorkflow } from '../../hooks/useBillingWorkflow';
+import { useSLAWorkflow } from '../../hooks/useSLAWorkflow';
+import { taskApi, Task } from '../../services/api';
+import { toast } from 'sonner';
 import { useKeyboardNavigation } from '../../hooks/useKeyboardNavigation';
 import { useI18n } from '../../hooks/useI18n';
 
@@ -34,7 +43,14 @@ interface TaskManagementPanelProps {
 export function TaskManagementPanel({ collapsed }: TaskManagementPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('tasks');
+  const [realTasks, setRealTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const { createTaskWithApproval, runAI, completeTask } = useTaskWorkflow();
+  const { uploadAndScanFile } = useFileWorkflow();
+  const { state: billingState, handle402Response } = useBillingWorkflow();
+  const { getUnacknowledgedCount } = useSLAWorkflow();
   const { t, isRTL } = useI18n();
 
   useKeyboardNavigation({
@@ -44,6 +60,59 @@ export function TaskManagementPanel({ collapsed }: TaskManagementPanelProps) {
     },
     enabled: !collapsed
   });
+
+  useEffect(() => {
+    loadTasks();
+  }, []);
+
+  const loadTasks = async () => {
+    setLoading(true);
+    try {
+      const response = await taskApi.getTasks();
+      if (response.success && response.data) {
+        setRealTasks(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to load tasks:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateTask = async () => {
+    try {
+      const newTask = await createTaskWithApproval({
+        title: 'New Task',
+        description: 'Task created from UI',
+        priority: 'medium',
+        projectId: 'default-project',
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        requiresApproval: true,
+        approverId: 'manager-user-id'
+      });
+      
+      if (newTask) {
+        setRealTasks(prev => [newTask, ...prev]);
+      }
+    } catch (error) {
+    }
+  };
+
+  const handleRunAI = async (taskId: string) => {
+    try {
+      await runAI('Process this task using AI assistance', 'openai');
+    } catch (error) {
+    }
+  };
+
+  const handleFileUpload = async (file: File, taskId?: string) => {
+    try {
+      await uploadAndScanFile(file, taskId);
+    } catch (error) {
+    }
+  };
+
+  const slaViolationCount = getUnacknowledgedCount();
 
   if (collapsed) {
     return (
@@ -66,11 +135,43 @@ export function TaskManagementPanel({ collapsed }: TaskManagementPanelProps) {
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-lg">{t('tasks_and_projects', 'Tasks & Projects')}</h2>
-          <Button size="sm" className="h-8">
-            <Plus className={cn("h-4 w-4", isRTL ? "ml-1" : "mr-1")} />
-            {t('new', 'New')}
-          </Button>
+          <div className="flex items-center gap-2">
+            <h2 className="font-semibold text-lg">{t('tasks_and_projects', 'Tasks & Projects')}</h2>
+            {slaViolationCount > 0 && (
+              <Badge variant="destructive" className="text-xs">
+                {slaViolationCount} SLA
+              </Badge>
+            )}
+            {billingState.status?.isOverQuota && (
+              <Badge variant="destructive" className="text-xs">
+                <CreditCard className="h-3 w-3 mr-1" />
+                Quota
+              </Badge>
+            )}
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" className="h-8">
+                <Plus className={cn("h-4 w-4", isRTL ? "ml-1" : "mr-1")} />
+                {t('new', 'New')}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleCreateTask}>
+                <ListTodo className="h-4 w-4 mr-2" />
+                Create Task
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <FolderOpen className="h-4 w-4 mr-2" />
+                Create Project
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Users className="h-4 w-4 mr-2" />
+                Create Team
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         
         {/* Search */}
@@ -99,7 +200,14 @@ export function TaskManagementPanel({ collapsed }: TaskManagementPanelProps) {
 
         <div className="flex-1 overflow-hidden">
           <TabsContent value="tasks" className="h-full m-0">
-            <TasksList searchQuery={searchQuery} />
+            <TasksList 
+              searchQuery={searchQuery} 
+              tasks={realTasks}
+              loading={loading}
+              onRunAI={handleRunAI}
+              onFileUpload={handleFileUpload}
+              onComplete={completeTask}
+            />
           </TabsContent>
           
           <TabsContent value="projects" className="h-full m-0">
@@ -115,41 +223,33 @@ export function TaskManagementPanel({ collapsed }: TaskManagementPanelProps) {
   );
 }
 
-function TasksList({ searchQuery }: { searchQuery: string }) {
-  const tasks = [
-    {
-      id: '1',
-      title: 'Implement user authentication',
-      status: 'in-progress',
-      priority: 'high',
-      assignee: 'John Doe',
-      dueDate: '2024-01-15',
-      project: 'BARQ Platform'
-    },
-    {
-      id: '2',
-      title: 'Design API endpoints',
-      status: 'completed',
-      priority: 'medium',
-      assignee: 'Jane Smith',
-      dueDate: '2024-01-10',
-      project: 'BARQ Platform'
-    },
-    {
-      id: '3',
-      title: 'Setup CI/CD pipeline',
-      status: 'pending',
-      priority: 'high',
-      assignee: 'Mike Johnson',
-      dueDate: '2024-01-20',
-      project: 'DevOps'
-    }
-  ];
+interface TasksListProps {
+  searchQuery: string;
+  tasks: Task[];
+  loading: boolean;
+  onRunAI: (taskId: string) => void;
+  onFileUpload: (file: File, taskId?: string) => void;
+  onComplete: () => Promise<boolean | undefined>;
+}
 
+function TasksList({ searchQuery, tasks, loading, onRunAI, onFileUpload, onComplete }: TasksListProps) {
   const filteredTasks = tasks.filter(task =>
     task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    task.project.toLowerCase().includes(searchQuery.toLowerCase())
+    task.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleFileUpload = (taskId: string) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (files) {
+        Array.from(files).forEach(file => onFileUpload(file, taskId));
+      }
+    };
+    input.click();
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -177,6 +277,14 @@ function TasksList({ searchQuery }: { searchQuery: string }) {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-sm text-muted-foreground">Loading tasks...</div>
+      </div>
+    );
+  }
+
   return (
     <ScrollArea className="h-full">
       <div className="p-4 space-y-2">
@@ -192,16 +300,22 @@ function TasksList({ searchQuery }: { searchQuery: string }) {
                   <h4 className="font-medium text-sm truncate">{task.title}</h4>
                 </div>
                 
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                  {task.description}
+                </p>
+                
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="secondary" className={cn("text-xs", getPriorityColor(task.priority))}>
                     {task.priority}
                   </Badge>
-                  <span className="text-xs text-muted-foreground">{task.project}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(task.dueDate).toLocaleDateString()}
+                  </span>
                 </div>
                 
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{task.assignee}</span>
-                  <span>{task.dueDate}</span>
+                  <span>{task.assigneeId}</span>
+                  <span>{task.status}</span>
                 </div>
               </div>
               
@@ -212,6 +326,19 @@ function TasksList({ searchQuery }: { searchQuery: string }) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onRunAI(task.id)}>
+                    <Play className="h-3 w-3 mr-2" />
+                    Run AI
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleFileUpload(task.id)}>
+                    <Upload className="h-3 w-3 mr-2" />
+                    Upload Files
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => onComplete()}>
+                    <CheckCircle2 className="h-3 w-3 mr-2" />
+                    Complete
+                  </DropdownMenuItem>
                   <DropdownMenuItem>Edit</DropdownMenuItem>
                   <DropdownMenuItem>Assign</DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -221,6 +348,12 @@ function TasksList({ searchQuery }: { searchQuery: string }) {
             </div>
           </div>
         ))}
+        {filteredTasks.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <ListTodo className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No tasks found</p>
+          </div>
+        )}
       </div>
     </ScrollArea>
   );
