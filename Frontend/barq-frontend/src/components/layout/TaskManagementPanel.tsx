@@ -24,6 +24,8 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { cn } from '../../lib/utils';
+import { useKeyboardNavigation } from '../../hooks/useKeyboardNavigation';
+import { useI18n } from '../../hooks/useI18n';
 
 interface TaskManagementPanelProps {
   collapsed: boolean;
@@ -32,6 +34,16 @@ interface TaskManagementPanelProps {
 export function TaskManagementPanel({ collapsed }: TaskManagementPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('tasks');
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const { t, isRTL } = useI18n();
+
+  useKeyboardNavigation({
+    onArrowUp: () => setSelectedIndex(prev => Math.max(0, prev - 1)),
+    onArrowDown: () => setSelectedIndex(prev => prev + 1),
+    onEnter: () => {
+    },
+    enabled: !collapsed
+  });
 
   if (collapsed) {
     return (
@@ -50,25 +62,29 @@ export function TaskManagementPanel({ collapsed }: TaskManagementPanelProps) {
   }
 
   return (
-    <div className="h-full border-r bg-muted/30 flex flex-col">
+    <div className={cn("h-full border-r bg-muted/30 flex flex-col", isRTL && "border-l border-r-0")}>
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-lg">Tasks & Projects</h2>
+          <h2 className="font-semibold text-lg">{t('tasks_and_projects', 'Tasks & Projects')}</h2>
           <Button size="sm" className="h-8">
-            <Plus className="h-4 w-4 mr-1" />
-            New
+            <Plus className={cn("h-4 w-4", isRTL ? "ml-1" : "mr-1")} />
+            {t('new', 'New')}
           </Button>
         </div>
         
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className={cn(
+            "absolute top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground",
+            isRTL ? "right-3" : "left-3"
+          )} />
           <Input
-            placeholder="Search tasks..."
+            placeholder={t('search_tasks', 'Search tasks...')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9"
+            className={cn("h-9", isRTL ? "pr-9" : "pl-9")}
+            dir={isRTL ? "rtl" : "ltr"}
           />
         </div>
       </div>
