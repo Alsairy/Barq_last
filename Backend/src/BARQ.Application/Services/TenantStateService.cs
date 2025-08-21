@@ -5,6 +5,7 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace BARQ.Application.Services
 {
@@ -122,7 +123,7 @@ namespace BARQ.Application.Services
                 tenantState.StatusChangedAt = DateTime.UtcNow;
                 tenantState.StatusChangedBy = updatedBy;
                 tenantState.UpdatedAt = DateTime.UtcNow;
-                tenantState.UpdatedBy = Guid.TryParse(updatedBy, out var updatedByGuid) ? updatedByGuid : null;
+                tenantState.UpdatedBy = Guid.TryParse(updatedBy, out var updatedByGuid) ? updatedByGuid : Guid.Empty;
 
                 await _context.SaveChangesAsync();
 
@@ -162,7 +163,7 @@ namespace BARQ.Application.Services
                         Status = "Active",
                         IsHealthy = true,
                         CreatedAt = DateTime.UtcNow,
-                        CreatedBy = null
+                        CreatedBy = Guid.Empty
                     };
 
                     _context.TenantStates.Add(tenantState);
@@ -171,7 +172,7 @@ namespace BARQ.Application.Services
                 await UpdateTenantUsageStatsInternalAsync(tenantState);
                 tenantState.LastHealthCheck = DateTime.UtcNow;
                 tenantState.UpdatedAt = DateTime.UtcNow;
-                tenantState.UpdatedBy = null;
+                tenantState.UpdatedBy = Guid.Empty;
 
                 await _context.SaveChangesAsync();
 
@@ -289,7 +290,7 @@ namespace BARQ.Application.Services
                 {
                     await UpdateTenantUsageStatsInternalAsync(tenantState);
                     tenantState.UpdatedAt = DateTime.UtcNow;
-                    tenantState.UpdatedBy = null;
+                    tenantState.UpdatedBy = Guid.Empty;
                     await _context.SaveChangesAsync();
                 }
             }
@@ -312,7 +313,7 @@ namespace BARQ.Application.Services
                     tenantState.RequiresAttention = true;
                     tenantState.AttentionReason = reason;
                     tenantState.UpdatedAt = DateTime.UtcNow;
-                    tenantState.UpdatedBy = Guid.TryParse(markedBy, out var markedByGuid) ? markedByGuid : null;
+                    tenantState.UpdatedBy = Guid.TryParse(markedBy, out var markedByGuid) ? markedByGuid : Guid.Empty;
 
                     await _context.SaveChangesAsync();
 
@@ -339,7 +340,7 @@ namespace BARQ.Application.Services
                     tenantState.RequiresAttention = false;
                     tenantState.AttentionReason = null;
                     tenantState.UpdatedAt = DateTime.UtcNow;
-                    tenantState.UpdatedBy = Guid.TryParse(clearedBy, out var clearedByGuid) ? clearedByGuid : null;
+                    tenantState.UpdatedBy = Guid.TryParse(clearedBy, out var clearedByGuid) ? clearedByGuid : Guid.Empty;
 
                     await _context.SaveChangesAsync();
 
@@ -432,7 +433,7 @@ namespace BARQ.Application.Services
                     ChangedBy = changedBy,
                     ChangedAt = DateTime.UtcNow,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = Guid.TryParse(changedBy, out var createdByGuid) ? createdByGuid : null
+                    CreatedBy = Guid.TryParse(changedBy, out var createdByGuid) ? createdByGuid : Guid.Empty
                 };
 
                 _context.TenantStateHistory.Add(history);

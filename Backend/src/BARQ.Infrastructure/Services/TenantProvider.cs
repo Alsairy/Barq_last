@@ -4,49 +4,30 @@ using System.Security.Claims;
 
 namespace BARQ.Infrastructure.Services;
 
-public class TenantProvider : ITenantProvider
+public sealed class TenantProvider : ITenantProvider
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    
-    private static readonly System.Threading.AsyncLocal<Guid?> _overrideTenant = new();
+    private readonly IHttpContextAccessor _ctx;
+    private Guid _tenantId;
 
-    public TenantProvider(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
+    public TenantProvider(IHttpContextAccessor ctx) => _ctx = ctx;
 
     public Guid GetTenantId()
     {
-        var overrideId = _overrideTenant.Value;
-        if (overrideId.HasValue && overrideId.Value != Guid.Empty)
-        {
-            return overrideId.Value;
-        }
+        if (_tenantId != Guid.Empty) return _tenantId;
+        var http = _ctx.HttpContext;
 
-        var http = _httpContextAccessor.HttpContext;
-        var user = http?.User;
-        if (user?.Identity?.IsAuthenticated == true)
-        {
-            var tenantIdClaim = user.FindFirst("TenantId")?.Value;
-            if (Guid.TryParse(tenantIdClaim, out var tenantId))
-            {
-                return tenantId;
-            }
-        }
+        if (http?.Request.Headers.TryGetValue("X-Tenant-Id", out var h) == true &&
+            Guid.TryParse(h.FirstOrDefault(), out var id)) { _tenantId = id; return _tenantId; }
 
-        var hdr = http?.Request.Headers["X-Tenant-Id"].ToString();
-        if (!string.IsNullOrWhiteSpace(hdr) && Guid.TryParse(hdr, out var fromHeader))
-        {
-            return fromHeader;
-        }
+        var claim = http?.User?.FindFirst("TenantId")?.Value ?? http?.User?.FindFirst("tid")?.Value;
+        if (Guid.TryParse(claim, out var cid)) { _tenantId = cid; return _tenantId; }
 
-        return Guid.Empty;
+        return Guid.Empty; // safe default: no tenant context
     }
 
-    public void SetTenantId(Guid tenantId) => _overrideTenant.Value = tenantId;
-
-    public string GetTenantName()
-    {
-        return "System";
-    }
+    public void SetTenantId(Guid tenantId) => _tenantId = tenantId;
+    public string GetTenantName() => "Default Tenant"; // optional
+    public void ClearTenantContext() => _tenantId = Guid.Empty;
+    public Guid GetCurrentUserId()
+        => Guid.TryParse(_ctx.HttpContext?.User?.FindFirst("sub")?.Value ?? "", out var uid) ? uid : Guid.Empty;
 }

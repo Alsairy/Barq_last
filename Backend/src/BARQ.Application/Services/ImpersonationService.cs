@@ -5,6 +5,7 @@ using BARQ.Core.Entities;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace BARQ.Application.Services
 {
@@ -135,7 +136,7 @@ namespace BARQ.Application.Services
                     IpAddress = ipAddress,
                     UserAgent = userAgent,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = Guid.TryParse(adminUserId, out var createdByGuid) ? createdByGuid : null
+                    CreatedBy = Guid.TryParse(adminUserId, out var createdByGuid) ? createdByGuid : Guid.Empty
                 };
 
                 _context.ImpersonationSessions.Add(session);
@@ -172,7 +173,7 @@ namespace BARQ.Application.Services
                 session.EndedBy = endedBy;
                 session.EndReason = request.Reason;
                 session.UpdatedAt = DateTime.UtcNow;
-                session.UpdatedBy = Guid.TryParse(endedBy, out var updatedByGuid) ? updatedByGuid : null;
+                session.UpdatedBy = Guid.TryParse(endedBy, out var updatedByGuid) ? updatedByGuid : Guid.Empty;
 
                 await _context.SaveChangesAsync();
 
@@ -245,7 +246,7 @@ namespace BARQ.Application.Services
                     ResponseTimeMs = responseTimeMs,
                     RiskLevel = riskLevel ?? "Low",
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = null
+                    CreatedBy = Guid.Empty
                 };
 
                 _context.ImpersonationActions.Add(action);
@@ -349,7 +350,7 @@ namespace BARQ.Application.Services
                     session.EndedAt = DateTime.UtcNow;
                     session.EndReason = "Session expired";
                     session.UpdatedAt = DateTime.UtcNow;
-                    session.UpdatedBy = null;
+                    session.UpdatedBy = Guid.Empty;
                 }
 
                 await _context.SaveChangesAsync();
