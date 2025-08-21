@@ -128,6 +128,8 @@ builder.Services.AddScoped<BARQ.Application.Interfaces.ITenantStateService, BARQ
 builder.Services.AddScoped<BARQ.Application.Interfaces.IImpersonationService, BARQ.Application.Services.ImpersonationService>();
 
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<BARQ.Core.Services.ITenantProvider, BARQ.Infrastructure.Services.TenantProvider>();
 
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<BarqDbContext>();
@@ -197,6 +199,8 @@ app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
 });
 
 app.Run();
+
+public partial class Program { }
 
 public sealed class AuthCookieOptions
 {

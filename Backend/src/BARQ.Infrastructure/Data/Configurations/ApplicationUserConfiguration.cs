@@ -45,6 +45,31 @@ namespace BARQ.Infrastructure.Data.Configurations
                 .HasForeignKey(u => u.TenantId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasMany(u => u.CreatedTasks)
+                .WithOne(t => t.Creator)
+                .HasForeignKey(t => t.CreatedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(u => u.AssignedTasks)
+                .WithOne(t => t.AssignedTo)
+                .HasForeignKey(t => t.AssignedToId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(u => u.OwnedProjects)
+                .WithOne(p => p.Owner)
+                .HasForeignKey(p => p.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(u => u.Notifications)
+                .WithOne(n => n.User)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(u => u.LanguagePreferences)
+                .WithOne(lp => lp.User)
+                .HasForeignKey(lp => lp.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasIndex(u => u.TenantId);
             builder.HasIndex(u => u.EmployeeId);
             builder.HasIndex(u => u.IsActive);

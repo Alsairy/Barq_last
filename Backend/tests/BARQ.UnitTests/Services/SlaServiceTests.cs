@@ -5,7 +5,9 @@ using Microsoft.Extensions.Logging;
 using BARQ.Application.Services.Workflow;
 using BARQ.Infrastructure.Data;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using Microsoft.EntityFrameworkCore;
+using BARQ.UnitTests.Mocks;
 
 namespace BARQ.UnitTests.Services;
 
@@ -21,13 +23,14 @@ public class SlaServiceTests : IDisposable
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         
-        _context = new BarqDbContext(options);
+        var mockTenantProvider = new MockTenantProvider();
+        _context = new BarqDbContext(options, mockTenantProvider);
         _loggerMock = new Mock<ILogger<SlaService>>();
         _slaService = new SlaService(_context, _loggerMock.Object);
     }
 
     [Fact]
-    public async Task CalculateRemainingTime_WithValidTask_ReturnsCorrectTime()
+    public async System.Threading.Tasks.Task CalculateRemainingTime_WithValidTask_ReturnsCorrectTime()
     {
         var task = new Core.Entities.Task
         {
@@ -56,7 +59,7 @@ public class SlaServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CalculateRemainingTime_WithExpiredTask_ReturnsNegativeTime()
+    public async System.Threading.Tasks.Task CalculateRemainingTime_WithExpiredTask_ReturnsNegativeTime()
     {
         var task = new Core.Entities.Task
         {
@@ -89,7 +92,7 @@ public class SlaServiceTests : IDisposable
     [InlineData("Medium", 6)]
     [InlineData("High", 4)]
     [InlineData("Critical", 2)]
-    public async Task CalculateRemainingTime_WithDifferentPriorities_ReturnsCorrectSlaTime(string priority, int expectedHours)
+    public async System.Threading.Tasks.Task CalculateRemainingTime_WithDifferentPriorities_ReturnsCorrectSlaTime(string priority, int expectedHours)
     {
         var task = new Core.Entities.Task
         {
@@ -118,7 +121,7 @@ public class SlaServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CheckViolations_WithExpiredTasks_CreatesViolations()
+    public async System.Threading.Tasks.Task CheckViolations_WithExpiredTasks_CreatesViolations()
     {
         var expiredTask = new Core.Entities.Task
         {

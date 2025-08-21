@@ -74,6 +74,7 @@ public sealed class BarqDbContext
     public DbSet<ImpersonationAction> ImpersonationActions => Set<ImpersonationAction>();
     public DbSet<SystemHealth> SystemHealth => Set<SystemHealth>();
     public DbSet<SlaViolation> SlaViolations => Set<SlaViolation>();
+    public DbSet<SlaPolicy> SlaPolicies => Set<SlaPolicy>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -98,12 +98,3 @@ public class AiProviderTests
         classification.Should().Be(expectedClassification);
     }
 }
-
-public class OpenAiConfig
-{
-    public string ApiKey { get; set; } = string.Empty;
-    public string BaseUrl { get; set; } = string.Empty;
-    public string Model { get; set; } = string.Empty;
-    public int MaxTokens { get; set; }
-    public float Temperature { get; set; }
-}

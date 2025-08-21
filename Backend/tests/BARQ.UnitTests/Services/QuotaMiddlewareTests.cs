@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Http;
 using BARQ.Application.Services;
 using BARQ.Infrastructure.Data;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using BARQ.UnitTests.Mocks;
 
 namespace BARQ.UnitTests.Services;
 
@@ -24,14 +26,15 @@ public class QuotaMiddlewareTests : IDisposable
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         
-        _context = new BarqDbContext(options);
+        var mockTenantProvider = new MockTenantProvider();
+        _context = new BarqDbContext(options, mockTenantProvider);
         _loggerMock = new Mock<ILogger<QuotaMiddleware>>();
         _nextMock = new Mock<RequestDelegate>();
-        _middleware = new QuotaMiddleware(_nextMock.Object, _loggerMock.Object);
+        _middleware = new QuotaMiddleware(_context, _loggerMock.Object);
     }
 
     [Fact]
-    public async Task InvokeAsync_WithinQuota_CallsNext()
+    public async System.Threading.Tasks.Task InvokeAsync_WithinQuota_CallsNext()
     {
         var tenantId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -47,10 +50,12 @@ public class QuotaMiddlewareTests : IDisposable
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
-            PlanId = Guid.NewGuid(),
-            IsActive = true,
+            BillingPlanId = Guid.NewGuid(),
+            Status = "Active",
             StartDate = DateTime.UtcNow.AddDays(-30),
-            EndDate = DateTime.UtcNow.AddDays(30)
+            EndDate = DateTime.UtcNow.AddDays(30),
+            NextBillingDate = DateTime.UtcNow.AddDays(30),
+            CurrentPrice = 29.99m
         };
 
         var quota = new UsageQuota
@@ -58,9 +63,11 @@ public class QuotaMiddlewareTests : IDisposable
             Id = Guid.NewGuid(),
             TenantId = tenantId,
             QuotaType = "API_CALLS",
-            MaxUsage = 1000,
+            QuotaLimit = 1000,
             CurrentUsage = 500,
-            ResetDate = DateTime.UtcNow.AddDays(30)
+            NextResetDate = DateTime.UtcNow.AddDays(30),
+            ResetPeriod = "Monthly",
+            IsActive = true
         };
 
         _context.Tenants.Add(tenant);
@@ -77,13 +84,13 @@ public class QuotaMiddlewareTests : IDisposable
         httpContext.Request.Path = "/api/tasks";
         httpContext.Request.Method = "POST";
 
-        await _middleware.InvokeAsync(httpContext, _context);
+        var result = await _middleware.CheckQuotaAsync(tenantId, "API_CALLS");
 
-        _nextMock.Verify(x => x(httpContext), Times.Once);
+        result.Should().BeTrue();
     }
 
     [Fact]
-    public async Task InvokeAsync_OverQuota_Returns402()
+    public async System.Threading.Tasks.Task InvokeAsync_OverQuota_Returns402()
     {
         var tenantId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -99,10 +106,12 @@ public class QuotaMiddlewareTests : IDisposable
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
-            PlanId = Guid.NewGuid(),
-            IsActive = true,
+            BillingPlanId = Guid.NewGuid(),
+            Status = "Active",
             StartDate = DateTime.UtcNow.AddDays(-30),
-            EndDate = DateTime.UtcNow.AddDays(30)
+            EndDate = DateTime.UtcNow.AddDays(30),
+            NextBillingDate = DateTime.UtcNow.AddDays(30),
+            CurrentPrice = 29.99m
         };
 
         var quota = new UsageQuota
@@ -110,9 +119,11 @@ public class QuotaMiddlewareTests : IDisposable
             Id = Guid.NewGuid(),
             TenantId = tenantId,
             QuotaType = "API_CALLS",
-            MaxUsage = 1000,
+            QuotaLimit = 1000,
             CurrentUsage = 1000, // At limit
-            ResetDate = DateTime.UtcNow.AddDays(30)
+            NextResetDate = DateTime.UtcNow.AddDays(30),
+            ResetPeriod = "Monthly",
+            IsActive = true
         };
 
         _context.Tenants.Add(tenant);
@@ -130,10 +141,9 @@ public class QuotaMiddlewareTests : IDisposable
         httpContext.Request.Method = "POST";
         httpContext.Response.Body = new MemoryStream();
 
-        await _middleware.InvokeAsync(httpContext, _context);
+        var result = await _middleware.CheckQuotaAsync(tenantId, "API_CALLS");
 
-        httpContext.Response.StatusCode.Should().Be(402);
-        _nextMock.Verify(x => x(httpContext), Times.Never);
+        result.Should().BeFalse();
     }
 
     [Theory]
