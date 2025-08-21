@@ -16,7 +16,7 @@ namespace BARQ.Application.Services
             _logger = logger;
         }
 
-        public async Task<bool> CheckQuotaAsync(Guid tenantId, string quotaType, long requestedQuantity = 1)
+        public async System.Threading.Tasks.Task<bool> CheckQuotaAsync(Guid tenantId, string quotaType, long requestedQuantity = 1)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task RecordUsageAsync(Guid tenantId, string quotaType, long quantity, string? entityId = null, string? entityType = null)
+        public async System.Threading.Tasks.Task RecordUsageAsync(Guid tenantId, string quotaType, long quantity, string? entityId = null, string? entityType = null)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<QuotaCheckResult> ValidateQuotaAsync(Guid tenantId, string quotaType, long requestedQuantity = 1)
+        public async System.Threading.Tasks.Task<QuotaCheckResult> ValidateQuotaAsync(Guid tenantId, string quotaType, long requestedQuantity = 1)
         {
             try
             {

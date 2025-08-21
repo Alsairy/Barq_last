@@ -1,31 +1,63 @@
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
 
-export function useOptimisticUpdate() {
-  const executeWithOptimism = useCallback(async <T, U>(
-    asyncFn: () => Promise<T>,
-    optimisticUpdate: (current: U) => U,
-    currentValue: U,
-    onSuccess?: (result: T, optimisticValue: U) => void,
-    onError?: (error: any, originalValue: U) => void
-  ): Promise<T> => {
-    const optimisticValue = optimisticUpdate(currentValue);
-    
-    try {
-      const result = await asyncFn();
-      
-      if (onSuccess) {
-        onSuccess(result, optimisticValue);
-      }
-      
-      return result;
-    } catch (error) {
-      if (onError) {
-        onError(error, currentValue);
-      }
-      
-      throw error;
-    }
-  }, []);
+interface OptimisticUpdateOptions<T> {
+  onSuccess?: (data: T) => void;
+  onError?: (error: Error) => void;
+  successMessage?: string;
+  errorMessage?: string;
+}
 
-  return { executeWithOptimism };
+export function useOptimisticUpdate<T, P = any>(
+  updateFn: (params: P) => Promise<T>,
+  options: OptimisticUpdateOptions<T> = {}
+) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const execute = useCallback(
+    async (params: P, optimisticUpdate?: () => void, rollback?: () => void) => {
+      setIsLoading(true);
+      setError(null);
+
+      if (optimisticUpdate) {
+        optimisticUpdate();
+      }
+
+      try {
+        const result = await updateFn(params);
+        
+        if (options.successMessage) {
+          toast.success(options.successMessage);
+        }
+        
+        if (options.onSuccess) {
+          options.onSuccess(result);
+        }
+        
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Unknown error');
+        setError(error);
+        
+        if (rollback) {
+          rollback();
+        }
+        
+        const errorMessage = options.errorMessage || error.message;
+        toast.error(errorMessage);
+        
+        if (options.onError) {
+          options.onError(error);
+        }
+        
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [updateFn, options]
+  );
+
+  return { execute, isLoading, error };
 }

@@ -1,42 +1,83 @@
-import { useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 
-export interface UseAutoRetryOptions {
+interface AutoRetryOptions {
   maxRetries?: number;
-  delay?: number;
-  backoff?: boolean;
+  retryDelay?: number;
+  exponentialBackoff?: boolean;
+  onRetry?: (attempt: number) => void;
+  onMaxRetriesReached?: () => void;
 }
 
-export function useAutoRetry(options: UseAutoRetryOptions = {}) {
-  const { maxRetries = 3, delay = 1000, backoff = true } = options;
+export function useAutoRetry<T>(
+  queryFn: () => Promise<T>,
+  options: AutoRetryOptions = {}
+) {
+  const {
+    maxRetries = 3,
+    retryDelay = 1000,
+    exponentialBackoff = true,
+    onRetry,
+    onMaxRetriesReached
+  } = options;
 
-  const executeWithRetry = useCallback(async <T>(
-    fn: () => Promise<T>,
-    retryOptions?: UseAutoRetryOptions
-  ): Promise<T> => {
-    const opts = { ...options, ...retryOptions };
-    const maxAttempts = opts.maxRetries || maxRetries;
-    let attempt = 0;
+  const [data, setData] = useState<T | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
-    while (attempt < maxAttempts) {
+  const execute = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    const attemptQuery = async (attempt: number): Promise<T> => {
       try {
-        return await fn();
-      } catch (error) {
-        attempt++;
+        const result = await queryFn();
+        setData(result);
+        setRetryCount(0);
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Unknown error');
         
-        if (attempt >= maxAttempts) {
+        if (attempt < maxRetries) {
+          const delay = exponentialBackoff 
+            ? retryDelay * Math.pow(2, attempt)
+            : retryDelay;
+          
+          setRetryCount(attempt + 1);
+          
+          if (onRetry) {
+            onRetry(attempt + 1);
+          }
+          
+          toast.info(`Retrying... (${attempt + 1}/${maxRetries})`);
+          
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return attemptQuery(attempt + 1);
+        } else {
+          setError(error);
+          setRetryCount(maxRetries);
+          
+          if (onMaxRetriesReached) {
+            onMaxRetriesReached();
+          }
+          
+          toast.error(`Failed after ${maxRetries} attempts: ${error.message}`);
           throw error;
         }
-
-        const waitTime = backoff 
-          ? (opts.delay || delay) * Math.pow(2, attempt - 1)
-          : (opts.delay || delay);
-
-        await new Promise(resolve => setTimeout(resolve, waitTime));
       }
+    };
+
+    try {
+      return await attemptQuery(0);
+    } finally {
+      setIsLoading(false);
     }
+  }, [queryFn, maxRetries, retryDelay, exponentialBackoff, onRetry, onMaxRetriesReached]);
 
-    throw new Error('Max retries exceeded');
-  }, [maxRetries, delay, backoff]);
+  const retry = useCallback(() => {
+    execute();
+  }, [execute]);
 
-  return { executeWithRetry };
+  return { data, isLoading, error, retryCount, execute, retry };
 }

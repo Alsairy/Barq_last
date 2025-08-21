@@ -23,6 +23,10 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { cn } from '../../lib/utils';
+import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
+import { useDraftSave } from '../../hooks/useDraftSave';
+import { useI18n } from '../../hooks/useI18n';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -56,7 +60,6 @@ export function ChatInterface() {
       status: 'sent'
     }
   ]);
-  const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<AIAgent>({
     id: '1',
@@ -64,6 +67,24 @@ export function ChatInterface() {
     status: 'online',
     capabilities: ['Task Management', 'Workflow Automation', 'Document Analysis']
   });
+
+  const { t, isRTL } = useI18n();
+  
+  const { data: inputValue, updateData: setInputValue, isDirty } = useDraftSave('', {
+    key: 'chat-input',
+    saveInterval: 10000
+  });
+
+  const { execute: sendMessage, isLoading: isSending } = useOptimisticUpdate(
+    async (message: string) => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { success: true };
+    },
+    {
+      successMessage: t('message_sent', 'Message sent'),
+      errorMessage: t('message_failed', 'Failed to send message')
+    }
+  );
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
