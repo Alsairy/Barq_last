@@ -15,7 +15,8 @@ import {
   TrendingUp,
   Calendar,
   Users,
-  Target
+  Target,
+  RefreshCw
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -25,6 +26,8 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { cn } from '../../lib/utils';
+import { useAutoRetry } from '../../hooks/useAutoRetry';
+import { useI18n } from '../../hooks/useI18n';
 
 interface ProgressPanelProps {
   collapsed: boolean;
@@ -32,6 +35,19 @@ interface ProgressPanelProps {
 
 export function ProgressPanel({ collapsed }: ProgressPanelProps) {
   const [activeTab, setActiveTab] = useState('progress');
+  const { t, isRTL } = useI18n();
+
+  const { data: progressData, isLoading, error, retry } = useAutoRetry(
+    async () => {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return { progress: 75, status: 'running' };
+    },
+    {
+      maxRetries: 3,
+      retryDelay: 2000,
+      exponentialBackoff: true
+    }
+  );
 
   if (collapsed) {
     return (
@@ -50,10 +66,17 @@ export function ProgressPanel({ collapsed }: ProgressPanelProps) {
   }
 
   return (
-    <div className="h-full border-l bg-muted/30 flex flex-col">
+    <div className={cn("h-full border-l bg-muted/30 flex flex-col", isRTL && "border-r border-l-0")}>
       {/* Header */}
       <div className="p-4 border-b">
-        <h2 className="font-semibold text-lg">Progress & Activity</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-lg">{t('progress_and_activity', 'Progress & Activity')}</h2>
+          {error && (
+            <Button variant="ghost" size="sm" onClick={retry} className="h-8 w-8 p-0">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Tabs */}
