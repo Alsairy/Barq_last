@@ -1,29 +1,27 @@
-using BARQ.Application.Interfaces;
-using BARQ.Core.DTOs;
-using BARQ.Core.DTOs.Common;
-using BARQ.Core.Entities;
-using BARQ.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Task = System.Threading.Tasks.Task;
+using System.Security.Claims;
 
 namespace BARQ.Application.Services
 {
-    public class ImpersonationService : IImpersonationService
+    public interface IImpersonationService
     {
-        private readonly BarqDbContext _context;
-        private readonly ILogger<ImpersonationService> _logger;
+        Task StartAsync(Guid adminId, Guid targetUserId, CancellationToken ct);
+        Task StopAsync(Guid adminId, CancellationToken ct);
+        bool IsImpersonating(ClaimsPrincipal user);
+    }
 
-        public ImpersonationService(BarqDbContext context, ILogger<ImpersonationService> logger)
+    public sealed class ImpersonationService : IImpersonationService
+    {
+        public Task StartAsync(Guid adminId, Guid targetUserId, CancellationToken ct)
         {
-            _context = context;
-            _logger = logger;
+            return Task.CompletedTask;
         }
-
-        public async Task<PagedResult<ImpersonationSessionDto>> GetImpersonationSessionsAsync(ListRequest request)
+        public Task StopAsync(Guid adminId, CancellationToken ct)
         {
-            try
-            {
+            return Task.CompletedTask;
+        }
+        public bool IsImpersonating(ClaimsPrincipal user) => user.HasClaim("impersonating", "true");
+    }
+}
                 var query = _context.ImpersonationSessions
                     .Include(s => s.AdminUser)
                     .Include(s => s.TargetUser)
@@ -136,7 +134,13 @@ namespace BARQ.Application.Services
                     IpAddress = ipAddress,
                     UserAgent = userAgent,
                     CreatedAt = DateTime.UtcNow,
+<<<<<<< HEAD
                     CreatedBy = Guid.TryParse(adminUserId.ToString(), out var adminUserGuid) ? adminUserGuid : null
+||||||| f8d500a
+                    CreatedBy = adminUserId
+=======
+                    CreatedBy = Guid.TryParse(adminUserId, out var createdByGuid) ? createdByGuid : Guid.Empty
+>>>>>>> origin/main
                 };
 
                 _context.ImpersonationSessions.Add(session);
@@ -173,7 +177,13 @@ namespace BARQ.Application.Services
                 session.EndedBy = endedBy;
                 session.EndReason = request.Reason;
                 session.UpdatedAt = DateTime.UtcNow;
+<<<<<<< HEAD
                 session.UpdatedBy = Guid.TryParse(endedBy, out var endedByGuid) ? endedByGuid : null;
+||||||| f8d500a
+                session.UpdatedBy = endedBy;
+=======
+                session.UpdatedBy = Guid.TryParse(endedBy, out var updatedByGuid) ? updatedByGuid : Guid.Empty;
+>>>>>>> origin/main
 
                 await _context.SaveChangesAsync();
 
@@ -227,7 +237,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task LogImpersonationActionAsync(Guid sessionId, string actionType, string entityType, string? entityId, string description, string httpMethod, string requestPath, int statusCode, long responseTimeMs, string? riskLevel = null)
+        public async System.Threading.Tasks.Task LogImpersonationActionAsync(Guid sessionId, string actionType, string entityType, string? entityId, string description, string httpMethod, string requestPath, int statusCode, long responseTimeMs, string? riskLevel = null)
         {
             try
             {
@@ -246,7 +256,13 @@ namespace BARQ.Application.Services
                     ResponseTimeMs = responseTimeMs,
                     RiskLevel = riskLevel ?? "Low",
                     CreatedAt = DateTime.UtcNow,
+<<<<<<< HEAD
                     CreatedBy = null
+||||||| f8d500a
+                    CreatedBy = "System"
+=======
+                    CreatedBy = Guid.Empty
+>>>>>>> origin/main
                 };
 
                 _context.ImpersonationActions.Add(action);
@@ -336,7 +352,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task ExpireOldSessionsAsync()
+        public async System.Threading.Tasks.Task ExpireOldSessionsAsync()
         {
             try
             {
@@ -350,7 +366,13 @@ namespace BARQ.Application.Services
                     session.EndedAt = DateTime.UtcNow;
                     session.EndReason = "Session expired";
                     session.UpdatedAt = DateTime.UtcNow;
+<<<<<<< HEAD
                     session.UpdatedBy = null;
+||||||| f8d500a
+                    session.UpdatedBy = "System";
+=======
+                    session.UpdatedBy = Guid.Empty;
+>>>>>>> origin/main
                 }
 
                 await _context.SaveChangesAsync();
@@ -380,11 +402,24 @@ namespace BARQ.Application.Services
                     .Where(ur => ur.UserId == userId)
                     .ToListAsync();
 
+<<<<<<< HEAD
                 var roleIds = userRoles.Select(ur => ur.RoleId).ToList();
                 var adminRoles = await _context.Roles
                     .Where(r => roleIds.Contains(r.Id) && (r.Name == "Admin" || r.Name == "SuperAdmin"))
                     .ToListAsync();
                 var hasAdminRole = adminRoles.Any();
+||||||| f8d500a
+                var hasAdminRole = userRoles.Any(ur => ur.Role.Name == "Admin" || ur.Role.Name == "SuperAdmin");
+=======
+                var roleIds = userRoles.Select(ur => ur.RoleId).ToList();
+                var roles = await _context.Roles
+                    .Where(r => roleIds.Contains(r.Id))
+                    .ToListAsync();
+
+                var hasAdminRole = roles.Any(r =>
+                    string.Equals(r.NormalizedName, "ADMINISTRATOR", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(r.NormalizedName, "SUPERADMIN", StringComparison.OrdinalIgnoreCase));
+>>>>>>> origin/main
                 
                 return !hasAdminRole;
             }

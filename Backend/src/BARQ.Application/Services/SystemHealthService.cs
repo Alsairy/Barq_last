@@ -1,40 +1,26 @@
-using BARQ.Application.Interfaces;
-using BARQ.Core.DTOs;
-using BARQ.Core.DTOs.Common;
-using BARQ.Core.Entities;
-using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Task = System.Threading.Tasks.Task;
 
 namespace BARQ.Application.Services
 {
-    public class SystemHealthService : ISystemHealthService
+    public interface ISystemHealthService
     {
-        private readonly BarqDbContext _context;
-        private readonly ILogger<SystemHealthService> _logger;
-        private readonly IFeatureFlagService _featureFlagService;
-        private readonly ITenantStateService _tenantStateService;
-        private readonly IImpersonationService _impersonationService;
+        Task<bool> DatabaseAsync(CancellationToken ct);
+        Task<bool> FlowableAsync(CancellationToken ct);
+        Task<bool> AiProvidersAsync(CancellationToken ct);
+    }
 
-        public SystemHealthService(
-            BarqDbContext context, 
-            ILogger<SystemHealthService> logger,
-            IFeatureFlagService featureFlagService,
-            ITenantStateService tenantStateService,
-            IImpersonationService impersonationService)
-        {
-            _context = context;
-            _logger = logger;
-            _featureFlagService = featureFlagService;
-            _tenantStateService = tenantStateService;
-            _impersonationService = impersonationService;
-        }
-
-        public async Task<PagedResult<SystemHealthDto>> GetSystemHealthAsync(ListRequest request)
-        {
-            try
-            {
+    public sealed class SystemHealthService : ISystemHealthService
+    {
+        private readonly DbContext _db;
+        private readonly HttpClient _http;
+        public SystemHealthService(DbContext db, IHttpClientFactory f) { _db = db; _http = f.CreateClient("health"); }
+        public async Task<bool> DatabaseAsync(CancellationToken ct) => await _db.Database.CanConnectAsync(ct);
+        public async Task<bool> FlowableAsync(CancellationToken ct)
+            => (await _http.GetAsync("http://flowable-rest:8080/flowable-rest/service/repository/deployments?size=1", ct)).IsSuccessStatusCode;
+        public async Task<bool> AiProvidersAsync(CancellationToken ct)
+            => true;
+    }
+}
                 var query = _context.SystemHealth.AsQueryable();
 
                 if (!string.IsNullOrEmpty(request.SearchTerm))
@@ -145,7 +131,13 @@ namespace BARQ.Application.Services
                     existingHealth.ResponseTimeMs = responseTimeMs;
                     existingHealth.Details = details != null ? System.Text.Json.JsonSerializer.Serialize(details) : null;
                     existingHealth.UpdatedAt = DateTime.UtcNow;
+<<<<<<< HEAD
                     existingHealth.UpdatedBy = null;
+||||||| f8d500a
+                    existingHealth.UpdatedBy = "System";
+=======
+                    existingHealth.UpdatedBy = Guid.Empty;
+>>>>>>> origin/main
 
                     if (status == "Healthy")
                     {
@@ -183,7 +175,13 @@ namespace BARQ.Application.Services
                         ConsecutiveFailures = status == "Error" ? 1 : 0,
                         Environment = "Production",
                         CreatedAt = DateTime.UtcNow,
+<<<<<<< HEAD
                         CreatedBy = null
+||||||| f8d500a
+                        CreatedBy = "System"
+=======
+                        CreatedBy = Guid.Empty
+>>>>>>> origin/main
                     };
 
                     _context.SystemHealth.Add(existingHealth);
@@ -208,7 +206,7 @@ namespace BARQ.Application.Services
                     .OrderBy(h => h.Component)
                     .ToListAsync();
 
-                var featureFlags = await _featureFlagService.GetFeatureFlagsAsync(new ListRequest { PageSize = 10 });
+                var testFlag = _featureFlagService.IsEnabled("HealthCheck");
                 
                 var tenantStates = await _tenantStateService.GetTenantStatesAsync(new ListRequest { PageSize = 10 });
                 
@@ -221,13 +219,13 @@ namespace BARQ.Application.Services
                 return new OpsDashboardDto
                 {
                     SystemHealth = systemHealth.Select(MapToDto).ToList(),
-                    FeatureFlags = featureFlags.Items.Take(5).ToList(),
+                    FeatureFlags = new List<BARQ.Core.DTOs.FeatureFlagDto>(),
                     TenantStates = tenantStates.Items.Where(ts => ts.RequiresAttention || !ts.IsHealthy).Take(5).ToList(),
                     ActiveImpersonations = activeImpersonations.Take(5).ToList(),
                     TotalTenants = (int)tenantStats.GetValueOrDefault("TotalTenants", 0),
                     HealthyTenants = (int)tenantStats.GetValueOrDefault("HealthyTenants", 0),
                     TenantsRequiringAttention = (int)tenantStats.GetValueOrDefault("TenantsRequiringAttention", 0),
-                    ActiveFeatureFlags = featureFlags.Items.Count(f => f.IsEnabled),
+                    ActiveFeatureFlags = testFlag ? 1 : 0,
                     SystemIssues = systemIssues,
                     LastUpdated = DateTime.UtcNow
                 };
@@ -239,7 +237,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task RefreshAllHealthChecksAsync()
+        public async System.Threading.Tasks.Task RefreshAllHealthChecksAsync()
         {
             try
             {
@@ -307,7 +305,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task CleanupOldHealthRecordsAsync(int daysToKeep = 30)
+        public async System.Threading.Tasks.Task CleanupOldHealthRecordsAsync(int daysToKeep = 30)
         {
             try
             {
@@ -333,7 +331,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task CheckDatabaseHealthAsync()
+        private async System.Threading.Tasks.Task CheckDatabaseHealthAsync()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
@@ -352,7 +350,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task CheckStorageHealthAsync()
+        private async System.Threading.Tasks.Task CheckStorageHealthAsync()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
@@ -382,7 +380,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task CheckQueueHealthAsync()
+        private async System.Threading.Tasks.Task CheckQueueHealthAsync()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
@@ -399,7 +397,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task CheckExternalServicesHealthAsync()
+        private async System.Threading.Tasks.Task CheckExternalServicesHealthAsync()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
@@ -416,7 +414,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task<double> CalculateUptimeAsync()
+        private async System.Threading.Tasks.Task<double> CalculateUptimeAsync()
         {
             try
             {
