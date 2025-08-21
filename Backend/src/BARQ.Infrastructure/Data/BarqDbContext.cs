@@ -8,7 +8,7 @@ using BARQ.Core.Services;
 namespace BARQ.Infrastructure.Data;
 
 public sealed class BarqDbContext
-    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid,
+    : IdentityDbContext<ApplicationUser, Role, Guid,
                         IdentityUserClaim<Guid>, IdentityUserRole<Guid>, IdentityUserLogin<Guid>,
                         IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
 {
@@ -79,6 +79,18 @@ public sealed class BarqDbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<BARQ.Core.Entities.Task>()
+            .HasOne(t => t.AssignedTo)
+            .WithMany(u => u.AssignedTasks)
+            .HasForeignKey(t => t.AssignedToId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.Entity<BARQ.Core.Entities.Task>()
+            .HasOne(t => t.Creator)
+            .WithMany(u => u.CreatedTasks)
+            .HasForeignKey(t => t.CreatedBy)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.ApplyConfigurationsFromAssembly(typeof(BarqDbContext).Assembly);
 
