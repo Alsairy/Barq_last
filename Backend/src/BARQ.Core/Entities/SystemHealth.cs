@@ -24,7 +24,7 @@ namespace BARQ.Core.Entities
         public string? Details { get; set; } // JSON for detailed metrics
         
         [MaxLength(100)]
-        public string? Version { get; set; }
+        public new string? Version { get; set; }
         
         public bool IsEnabled { get; set; } = true;
         
