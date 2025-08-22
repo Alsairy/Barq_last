@@ -87,45 +87,29 @@ namespace BARQ.Application.Services
             return System.Threading.Tasks.Task.CompletedTask;
         }
 
-        public System.Threading.Tasks.Task<Dictionary<string, object>> GetLivenessAsync()
+        public System.Threading.Tasks.Task<SystemHealthDto> GetLivenessAsync()
         {
-            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>
-            {
-                ["status"] = "healthy",
-                ["timestamp"] = DateTime.UtcNow
-            });
+            return System.Threading.Tasks.Task.FromResult(new SystemHealthDto());
         }
 
-        public System.Threading.Tasks.Task<Dictionary<string, object>> GetReadinessAsync()
+        public System.Threading.Tasks.Task<SystemHealthDto> GetReadinessAsync()
         {
-            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>
-            {
-                ["status"] = "ready",
-                ["timestamp"] = DateTime.UtcNow
-            });
+            return System.Threading.Tasks.Task.FromResult(new SystemHealthDto());
         }
 
-        public System.Threading.Tasks.Task<Dictionary<string, object>> GetFlowableHealthAsync()
+        public System.Threading.Tasks.Task<SystemHealthDto> GetFlowableHealthAsync()
         {
-            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>
-            {
-                ["status"] = "healthy",
-                ["timestamp"] = DateTime.UtcNow
-            });
+            return System.Threading.Tasks.Task.FromResult(new SystemHealthDto());
         }
 
-        public System.Threading.Tasks.Task<Dictionary<string, object>> GetAiProvidersHealthAsync()
+        public System.Threading.Tasks.Task<SystemHealthDto> GetAiProvidersHealthAsync()
         {
-            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>
-            {
-                ["status"] = "healthy",
-                ["timestamp"] = DateTime.UtcNow
-            });
+            return System.Threading.Tasks.Task.FromResult(new SystemHealthDto());
         }
 
-        public System.Threading.Tasks.Task<Dictionary<string, object>> GetMetricsAsync()
+        public System.Threading.Tasks.Task<MetricsDto> GetMetricsAsync()
         {
-            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>());
+            return System.Threading.Tasks.Task.FromResult(new MetricsDto());
         }
 
         public System.Threading.Tasks.Task<Dictionary<string, object>> GetProviderPerformanceAsync()
@@ -133,9 +117,9 @@ namespace BARQ.Application.Services
             return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>());
         }
 
-        public System.Threading.Tasks.Task<Dictionary<string, object>> GetSlaViolationMetricsAsync(DateTime? startDate, DateTime? endDate)
+        public System.Threading.Tasks.Task<object> GetSlaViolationMetricsAsync(DateTime? startDate, DateTime? endDate)
         {
-            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>());
+            return System.Threading.Tasks.Task.FromResult<object>(new Dictionary<string, object>());
         }
     }
 }
