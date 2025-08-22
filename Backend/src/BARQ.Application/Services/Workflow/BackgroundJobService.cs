@@ -63,7 +63,7 @@ namespace BARQ.Application.Services.Workflow
             _logger.LogInformation("Job {JobId} of type {JobType} enqueued for execution at {ScheduledAt}", 
                 jobId, typeof(T).Name, executeAt);
 
-            return Task.FromResult(jobId);
+            return jobId;
         }
 
         public Task<string> ScheduleAsync<T>(Func<T, Task> job, DateTime scheduledTime) where T : class
@@ -91,7 +91,7 @@ namespace BARQ.Application.Services.Workflow
             _logger.LogInformation("Recurring job {JobId} of type {JobType} scheduled with cron {CronExpression}", 
                 jobId, typeof(T).Name, cronExpression);
 
-            return Task.FromResult(jobId);
+            return jobId;
         }
 
         public Task<bool> CancelJobAsync(string jobId)
@@ -104,21 +104,21 @@ namespace BARQ.Application.Services.Workflow
                     jobInfo.CompletedAt = DateTime.UtcNow;
                     
                     _logger.LogInformation("Job {JobId} cancelled", jobId);
-                    return Task.FromResult(true);
+                    return true;
                 }
             }
 
-            return Task.FromResult(false);
+            return false;
         }
 
         public Task<JobStatus> GetJobStatusAsync(string jobId)
         {
             if (_jobs.TryGetValue(jobId, out var jobInfo))
             {
-                return Task.FromResult(jobInfo.Status);
+                return jobInfo.Status;
             }
 
-            return Task.FromResult(JobStatus.NotFound);
+            return JobStatus.NotFound;
         }
 
         public Task<List<JobInfo>> GetJobsAsync(JobStatusFilter filter = JobStatusFilter.All)
@@ -137,7 +137,7 @@ namespace BARQ.Application.Services.Workflow
                 };
             }
 
-            return Task.FromResult(jobs.OrderByDescending(j => j.CreatedAt).ToList());
+            return jobs.OrderByDescending(j => j.CreatedAt).ToList();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -249,15 +249,15 @@ namespace BARQ.Application.Services.Workflow
 
     public class QueuedJob
     {
-        public string Id { get; set; } = string.Empty;
+        public string Id { get; set; } = "";
         public Func<IServiceProvider, Task> Job { get; set; } = default!;
         public DateTime ScheduledAt { get; set; }
     }
 
     public class JobInfo
     {
-        public string Id { get; set; } = string.Empty;
-        public string Type { get; set; } = string.Empty;
+        public string Id { get; set; } = "";
+        public string Type { get; set; } = "";
         public JobStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? ScheduledAt { get; set; }

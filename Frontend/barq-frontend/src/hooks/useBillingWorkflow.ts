@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { billingApi, BillingStatus } from '../services/api';
 import { toast } from 'sonner';
 
@@ -10,6 +11,7 @@ export interface BillingWorkflowState {
 }
 
 export function useBillingWorkflow() {
+  const navigate = useNavigate();
   const [state, setState] = useState<BillingWorkflowState>({
     plans: [],
     upgrading: false
@@ -76,7 +78,7 @@ export function useBillingWorkflow() {
         duration: 5000,
         action: {
           label: 'View Plans',
-          onClick: () => console.log('Navigate to billing page')
+          onClick: () => navigate('/billing/plans')
         }
       });
     }

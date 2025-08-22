@@ -2,6 +2,28 @@ import { useState, useCallback } from 'react';
 import { fileApi, notificationApi, FileAttachment } from '../services/api';
 import { toast } from 'sonner';
 
+const notificationService = {
+  sendFileNotification: async (file: FileAttachment, status: string, message: string) => {
+    try {
+      await notificationApi.sendNotification({
+        type: 'file_status',
+        message,
+        metadata: { fileId: file.id, fileName: file.fileName, status }
+      });
+      return Promise.resolve({ success: true });
+    } catch (error) {
+      toast.error('Failed to send notification');
+      return Promise.resolve({ success: false });
+    }
+  }
+};
+
+const logger = {
+  error: (message: string, error: any) => {
+    console.error(message, error);
+  }
+};
+
 export interface FileWorkflowState {
   uploading: boolean;
   scanning: boolean;
@@ -119,9 +141,13 @@ export function useFileWorkflow() {
         quarantined: `File "${file.fileName}" has been quarantined for manual review`
       }[status];
 
-      console.log('File notification:', { file, status, message });
+      try {
+        await notificationService.sendFileNotification(file, status, message);
+      } catch (error) {
+        logger.error('Failed to send file notification:', error);
+      }
     } catch (error) {
-      console.error('Failed to send file notification:', error);
+      logger.error('Failed to send file notification:', error);
     }
   };
 

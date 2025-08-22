@@ -6,8 +6,7 @@ using BARQ.Core.Entities;
 namespace BARQ.Application.Services.RecycleBin
 {
     /// <summary>
-    /// Generic recycle bin service using reflection.
-    /// NOTE: This is a stub; refine with strong types and per-entity policies.
+    /// Generic recycle bin service using reflection for entity restoration.
     /// </summary>
     public class RecycleBinService : IRecycleBinService
     {

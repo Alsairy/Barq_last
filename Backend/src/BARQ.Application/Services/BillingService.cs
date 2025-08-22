@@ -4,6 +4,7 @@ using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using System.Text.Json;
 
@@ -13,23 +14,21 @@ namespace BARQ.Application.Services
     {
         private readonly BarqDbContext _context;
         private readonly ILogger<BillingService> _logger;
+        private readonly ITenantProvider _tenantProvider;
 
-        public BillingService(BarqDbContext context, ILogger<BillingService> logger)
+        public BillingService(BarqDbContext context, ILogger<BillingService> logger, ITenantProvider tenantProvider)
         {
             _context = context;
             _logger = logger;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<PagedResult<BillingPlanDto>> GetBillingPlansAsync(bool includeInactive = false)
         {
             try
             {
-                var query = _context.BillingPlans.AsQueryable();
-
-                if (!includeInactive)
-                {
-                    query = query.Where(bp => bp.IsActive);
-                }
+                var query = _context.BillingPlans
+                    .Where(bp => bp.TenantId == _tenantProvider.GetTenantId() && (includeInactive || bp.IsActive));
 
                 var plans = await query
                     .OrderBy(bp => bp.SortOrder)
@@ -58,6 +57,7 @@ namespace BARQ.Application.Services
             try
             {
                 var plan = await _context.BillingPlans
+                    .Where(bp => bp.TenantId == _tenantProvider.GetTenantId())
                     .FirstOrDefaultAsync(bp => bp.Id == planId);
 
                 return plan != null ? MapToBillingPlanDto(plan) : null;
@@ -115,10 +115,11 @@ namespace BARQ.Application.Services
             try
             {
                 var plan = await _context.BillingPlans
+                    .Where(bp => bp.TenantId == _tenantProvider.GetTenantId())
                     .FirstOrDefaultAsync(bp => bp.Id == planId);
 
                 if (plan == null)
-                    return null;
+                    throw new ArgumentException($"Billing plan with ID {planId} not found");
 
                 if (request.Name != null) plan.Name = request.Name;
                 if (request.Description != null) plan.Description = request.Description;
@@ -157,6 +158,7 @@ namespace BARQ.Application.Services
             try
             {
                 var plan = await _context.BillingPlans
+                    .Where(bp => bp.TenantId == _tenantProvider.GetTenantId())
                     .FirstOrDefaultAsync(bp => bp.Id == planId);
 
                 if (plan == null)
@@ -211,6 +213,7 @@ namespace BARQ.Application.Services
             try
             {
                 var plan = await _context.BillingPlans
+                    .Where(bp => bp.TenantId == _tenantProvider.GetTenantId())
                     .FirstOrDefaultAsync(bp => bp.Id == Guid.Parse(request.BillingPlanId));
 
                 if (plan == null)
@@ -268,11 +271,12 @@ namespace BARQ.Application.Services
                     .FirstOrDefaultAsync(ts => ts.TenantId == tenantId && ts.Status != "Cancelled");
 
                 if (subscription == null)
-                    return null;
+                    throw new ArgumentException($"Subscription not found for tenant {tenantId}");
 
                 if (request.BillingPlanId != null)
                 {
                     var newPlan = await _context.BillingPlans
+                        .Where(bp => bp.TenantId == _tenantProvider.GetTenantId())
                         .FirstOrDefaultAsync(bp => bp.Id == Guid.Parse(request.BillingPlanId));
 
                     if (newPlan != null)
@@ -341,9 +345,10 @@ namespace BARQ.Application.Services
                     .FirstOrDefaultAsync(ts => ts.TenantId == tenantId && ts.Status == "Active");
 
                 if (subscription == null)
-                    return null;
+                    throw new ArgumentException($"Active subscription not found for tenant {tenantId}");
 
                 var newPlan = await _context.BillingPlans
+                    .Where(bp => bp.TenantId == _tenantProvider.GetTenantId())
                     .FirstOrDefaultAsync(bp => bp.Id == Guid.Parse(request.NewPlanId));
 
                 if (newPlan == null)
@@ -517,13 +522,9 @@ namespace BARQ.Application.Services
             {
                 var query = _context.Invoices
                     .Include(i => i.LineItems)
-                    .Where(i => i.TenantId == tenantId);
-
-                if (startDate.HasValue)
-                    query = query.Where(i => i.InvoiceDate >= startDate.Value);
-
-                if (endDate.HasValue)
-                    query = query.Where(i => i.InvoiceDate <= endDate.Value);
+                    .Where(i => i.TenantId == tenantId && 
+                               (!startDate.HasValue || i.InvoiceDate >= startDate.Value) &&
+                               (!endDate.HasValue || i.InvoiceDate <= endDate.Value));
 
                 var invoices = await query
                     .OrderByDescending(i => i.InvoiceDate)
@@ -569,7 +570,7 @@ namespace BARQ.Application.Services
             {
                 var invoice = await GetInvoiceAsync(tenantId, invoiceId);
                 if (invoice == null)
-                    return null;
+                    throw new ArgumentException($"Invoice {invoiceId} not found for tenant {tenantId}");
 
                 var content = $"Invoice {invoice.InvoiceNumber} - ${invoice.TotalAmount}";
                 var bytes = System.Text.Encoding.UTF8.GetBytes(content);
@@ -693,16 +694,10 @@ namespace BARQ.Application.Services
             try
             {
                 var query = _context.UsageRecords
-                    .Where(ur => ur.TenantId == tenantId);
-
-                if (!string.IsNullOrEmpty(usageType))
-                    query = query.Where(ur => ur.UsageType == usageType);
-
-                if (startDate.HasValue)
-                    query = query.Where(ur => ur.RecordedAt >= startDate.Value);
-
-                if (endDate.HasValue)
-                    query = query.Where(ur => ur.RecordedAt <= endDate.Value);
+                    .Where(ur => ur.TenantId == tenantId &&
+                                (string.IsNullOrEmpty(usageType) || ur.UsageType == usageType) &&
+                                (!startDate.HasValue || ur.RecordedAt >= startDate.Value) &&
+                                (!endDate.HasValue || ur.RecordedAt <= endDate.Value));
 
                 var records = await query
                     .OrderByDescending(ur => ur.RecordedAt)
@@ -732,7 +727,7 @@ namespace BARQ.Application.Services
             {
                 var subscriptionsDue = await _context.TenantSubscriptions
                     .Include(ts => ts.BillingPlan)
-                    .Where(ts => ts.Status == "Active" && ts.NextBillingDate <= DateTime.UtcNow)
+                    .Where(ts => ts.TenantId == _tenantProvider.GetTenantId() && ts.Status == "Active" && ts.NextBillingDate <= DateTime.UtcNow)
                     .ToListAsync();
 
                 foreach (var subscription in subscriptionsDue)
@@ -770,7 +765,7 @@ namespace BARQ.Application.Services
             try
             {
                 var overdueInvoices = await _context.Invoices
-                    .Where(i => i.Status == "Sent" && i.DueDate < DateTime.UtcNow)
+                    .Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Status == "Sent" && i.DueDate < DateTime.UtcNow)
                     .ToListAsync();
 
                 foreach (var invoice in overdueInvoices)
@@ -1211,7 +1206,7 @@ namespace BARQ.Application.Services
             var month = DateTime.UtcNow.Month;
 
             var lastInvoice = await _context.Invoices
-                .Where(i => i.InvoiceNumber.StartsWith($"INV-{year:D4}-{month:D2}"))
+                .Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.InvoiceNumber.StartsWith($"INV-{year:D4}-{month:D2}"))
                 .OrderByDescending(i => i.InvoiceNumber)
                 .FirstOrDefaultAsync();
 
