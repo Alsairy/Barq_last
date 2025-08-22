@@ -1,0 +1,117 @@
+name: audits
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  audits:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          SA_PASSWORD: YourStrong@Passw0rd
+          ACCEPT_EULA: "Y"
+        ports: [ "1433:1433" ]
+        options: >-
+          --health-cmd " /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'select 1' || exit 1"
+          --health-interval 10s --health-timeout 5s --health-retries 20
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Dotnet info
+        run: dotnet --info
+
+      - name: Restore & Build
+        run: |
+          dotnet restore Backend/BARQ.sln
+          dotnet build Backend/BARQ.sln -c Release --no-restore
+
+      - name: Apply EF Migrations
+        run: |
+          dotnet tool install --global dotnet-ef || true
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+          dotnet ef database update --project Backend/src/BARQ.Infrastructure --startup-project Backend/src/BARQ.API
+
+      - name: Run API (Dev on fixed port) with logs
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ASPNETCORE_URLS: http://127.0.0.1:5080
+        run: |
+          nohup dotnet run --project Backend/src/BARQ.API/BARQ.API.csproj --no-build > api.log 2>&1 &
+          for i in {1..60}; do
+            curl -fsSL http://127.0.0.1:5080/health/ready && break
+            echo "waiting for API... ($i)"; sleep 2
+          done
+          curl -fsSL http://127.0.0.1:5080/health/ready || (echo "API not ready" && tail -n 200 api.log && exit 1)
+
+      - name: Python env
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: API Routes & Probe (treat 401/403 as pass)
+        env:
+          API_BASE_URL: http://127.0.0.1:5080
+        run: |
+          python3 scripts/controller_routes.py Backend/src/BARQ.API/Controllers > controller_routes.json
+          python3 scripts/api_probe.py "$API_BASE_URL" controller_routes.json audit/audit_api.csv || true
+          cat audit/audit_api.csv || true
+
+      - name: Placeholder sweep
+        run: |
+          python3 scripts/placeholder_sweep.py Backend Frontend || true
+          cat audit/audit_placeholders.csv || true
+
+      - name: Backend Functional Audit
+        run: |
+          python3 scripts/backend_audit.py --src Backend --out audit/audit_backend.csv --fail-on High || true
+          tail -n +1 audit/audit_backend.csv | head -n 100 || true
+
+      - name: Frontend Functional Audit
+        run: |
+          npm i minimist --prefix scripts --no-save
+          node scripts/frontend_audit.js --src Frontend/barq-frontend --out audit/audit_frontend.csv --fail-on High || true
+          tail -n +1 audit/audit_frontend.csv | head -n 100 || true
+
+      - name: Frontend build & preview
+        working-directory: Frontend/barq-frontend
+        run: |
+          npm ci
+          npm run build
+          npm run preview -- --host --port 5173 > fe.log 2>&1 &
+          for i in {1..60}; do
+            curl -fsSL http://127.0.0.1:5173/ && break
+            echo "waiting for FE... ($i)"; sleep 2
+          done
+
+      - name: Playwright install & smoke test
+        working-directory: Frontend/barq-frontend
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:5173
+        run: |
+          npx playwright install --with-deps
+          npx playwright test tests/wiring.smoke.spec.ts --reporter=line || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: audits-artifacts
+          path: |
+            api.log
+            Frontend/barq-frontend/fe.log
+            controller_routes.json
+            audit/audit_api.csv
+            audit/audit_backend.csv
+            audit/audit_frontend.csv
+            audit/audit_placeholders.csv

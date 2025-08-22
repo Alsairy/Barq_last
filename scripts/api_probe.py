@@ -9,6 +9,7 @@ import csv
 import time
 import requests
 import sys
+import os
 import argparse
 from typing import List, Dict
 from urllib.parse import urljoin
@@ -139,12 +140,15 @@ class ApiProber:
 
 def main():
     parser = argparse.ArgumentParser(description='API Route Prober')
-    parser.add_argument('base_url', help='Base URL of the API')
+    parser.add_argument('base_url', nargs='?', help='Base URL of the API')
     parser.add_argument('routes_file', help='JSON file containing routes')
     parser.add_argument('output_file', help='Output CSV file')
     parser.add_argument('--timeout', type=int, default=10, help='Request timeout in seconds')
     
     args = parser.parse_args()
+    
+    import os
+    BASE = args.base_url if args.base_url else os.getenv("API_BASE_URL", "http://127.0.0.1:5080")
     
     try:
         with open(args.routes_file, 'r') as f:
@@ -153,7 +157,7 @@ def main():
         print(f"Error loading routes file: {e}")
         sys.exit(1)
     
-    prober = ApiProber(args.base_url, args.timeout)
+    prober = ApiProber(BASE, args.timeout)
     prober.probe_all_routes(routes)
     prober.generate_report(args.output_file)
     
