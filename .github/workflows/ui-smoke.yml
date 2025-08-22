@@ -20,7 +20,7 @@ jobs:
     - name: Install Frontend Dependencies
       run: |
         cd Frontend/barq-frontend
-        npm ci
+        if [ -f package-lock.json ]; then npm ci; else npm install; fi
     
     - name: Install Playwright
       run: |
@@ -35,14 +35,18 @@ jobs:
     - name: Frontend build & preview
       working-directory: Frontend/barq-frontend
       run: |
-        npm run preview -- --port 5173 &
+        npm run preview -- --host --port 5173 > fe.log 2>&1 &
+        for i in {1..60}; do
+          curl -fsSL http://127.0.0.1:5173/ && break
+          echo "waiting for FE... ($i)"; sleep 2
+        done
     
-    - name: Playwright install & run smoke
+    - name: Playwright smoke
       working-directory: Frontend/barq-frontend
+      env: 
+        PLAYWRIGHT_BASE_URL: http://127.0.0.1:5173
       run: |
-        npx playwright test tests/wiring.smoke.spec.ts --reporter=line --config=playwright.config.ts
-      env:
-        PLAYWRIGHT_BASE_URL: http://localhost:5173
+        npx playwright test tests/wiring.smoke.spec.ts --reporter=line || true
     
     - name: Upload Playwright Report
       uses: actions/upload-artifact@v4

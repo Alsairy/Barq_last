@@ -68,20 +68,24 @@ jobs:
         env: 
           API_BASE_URL: http://127.0.0.1:5080
         run: |
+          mkdir -p audit
           python3 scripts/controller_routes.py Backend/src/BARQ.API/Controllers > controller_routes.json
           python3 scripts/api_probe.py "$API_BASE_URL" controller_routes.json audit/audit_api.csv || true
 
       - name: Placeholder sweep
         run: |
+          mkdir -p audit
           python3 scripts/placeholder_sweep.py Backend Frontend audit/audit_placeholders.csv || true
 
       - name: Backend Functional Audit
         run: |
+          mkdir -p audit
           python3 scripts/backend_audit.py --src Backend --out audit/audit_backend.csv --fail-on High || true
           tail -n +1 audit/audit_backend.csv | head -n 100 || true
 
       - name: Frontend Functional Audit
         run: |
+          mkdir -p audit
           npm i minimist --prefix scripts --no-save
           node scripts/frontend_audit.js --src Frontend/barq-frontend --out audit/audit_frontend.csv --fail-on High || true
           tail -n +1 audit/audit_frontend.csv | head -n 100 || true

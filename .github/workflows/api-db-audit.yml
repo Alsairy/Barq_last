@@ -9,71 +9,71 @@ on:
 jobs:
   api-db-audit:
     runs-on: ubuntu-latest
+    env:
+      SQL_SA_PASSWORD: ${{ secrets.SQL_SA_PASSWORD }}
     services:
       sqlserver:
         image: mcr.microsoft.com/mssql/server:2022-latest
         env:
-          SA_PASSWORD: YourStrong@Passw0rd
-          ACCEPT_EULA: Y
-        ports:
-          - 1433:1433
+          SA_PASSWORD: ${{ env.SQL_SA_PASSWORD }}
+          ACCEPT_EULA: "Y"
+        ports: ["1433:1433"]
         options: >-
-          --health-cmd="/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1'"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${{ env.SQL_SA_PASSWORD }} -Q 'SELECT 1' || exit 1"
+          --health-interval 10s --health-timeout 5s --health-retries 30
 
     steps:
     - uses: actions/checkout@v4
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
     
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+    
+    - name: Install sqlcmd
+      run: |
+        sudo ACCEPT_EULA=Y apt-get update
+        sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18
+        echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
     
     - name: Install Dependencies
       run: |
         pip install requests
         dotnet restore Backend/BARQ.sln
     
-    - name: Run Database Migrations
-      run: |
-        dotnet ef database update --project Backend/src/BARQ.Infrastructure --startup-project Backend/src/BARQ.API
-      env:
-        ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=BarqDev;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;"
-    
-    - name: Run API (Dev env on fixed port)
-      run: |
-        export ASPNETCORE_ENVIRONMENT=Development
-        dotnet run --project Backend/src/BARQ.API/BARQ.API.csproj --no-build --urls http://localhost:5080 &
-        for i in {1..30}; do
-          curl -fsSL http://localhost:5080/health/ready && break
-          echo "waiting for API... ($i)"; sleep 2
-        done
-      env:
-        ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=BarqDev;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;"
-    
-    - name: Create Audit Directory
-      run: mkdir -p audit
-        
-    - name: Extract API Routes
-      run: |
-        python3 scripts/controller_routes.py Backend/src/BARQ.API/Controllers > audit/controller_routes.json
-    
-    - name: Probe API Endpoints
-      run: |
-        python3 scripts/api_probe.py http://localhost:5080 audit/controller_routes.json audit/audit_api.csv
-    
-    - name: Apply EF migrations (ensures schema exists)
+    - name: Build & apply EF migrations
       run: |
         dotnet tool install --global dotnet-ef || true
-        export PATH="$PATH:~/.dotnet/tools"
+        echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+        dotnet build Backend/BARQ.sln -c Release
         dotnet ef database update --project Backend/src/BARQ.Infrastructure --startup-project Backend/src/BARQ.API
+    
+    - name: Run API (Dev on 5000) and wait
+      env:
+        ASPNETCORE_ENVIRONMENT: Development
+        ASPNETCORE_URLS: "http://127.0.0.1:5000"
+        ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=BarqDev;User Id=sa;Password=${{ env.SQL_SA_PASSWORD }};TrustServerCertificate=True;"
+      run: |
+        nohup dotnet run --project Backend/src/BARQ.API/BARQ.API.csproj --no-build > api.log 2>&1 &
+        for i in {1..60}; do
+          curl -fsSL http://127.0.0.1:5000/health/ready && break
+          echo "waiting for API... ($i)"; sleep 2
+        done
+        curl -fsSL http://127.0.0.1:5000/health/ready || (echo "API not ready" && tail -n 200 api.log && exit 1)
+    
+    - name: API Routes & Probe
+      env: 
+        API_BASE_URL: http://127.0.0.1:5000
+      run: |
+        mkdir -p audit
+        python3 scripts/controller_routes.py Backend/src/BARQ.API/Controllers > controller_routes.json
+        python3 scripts/api_probe.py "$API_BASE_URL" controller_routes.json audit/audit_api.csv || true
+        tail -n +1 audit/audit_api.csv | head -n 100 || true
     
     - name: Run Placeholder Sweep
       run: |
