@@ -200,11 +200,11 @@ export const notificationApi = {
   },
 
   async markAsRead(notificationId: string): Promise<ApiResponse> {
-    const response = await axios.patch(`/api/notifications/${notificationId}/read`);
+    const response = await axios.post(`/api/notifications/${notificationId}/mark-read`);
     return response.data;
   },
 
-  async sendNotification(notification: { type: string; message: string; metadata?: any }): Promise<ApiResponse> {
+  async sendNotification(notification: { title: string; type: string; message: string; priority?: 'low' | 'medium' | 'high'; metadata?: any }): Promise<ApiResponse> {
     const response = await axios.post('/api/notifications', notification);
     return response.data;
   }

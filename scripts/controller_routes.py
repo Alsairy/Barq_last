@@ -37,7 +37,7 @@ class RouteExtractor:
             else:
                 route_prefix = f"api/{controller_name.lower()}"
             
-            action_pattern = r'\[(HttpGet|HttpPost|HttpPut|HttpDelete|HttpPatch)(?:\("([^"]+)"\))?\]\s*(?:\[.*?\]\s*)*public\s+(?:async\s+)?(?:Task<)?[^>]*>?\s+(\w+)\s*\('
+            action_pattern = r'\[(HttpGet|HttpPost|HttpPut|HttpDelete|HttpPatch)(?:\("([^"]+)"\))?\]\s*(?:\[.*?\]\s*)*public\s+(?:async\s+)?(?:Task<?[^>]*>?\s+)?(\w+)\s*\('
             
             for match in re.finditer(action_pattern, content, re.MULTILINE | re.DOTALL):
                 http_method = match.group(1).replace('Http', '').upper()
@@ -69,7 +69,7 @@ class RouteExtractor:
     
     def extract_all_routes(self) -> None:
         """Extract routes from all controller files"""
-        controller_files = list(self.controllers_dir.glob('*Controller.cs'))
+        controller_files = list(self.controllers_dir.rglob('*Controller.cs'))
         
         for file_path in controller_files:
             file_routes = self.extract_routes_from_file(file_path)

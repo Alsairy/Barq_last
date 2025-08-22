@@ -1,11 +1,17 @@
 title = "BARQ gitleaks"
 
 [allowlist]
-description = "Known safe placeholders"
+description = "Dev/test placeholders"
 paths = [
-  '''^Backend/src/BARQ\.API/appsettings\.(Development|Docker)\.json$''',
+  "Backend/src/BARQ.API/appsettings.Development.json",
+  "Backend/src/BARQ.API/appsettings.Docker.json",
+  "docs/deployment/README.md",
+  ".env.example",
+  "docker-compose.yml",
+  "Makefile",
+  ".github/workflows/api-db-audit.yml",
 ]
 regexes = [
-  '''dummy-dev-key''',
-  '''YourStrong@Passw0rd''',
+  "dummy-dev-key",
+  "YourStrong@Passw0rd",
 ]

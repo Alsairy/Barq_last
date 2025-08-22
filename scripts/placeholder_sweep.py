@@ -89,7 +89,8 @@ class PlaceholderSweeper:
             files = list(base_dir.rglob(f'*.{ext}'))
             
             for file_path in files:
-                if any(skip in str(file_path) for skip in ['node_modules', '/bin/', '/obj/', '/.git/', '/dist/', '/build/']):
+                parts = set(map(str.lower, file_path.parts))
+                if parts & {'node_modules','bin','obj','.git','dist','build'}:
                     continue
                     
                 file_issues = self.scan_file(file_path, base_dir)
@@ -102,7 +103,8 @@ class PlaceholderSweeper:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             
             writer.writeheader()
-            for issue in sorted(self.issues, key=lambda x: (x['severity'], x['file'], x['line'])):
+            order = {'High':0,'Medium':1,'Low':2}
+            for issue in sorted(self.issues, key=lambda x: (order.get(x['severity'],3), x['file'], x['line'])):
                 writer.writerow(issue)
     
     def get_summary(self) -> Dict[str, int]:

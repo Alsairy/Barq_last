@@ -116,7 +116,8 @@ class BackendAuditor:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             
             writer.writeheader()
-            for issue in sorted(self.issues, key=lambda x: (x['severity'], x['file'], x['line'])):
+            order = {'High':0,'Medium':1,'Low':2}
+            for issue in sorted(self.issues, key=lambda x: (order.get(x['severity'],3), x['file'], x['line'])):
                 writer.writerow(issue)
     
     def get_summary(self) -> Dict[str, int]:
