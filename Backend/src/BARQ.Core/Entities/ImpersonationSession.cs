@@ -11,7 +11,7 @@ namespace BARQ.Core.Entities
         public Guid TargetUserId { get; set; }
         
         [Required]
-        public Guid TenantId { get; set; }
+        public new Guid TenantId { get; set; }
         
         [Required]
         [MaxLength(100)]

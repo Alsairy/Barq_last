@@ -1,0 +1,8 @@
+# Ignore development sample keys and tokens
+Backend/src/BARQ.API/appsettings.Development.json:generic-api-key
+Backend/src/BARQ.API/appsettings.Development.json:40
+
+# Ignore sample credentials in documentation
+README.md:sidekiq-secret
+README.md:aws-access-token
+docs/flowable-rest.md:generic-api-key

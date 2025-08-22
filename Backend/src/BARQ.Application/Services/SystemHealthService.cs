@@ -86,5 +86,40 @@ namespace BARQ.Application.Services
         {
             return System.Threading.Tasks.Task.CompletedTask;
         }
+
+        public System.Threading.Tasks.Task<SystemHealthDto> GetLivenessAsync()
+        {
+            return System.Threading.Tasks.Task.FromResult(new SystemHealthDto());
+        }
+
+        public System.Threading.Tasks.Task<SystemHealthDto> GetReadinessAsync()
+        {
+            return System.Threading.Tasks.Task.FromResult(new SystemHealthDto());
+        }
+
+        public System.Threading.Tasks.Task<SystemHealthDto> GetFlowableHealthAsync()
+        {
+            return System.Threading.Tasks.Task.FromResult(new SystemHealthDto());
+        }
+
+        public System.Threading.Tasks.Task<SystemHealthDto> GetAiProvidersHealthAsync()
+        {
+            return System.Threading.Tasks.Task.FromResult(new SystemHealthDto());
+        }
+
+        public System.Threading.Tasks.Task<MetricsDto> GetMetricsAsync()
+        {
+            return System.Threading.Tasks.Task.FromResult(new MetricsDto());
+        }
+
+        public System.Threading.Tasks.Task<Dictionary<string, object>> GetProviderPerformanceAsync()
+        {
+            return System.Threading.Tasks.Task.FromResult(new Dictionary<string, object>());
+        }
+
+        public System.Threading.Tasks.Task<object> GetSlaViolationMetricsAsync(DateTime? startDate, DateTime? endDate)
+        {
+            return System.Threading.Tasks.Task.FromResult<object>(new Dictionary<string, object>());
+        }
     }
 }

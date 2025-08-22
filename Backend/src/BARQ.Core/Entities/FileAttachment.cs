@@ -18,6 +18,8 @@ namespace BARQ.Core.Entities
         
         public long FileSize { get; set; }
         
+        public long FileSizeBytes { get; set; }
+        
         [Required]
         [MaxLength(500)]
         public string StoragePath { get; set; } = string.Empty;

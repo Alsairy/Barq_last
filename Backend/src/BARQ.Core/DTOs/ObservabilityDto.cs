@@ -171,6 +171,28 @@ namespace BARQ.Core.DTOs
         public bool IsHealthy { get; set; }
         public string StatusIcon { get; set; } = string.Empty;
         public string StatusColor { get; set; } = string.Empty;
+        
+        public string OverallStatus { get; set; } = string.Empty;
+        public Dictionary<string, HealthCheckResult> Components { get; set; } = new();
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    }
+
+    public class HealthCheckResult
+    {
+        public string Status { get; set; } = string.Empty;
+        public bool IsHealthy { get; set; }
+        public Dictionary<string, object> Details { get; set; } = new();
+        public TimeSpan Duration { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    }
+
+    public class MetricsDto
+    {
+        public Dictionary<string, double> ProviderLatency { get; set; } = new();
+        public Dictionary<string, decimal> ProviderCost { get; set; } = new();
+        public int SlaViolations { get; set; }
+        public int QueueDepth { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 
     public class OpsDashboardDto

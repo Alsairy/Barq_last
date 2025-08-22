@@ -15,5 +15,13 @@ namespace BARQ.Application.Interfaces
         Task<bool> IsSystemHealthyAsync();
         Task<Dictionary<string, object>> GetSystemMetricsAsync();
         Task CleanupOldHealthRecordsAsync(int daysToKeep = 30);
+        
+        Task<SystemHealthDto> GetLivenessAsync();
+        Task<SystemHealthDto> GetReadinessAsync();
+        Task<SystemHealthDto> GetFlowableHealthAsync();
+        Task<SystemHealthDto> GetAiProvidersHealthAsync();
+        Task<MetricsDto> GetMetricsAsync();
+        Task<Dictionary<string, object>> GetProviderPerformanceAsync();
+        Task<object> GetSlaViolationMetricsAsync(DateTime? from, DateTime? to);
     }
 }
