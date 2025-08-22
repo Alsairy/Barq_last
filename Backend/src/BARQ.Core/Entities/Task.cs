@@ -9,6 +9,10 @@ namespace BARQ.Core.Entities
         [Required]
         [MaxLength(255)]
         public string Name { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(255)]
+        public string Title { get; set; } = string.Empty;
         
         [MaxLength(2000)]
         public string? Description { get; set; }

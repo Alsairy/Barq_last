@@ -271,6 +271,8 @@ finally
     Log.CloseAndFlush();
 }
 
+public partial class Program { }
+
 public sealed class AuthCookieOptions
 {
     public bool Enabled { get; set; } = true;
