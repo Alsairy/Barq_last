@@ -32,20 +32,17 @@ jobs:
         cd Frontend/barq-frontend
         npm run build
     
-    - name: Start Frontend
+    - name: Frontend build & preview
+      working-directory: Frontend/barq-frontend
       run: |
-        cd Frontend/barq-frontend
-        npm run preview -- --port 4173 &
-        sleep 15
-        
-    - name: Wait for Frontend to be Ready
-      run: |
-        timeout 30 bash -c 'until curl -f http://localhost:4173; do sleep 1; done'
+        npm run preview -- --port 5173 &
     
-    - name: Run Playwright Smoke Tests
+    - name: Playwright install & run smoke
+      working-directory: Frontend/barq-frontend
       run: |
-        cd Frontend/barq-frontend
-        npx playwright test tests/wiring.smoke.spec.ts --reporter=list
+        npx playwright test tests/wiring.smoke.spec.ts --reporter=line --config=playwright.config.ts
+      env:
+        PLAYWRIGHT_BASE_URL: http://localhost:5173
     
     - name: Upload Playwright Report
       uses: actions/upload-artifact@v4

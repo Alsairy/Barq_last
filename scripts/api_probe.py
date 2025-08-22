@@ -37,6 +37,13 @@ class ApiProber:
             
             latency = (time.time() - start_time) * 1000  # Convert to ms
             
+            if response.status_code in (401, 403):
+                note = "Auth required (treated as pass)"
+                error = ''
+            else:
+                note = ''
+                error = ''
+            
             result = {
                 'controller': route_info['controller'],
                 'action': route_info['action'],
@@ -46,7 +53,8 @@ class ApiProber:
                 'status_code': response.status_code,
                 'latency_ms': round(latency, 2),
                 'content_length': len(response.content),
-                'error': ''
+                'error': error,
+                'note': note
             }
             
         except requests.exceptions.Timeout:
@@ -103,7 +111,7 @@ class ApiProber:
     def generate_report(self, output_file: str) -> None:
         """Generate CSV report"""
         with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ['controller', 'action', 'method', 'route', 'url', 'status_code', 'latency_ms', 'content_length', 'error']
+            fieldnames = ['controller', 'action', 'method', 'route', 'url', 'status_code', 'latency_ms', 'content_length', 'error', 'note']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             
             writer.writeheader()

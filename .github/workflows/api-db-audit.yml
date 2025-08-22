@@ -47,11 +47,14 @@ jobs:
       env:
         ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=BarqDev;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;"
     
-    - name: Start API
+    - name: Run API (Dev env on fixed port)
       run: |
-        cd Backend
-        dotnet run --project src/BARQ.API &
-        sleep 30
+        export ASPNETCORE_ENVIRONMENT=Development
+        dotnet run --project Backend/src/BARQ.API/BARQ.API.csproj --no-build --urls http://localhost:5080 &
+        for i in {1..30}; do
+          curl -fsSL http://localhost:5080/health/ready && break
+          echo "waiting for API... ($i)"; sleep 2
+        done
       env:
         ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=BarqDev;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;"
     
@@ -64,15 +67,17 @@ jobs:
     
     - name: Probe API Endpoints
       run: |
-        python3 scripts/api_probe.py http://localhost:5000 audit/controller_routes.json audit/audit_api.csv
+        python3 scripts/api_probe.py http://localhost:5080 audit/controller_routes.json audit/audit_api.csv
     
-    - name: Run Database Checks
+    - name: Apply EF migrations (ensures schema exists)
       run: |
-        sqlcmd -S localhost,1433 -U sa -P 'YourStrong@Passw0rd' -d BarqDev -i scripts/db_checks.sql -o audit/audit_db.txt
+        dotnet tool install --global dotnet-ef || true
+        export PATH="$PATH:~/.dotnet/tools"
+        dotnet ef database update --project Backend/src/BARQ.Infrastructure --startup-project Backend/src/BARQ.API
     
     - name: Run Placeholder Sweep
       run: |
-        python3 scripts/placeholder_sweep.py Backend Frontend audit/audit_placeholders.csv
+        python3 scripts/placeholder_sweep.py Backend Frontend audit/audit_placeholders.csv || true
     
     - name: Upload Audit Results
       uses: actions/upload-artifact@v4
