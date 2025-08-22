@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test("every button triggers DOM or network activity", async ({ page }) => {
-  await page.goto("http://localhost:4173");
+  await page.goto("http://localhost:5173");
 
   const buttons = page.locator("button");
   const count = await buttons.count();
@@ -42,7 +42,7 @@ test("every button triggers DOM or network activity", async ({ page }) => {
 });
 
 test("every anchor has href or click handler", async ({ page }) => {
-  await page.goto("http://localhost:4173");
+  await page.goto("http://localhost:5173");
 
   const anchors = page.locator("a");
   const count = await anchors.count();
@@ -70,14 +70,14 @@ test("no console errors on page load", async ({ page }) => {
     }
   });
 
-  await page.goto("http://localhost:4173");
+  await page.goto("http://localhost:5173");
   await page.waitForTimeout(2000);
 
   expect(consoleErrors.length, `Console errors found: ${consoleErrors.join(', ')}`).toBe(0);
 });
 
 test("critical UI elements are present", async ({ page }) => {
-  await page.goto("http://localhost:4173");
+  await page.goto("http://localhost:5173");
 
   const criticalElements = [
     'header, [role="banner"]',
