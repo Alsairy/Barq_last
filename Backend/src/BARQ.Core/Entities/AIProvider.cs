@@ -46,6 +46,8 @@ namespace BARQ.Core.Entities
         
         [MaxLength(1000)]
         public string? HealthCheckMessage { get; set; }
+        
+        public bool IsEnabled { get; set; } = true;
 
         [ForeignKey("TenantId")]
         public virtual Tenant Tenant { get; set; } = null!;

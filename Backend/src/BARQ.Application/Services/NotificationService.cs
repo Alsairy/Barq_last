@@ -518,7 +518,7 @@ namespace BARQ.Application.Services
                             );
                             break;
                         case "SMS":
-                            success = await SendEmailNotificationAsync(notification);
+                            success = await SendEmailNotificationAsync(notification.Id);
                             break;
                         case "InApp":
                             success = true;

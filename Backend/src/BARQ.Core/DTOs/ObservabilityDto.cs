@@ -199,6 +199,10 @@ namespace BARQ.Core.DTOs
         public Dictionary<string, decimal> ProviderCost { get; set; } = new();
         public int SlaViolations { get; set; }
         public int QueueDepth { get; set; }
+        public int TotalTasks { get; set; }
+        public int CompletedTasks { get; set; }
+        public int ActiveTasks { get; set; }
+        public long AverageResponseTimeMs { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 

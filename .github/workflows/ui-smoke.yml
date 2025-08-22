@@ -35,8 +35,12 @@ jobs:
     - name: Start Frontend
       run: |
         cd Frontend/barq-frontend
-        npm run preview &
-        sleep 10
+        npm run preview -- --port 4173 &
+        sleep 15
+        
+    - name: Wait for Frontend to be Ready
+      run: |
+        timeout 30 bash -c 'until curl -f http://localhost:4173; do sleep 1; done'
     
     - name: Run Playwright Smoke Tests
       run: |

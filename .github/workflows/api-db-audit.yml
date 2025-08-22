@@ -55,27 +55,30 @@ jobs:
       env:
         ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=BarqDev;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;"
     
+    - name: Create Audit Directory
+      run: mkdir -p audit
+        
     - name: Extract API Routes
       run: |
-        python3 scripts/controller_routes.py Backend/src/BARQ.API/Controllers > controller_routes.json
+        python3 scripts/controller_routes.py Backend/src/BARQ.API/Controllers > audit/controller_routes.json
     
     - name: Probe API Endpoints
       run: |
-        python3 scripts/api_probe.py http://localhost:5000 controller_routes.json audit_api.csv
+        python3 scripts/api_probe.py http://localhost:5000 audit/controller_routes.json audit/audit_api.csv
     
     - name: Run Database Checks
       run: |
-        sqlcmd -S localhost,1433 -U sa -P 'YourStrong@Passw0rd' -d BarqDev -i scripts/db_checks.sql -o audit_db.txt
+        sqlcmd -S localhost,1433 -U sa -P 'YourStrong@Passw0rd' -d BarqDev -i scripts/db_checks.sql -o audit/audit_db.txt
     
     - name: Run Placeholder Sweep
       run: |
-        python3 scripts/placeholder_sweep.py Backend Frontend audit_placeholders.csv
+        python3 scripts/placeholder_sweep.py Backend Frontend audit/audit_placeholders.csv
     
     - name: Upload Audit Results
       uses: actions/upload-artifact@v4
       with:
         name: api-db-audit-results
         path: |
-          audit_api.csv
-          audit_db.txt
-          audit_placeholders.csv
+          audit/audit_api.csv
+          audit/audit_db.txt
+          audit/audit_placeholders.csv

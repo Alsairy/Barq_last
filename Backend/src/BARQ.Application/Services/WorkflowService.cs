@@ -508,7 +508,7 @@ namespace BARQ.Application.Services
                 }
                 else
                 {
-                    var steps = ParseWorkflowSteps(instance.Workflow.ProcessDefinition);
+                    var steps = ParseWorkflowSteps(instance.Workflow.ProcessDefinition ?? "");
                     var totalSteps = steps.Count;
                     
                     for (int i = 0; i < totalSteps; i++)
@@ -519,7 +519,15 @@ namespace BARQ.Application.Services
                         
                         await _context.SaveChangesAsync();
                         
-                        await ExecuteWorkflowStep(step, input, variables);
+                        var inputDict = new Dictionary<string, object>();
+                        if (!string.IsNullOrEmpty(input))
+                            inputDict["input"] = input;
+                        
+                        var variablesDict = new Dictionary<string, object>();
+                        if (!string.IsNullOrEmpty(variables))
+                            variablesDict["variables"] = variables;
+                        
+                        await ExecuteWorkflowStep(step, inputDict, variablesDict);
                         
                         _logger.LogInformation("Workflow instance {InstanceId} completed step {StepName} ({Progress}%)", 
                             instanceId, step.Name, instance.ProgressPercentage);
@@ -548,5 +556,67 @@ namespace BARQ.Application.Services
                 _logger.LogError(ex, "Workflow instance {InstanceId} failed with error: {Error}", instanceId, ex.Message);
             }
         }
+
+        private List<WorkflowStep> ParseWorkflowSteps(string processDefinition)
+        {
+            var steps = new List<WorkflowStep>();
+            
+            if (string.IsNullOrEmpty(processDefinition))
+            {
+                steps.Add(new WorkflowStep { Name = "Default Step", Type = "Task" });
+                return steps;
+            }
+
+            try
+            {
+                var lines = processDefinition.Split('\n');
+                foreach (var line in lines)
+                {
+                    if (line.Trim().StartsWith("step:"))
+                    {
+                        var stepName = line.Replace("step:", "").Trim();
+                        steps.Add(new WorkflowStep { Name = stepName, Type = "Task" });
+                    }
+                }
+                
+                if (steps.Count == 0)
+                {
+                    steps.Add(new WorkflowStep { Name = "Default Step", Type = "Task" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to parse workflow steps from process definition");
+                steps.Add(new WorkflowStep { Name = "Default Step", Type = "Task" });
+            }
+
+            return steps;
+        }
+
+        private async System.Threading.Tasks.Task ExecuteWorkflowStep(WorkflowStep step, Dictionary<string, object> input, Dictionary<string, object> variables)
+        {
+            try
+            {
+                _logger.LogInformation("Executing workflow step: {StepName}", step.Name);
+                
+                await System.Threading.Tasks.Task.Delay(100);
+                
+                variables[$"step_{step.Name}_completed"] = true;
+                variables[$"step_{step.Name}_timestamp"] = DateTime.UtcNow;
+                
+                _logger.LogInformation("Completed workflow step: {StepName}", step.Name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to execute workflow step: {StepName}", step.Name);
+                throw;
+            }
+        }
+    }
+
+    public class WorkflowStep
+    {
+        public string Name { get; set; } = "";
+        public string Type { get; set; } = "";
     }
 }

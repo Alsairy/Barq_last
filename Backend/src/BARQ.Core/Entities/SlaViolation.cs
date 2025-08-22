@@ -30,6 +30,10 @@ namespace BARQ.Core.Entities
         
         public int EscalationLevel { get; set; } = 0;
         
+        [Required]
+        [MaxLength(32)]
+        public string Severity { get; set; } = "Medium";
+        
         [MaxLength(2000)]
         public string? Metadata { get; set; } // JSON for additional data
         
