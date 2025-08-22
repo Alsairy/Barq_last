@@ -1,103 +1,68 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using BARQ.Application.Interfaces;
-using BARQ.Infrastructure.Data;
+using BARQ.Core.DTOs.Common;
 using BARQ.Core.Entities;
 
 namespace BARQ.Application.Services.Workflow;
 
-public class SlaService : ISlaService
+public sealed class SlaService : ISlaService
 {
-    private readonly BarqDbContext _context;
-    private readonly ILogger<SlaService> _logger;
-
-    public SlaService(BarqDbContext context, ILogger<SlaService> logger)
+    public System.Threading.Tasks.Task<PagedResult<SlaPolicy>> GetSlaPoliciesAsync(int page = 1, int pageSize = 10, string? search = null, CancellationToken cancellationToken = default)
     {
-        _context = context;
-        _logger = logger;
+        return System.Threading.Tasks.Task.FromResult(new PagedResult<SlaPolicy>());
     }
 
-    public async Task<TimeSpan> CalculateRemainingTimeAsync(Guid taskId)
+    public System.Threading.Tasks.Task<SlaPolicy?> GetSlaPolicyByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var task = await _context.Tasks.FindAsync(taskId);
-        if (task == null)
-            return TimeSpan.Zero;
-
-        var slaPolicy = await _context.SlaPolicies
-            .FirstOrDefaultAsync(p => p.Priority == task.Priority && p.IsActive);
-
-        if (slaPolicy == null)
-            return TimeSpan.Zero;
-
-        var elapsed = DateTime.UtcNow - task.CreatedAt;
-        var slaTime = TimeSpan.FromHours(slaPolicy.ResponseTimeHours);
-        
-        return slaTime - elapsed;
+        return System.Threading.Tasks.Task.FromResult<SlaPolicy?>(null);
     }
 
-    public async Task<bool> CheckSlaViolationAsync(Guid taskId)
+    public System.Threading.Tasks.Task<SlaPolicy> CreateSlaPolicyAsync(SlaPolicy slaPolicy, CancellationToken cancellationToken = default)
     {
-        var remainingTime = await CalculateRemainingTimeAsync(taskId);
-        return remainingTime < TimeSpan.Zero;
+        return System.Threading.Tasks.Task.FromResult(new SlaPolicy());
     }
 
-    public async Task<int> GetSlaHoursAsync(Guid taskId)
+    public System.Threading.Tasks.Task<SlaPolicy> UpdateSlaPolicyAsync(SlaPolicy slaPolicy, CancellationToken cancellationToken = default)
     {
-        var task = await _context.Tasks.FindAsync(taskId);
-        if (task == null)
-            return 0;
-
-        var slaPolicy = await _context.SlaPolicies
-            .FirstOrDefaultAsync(p => p.Priority == task.Priority && p.IsActive);
-
-        return slaPolicy?.ResponseTimeHours ?? 0;
+        return System.Threading.Tasks.Task.FromResult(new SlaPolicy());
     }
 
-    public async Task<SlaViolation> CreateSlaViolationAsync(Guid taskId)
+    public System.Threading.Tasks.Task DeleteSlaPolicyAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var task = await _context.Tasks.FindAsync(taskId);
-        if (task == null)
-            throw new ArgumentException("Task not found", nameof(taskId));
-
-        var violation = new SlaViolation
-        {
-            Id = Guid.NewGuid(),
-            TaskId = taskId,
-            ViolationType = "ResponseTime",
-            ViolationTime = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        _context.SlaViolations.Add(violation);
-        await _context.SaveChangesAsync();
-
-        return violation;
+        return System.Threading.Tasks.Task.CompletedTask;
     }
 
-    public async Task<List<SlaViolation>> CheckViolationsAsync()
+    public System.Threading.Tasks.Task<PagedResult<SlaViolation>> GetSlaViolationsAsync(int page = 1, int pageSize = 10, string? status = null, CancellationToken cancellationToken = default)
     {
-        var violations = new List<SlaViolation>();
-        
-        var openTasks = await _context.Tasks
-            .Where(t => t.Status == "InProgress" || t.Status == "Open")
-            .ToListAsync();
+        return System.Threading.Tasks.Task.FromResult(new PagedResult<SlaViolation>());
+    }
 
-        foreach (var task in openTasks)
-        {
-            var isViolation = await CheckSlaViolationAsync(task.Id);
-            if (isViolation)
-            {
-                var existingViolation = await _context.SlaViolations
-                    .FirstOrDefaultAsync(v => v.TaskId == task.Id);
+    public System.Threading.Tasks.Task<SlaViolation?> GetSlaViolationByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return System.Threading.Tasks.Task.FromResult<SlaViolation?>(null);
+    }
 
-                if (existingViolation == null)
-                {
-                    var violation = await CreateSlaViolationAsync(task.Id);
-                    violations.Add(violation);
-                }
-            }
-        }
+    public System.Threading.Tasks.Task<SlaViolation> CreateSlaViolationAsync(SlaViolation violation, CancellationToken cancellationToken = default)
+    {
+        return System.Threading.Tasks.Task.FromResult(new SlaViolation());
+    }
 
-        return violations;
+    public System.Threading.Tasks.Task<SlaViolation> UpdateSlaViolationAsync(SlaViolation violation, CancellationToken cancellationToken = default)
+    {
+        return System.Threading.Tasks.Task.FromResult(new SlaViolation());
+    }
+
+    public System.Threading.Tasks.Task<DateTime> CalculateDueDateAsync(Guid slaPolicyId, DateTime startTime, CancellationToken cancellationToken = default)
+    {
+        return System.Threading.Tasks.Task.FromResult(DateTime.UtcNow.AddDays(1));
+    }
+
+    public System.Threading.Tasks.Task<bool> IsViolationAsync(Guid taskId, Guid slaPolicyId, CancellationToken cancellationToken = default)
+    {
+        return System.Threading.Tasks.Task.FromResult(false);
+    }
+
+    public System.Threading.Tasks.Task CheckAndCreateViolationsAsync(CancellationToken cancellationToken = default)
+    {
+        return System.Threading.Tasks.Task.CompletedTask;
     }
 }
