@@ -15,7 +15,10 @@ import {
   TrendingUp,
   Calendar,
   Users,
-  Target
+  Target,
+  Upload,
+  DollarSign,
+  RefreshCw
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -25,6 +28,12 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { cn } from '../../lib/utils';
+import { useFileWorkflow } from '../../hooks/useFileWorkflow';
+import { useSLAWorkflow } from '../../hooks/useSLAWorkflow';
+import { useBillingWorkflow } from '../../hooks/useBillingWorkflow';
+import { toast } from 'sonner';
+import { useAutoRetry } from '../../hooks/useAutoRetry';
+import { useI18n } from '../../hooks/useI18n';
 
 interface ProgressPanelProps {
   collapsed: boolean;
@@ -32,6 +41,22 @@ interface ProgressPanelProps {
 
 export function ProgressPanel({ collapsed }: ProgressPanelProps) {
   const [activeTab, setActiveTab] = useState('progress');
+  const { state: fileState, uploadAndScanFile, downloadFile, deleteFile } = useFileWorkflow();
+  const { state: slaState, acknowledgeViolation } = useSLAWorkflow();
+  const { state: billingState, handle402Response } = useBillingWorkflow();
+  const { t, isRTL } = useI18n();
+
+  const { data: progressData, isLoading, error, retry } = useAutoRetry(
+    async () => {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return { progress: 75, status: 'running' };
+    },
+    {
+      maxRetries: 3,
+      retryDelay: 2000,
+      exponentialBackoff: true
+    }
+  );
 
   if (collapsed) {
     return (
@@ -50,18 +75,26 @@ export function ProgressPanel({ collapsed }: ProgressPanelProps) {
   }
 
   return (
-    <div className="h-full border-l bg-muted/30 flex flex-col">
+    <div className={cn("h-full border-l bg-muted/30 flex flex-col", isRTL && "border-r border-l-0")}>
       {/* Header */}
       <div className="p-4 border-b">
-        <h2 className="font-semibold text-lg">Progress & Activity</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-lg">{t('progress_and_activity', 'Progress & Activity')}</h2>
+          {error && (
+            <Button variant="ghost" size="sm" onClick={retry} className="h-8 w-8 p-0">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <TabsList className="grid w-full grid-cols-3 mx-4 mt-2">
+        <TabsList className="grid w-full grid-cols-4 mx-4 mt-2">
           <TabsTrigger value="progress" className="text-xs">Progress</TabsTrigger>
-          <TabsTrigger value="documents" className="text-xs">Documents</TabsTrigger>
-          <TabsTrigger value="activity" className="text-xs">Activity</TabsTrigger>
+          <TabsTrigger value="documents" className="text-xs">Files</TabsTrigger>
+          <TabsTrigger value="sla" className="text-xs">SLA</TabsTrigger>
+          <TabsTrigger value="billing" className="text-xs">Billing</TabsTrigger>
         </TabsList>
 
         <div className="flex-1 overflow-hidden">
@@ -70,11 +103,15 @@ export function ProgressPanel({ collapsed }: ProgressPanelProps) {
           </TabsContent>
           
           <TabsContent value="documents" className="h-full m-0">
-            <DocumentsView />
+            <DocumentsView files={fileState.files} onDownload={downloadFile} onDelete={deleteFile} />
           </TabsContent>
           
-          <TabsContent value="activity" className="h-full m-0">
-            <ActivityView />
+          <TabsContent value="sla" className="h-full m-0">
+            <SLAView violations={slaState.violations} onAcknowledge={acknowledgeViolation} />
+          </TabsContent>
+          
+          <TabsContent value="billing" className="h-full m-0">
+            <BillingView status={billingState.status} onUpgrade={handle402Response} />
           </TabsContent>
         </div>
       </Tabs>
@@ -258,45 +295,13 @@ function ProgressView() {
   );
 }
 
-function DocumentsView() {
-  const documents = [
-    {
-      id: '1',
-      name: 'Project Requirements.pdf',
-      type: 'pdf',
-      size: '2.4 MB',
-      uploadedAt: '2024-01-10T10:00:00Z',
-      uploadedBy: 'John Doe',
-      status: 'approved'
-    },
-    {
-      id: '2',
-      name: 'Design Mockups.figma',
-      type: 'figma',
-      size: '15.2 MB',
-      uploadedAt: '2024-01-12T14:30:00Z',
-      uploadedBy: 'Jane Smith',
-      status: 'review'
-    },
-    {
-      id: '3',
-      name: 'API Documentation.md',
-      type: 'markdown',
-      size: '156 KB',
-      uploadedAt: '2024-01-15T09:15:00Z',
-      uploadedBy: 'Mike Johnson',
-      status: 'draft'
-    },
-    {
-      id: '4',
-      name: 'Test Results.xlsx',
-      type: 'excel',
-      size: '892 KB',
-      uploadedAt: '2024-01-16T16:45:00Z',
-      uploadedBy: 'Sarah Wilson',
-      status: 'approved'
-    }
-  ];
+interface DocumentsViewProps {
+  files: any[];
+  onDownload: (fileId: string) => void;
+  onDelete: (fileId: string) => void;
+}
+
+function DocumentsView({ files, onDownload, onDelete }: DocumentsViewProps) {
 
   const getFileIcon = (type: string) => {
     return <FileText className="h-4 w-4 text-blue-500" />;
@@ -304,12 +309,13 @@ function DocumentsView() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved':
+      case 'clean':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'review':
+      case 'pending':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'draft':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+      case 'infected':
+      case 'quarantined':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
@@ -318,7 +324,7 @@ function DocumentsView() {
   return (
     <ScrollArea className="h-full">
       <div className="p-4 space-y-3">
-        {documents.map((doc) => (
+        {files.map((doc) => (
           <div
             key={doc.id}
             className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
@@ -327,15 +333,15 @@ function DocumentsView() {
               <div className="flex items-start gap-3 flex-1 min-w-0">
                 {getFileIcon(doc.type)}
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-sm truncate">{doc.name}</h4>
+                  <h4 className="font-medium text-sm truncate">{doc.fileName}</h4>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="secondary" className={cn("text-xs", getStatusColor(doc.status))}>
-                      {doc.status}
+                    <Badge variant="secondary" className={cn("text-xs", getStatusColor(doc.scanStatus))}>
+                      {doc.scanStatus}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">{doc.size}</span>
+                    <span className="text-xs text-muted-foreground">{(doc.fileSize / 1024 / 1024).toFixed(1)} MB</span>
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    By {doc.uploadedBy} • {new Date(doc.uploadedAt).toLocaleDateString()}
+                    Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}
                   </div>
                 </div>
               </div>
@@ -347,16 +353,15 @@ function DocumentsView() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <Eye className="mr-2 h-4 w-4" />
-                    View
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDownload(doc.id)}>
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive">
+                  <DropdownMenuItem 
+                    className="text-destructive"
+                    onClick={() => onDelete(doc.id)}
+                  >
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -369,84 +374,153 @@ function DocumentsView() {
   );
 }
 
-function ActivityView() {
-  const activities = [
-    {
-      id: '1',
-      type: 'task_completed',
-      message: 'Task "Implement user authentication" was completed',
-      user: 'John Doe',
-      timestamp: '2024-01-16T16:30:00Z'
-    },
-    {
-      id: '2',
-      type: 'document_uploaded',
-      message: 'Document "Test Results.xlsx" was uploaded',
-      user: 'Sarah Wilson',
-      timestamp: '2024-01-16T16:45:00Z'
-    },
-    {
-      id: '3',
-      type: 'workflow_started',
-      message: 'Workflow "Code Review Process" was started',
-      user: 'Mike Johnson',
-      timestamp: '2024-01-16T15:20:00Z'
-    },
-    {
-      id: '4',
-      type: 'comment_added',
-      message: 'Comment added to task "Setup CI/CD pipeline"',
-      user: 'Jane Smith',
-      timestamp: '2024-01-16T14:15:00Z'
-    },
-    {
-      id: '5',
-      type: 'milestone_reached',
-      message: 'Milestone "Design Phase" was completed',
-      user: 'System',
-      timestamp: '2024-01-16T12:00:00Z'
-    }
-  ];
+interface SLAViewProps {
+  violations: any[];
+  onAcknowledge: (violationId: string) => void;
+}
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'task_completed':
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-      case 'document_uploaded':
-        return <FileText className="h-4 w-4 text-blue-500" />;
-      case 'workflow_started':
-        return <Activity className="h-4 w-4 text-purple-500" />;
-      case 'comment_added':
-        return <Users className="h-4 w-4 text-orange-500" />;
-      case 'milestone_reached':
-        return <Target className="h-4 w-4 text-green-500" />;
+function SLAView({ violations, onAcknowledge }: SLAViewProps) {
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'high':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       default:
-        return <Activity className="h-4 w-4 text-muted-foreground" />;
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
   return (
     <ScrollArea className="h-full">
-      <div className="p-4 space-y-4">
-        {activities.map((activity, index) => (
-          <div key={activity.id} className="flex items-start gap-3">
-            <div className="flex flex-col items-center">
-              {getActivityIcon(activity.type)}
-              {index < activities.length - 1 && (
-                <div className="w-px h-8 bg-border mt-2" />
-              )}
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <p className="text-sm">{activity.message}</p>
-              <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                <span>{activity.user}</span>
-                <span>•</span>
-                <span>{new Date(activity.timestamp).toLocaleString()}</span>
+      <div className="p-4 space-y-3">
+        {violations.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-green-500" />
+            <p>No SLA violations</p>
+          </div>
+        ) : (
+          violations.map((violation) => (
+            <div
+              key={violation.id}
+              className="p-3 rounded-lg border bg-card"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="secondary" className={cn("text-xs", getSeverityColor(violation.severity))}>
+                      {violation.severity}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {violation.type}
+                    </span>
+                  </div>
+                  <h4 className="font-medium text-sm">{violation.taskTitle}</h4>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Violated at {new Date(violation.violatedAt).toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Overdue by {violation.overdueMinutes} minutes
+                  </p>
+                </div>
+                
+                {!violation.acknowledged && (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => onAcknowledge(violation.id)}
+                  >
+                    Acknowledge
+                  </Button>
+                )}
               </div>
             </div>
+          ))
+        )}
+      </div>
+    </ScrollArea>
+  );
+}
+
+interface BillingViewProps {
+  status?: any;
+  onUpgrade: () => void;
+}
+
+function BillingView({ status, onUpgrade }: BillingViewProps) {
+  if (!status) {
+    return (
+      <ScrollArea className="h-full">
+        <div className="p-4 text-center text-muted-foreground">
+          Loading billing information...
+        </div>
+      </ScrollArea>
+    );
+  }
+
+  const usagePercentage = (status.currentUsage / status.planLimit) * 100;
+
+  return (
+    <ScrollArea className="h-full">
+      <div className="p-4 space-y-4">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-medium">Usage Overview</h3>
+            <Badge variant={status.isOverQuota ? "destructive" : "secondary"}>
+              {status.isOverQuota ? "Over Quota" : "Within Limits"}
+            </Badge>
           </div>
-        ))}
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span>Current Usage</span>
+              <span>{status.currentUsage} / {status.planLimit}</span>
+            </div>
+            <div className="w-full bg-secondary rounded-full h-2">
+              <div 
+                className={cn(
+                  "h-2 rounded-full transition-all",
+                  status.isOverQuota ? "bg-red-500" : "bg-primary"
+                )}
+                style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+              />
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {usagePercentage.toFixed(1)}% of plan limit used
+            </div>
+          </div>
+        </div>
+
+        {status.isOverQuota && (
+          <div className="p-3 rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle className="h-4 w-4 text-red-500" />
+              <span className="font-medium text-sm text-red-700 dark:text-red-300">
+                Quota Exceeded
+              </span>
+            </div>
+            <p className="text-xs text-red-600 dark:text-red-400 mb-3">
+              Your usage has exceeded the current plan limits. Upgrade to continue using the service.
+            </p>
+            <Button size="sm" onClick={onUpgrade} className="w-full">
+              <DollarSign className="mr-2 h-4 w-4" />
+              Upgrade Plan
+            </Button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-3">
+          <div className="p-3 rounded-lg border bg-card">
+            <div className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-blue-500" />
+              <span className="text-xs font-medium">API Calls</span>
+            </div>
+            <div className="text-lg font-semibold mt-1">{status.currentUsage}</div>
+            <div className="text-xs text-muted-foreground">This month</div>
+          </div>
+        </div>
       </div>
     </ScrollArea>
   );
