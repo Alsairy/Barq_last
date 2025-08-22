@@ -7,6 +7,13 @@ namespace BARQ.Core.Entities
         [Required]
         public Guid ImpersonationSessionId { get; set; }
         
+        [MaxLength(100)]
+        public string? SessionId { get; set; }
+        
+        public int StatusCode { get; set; }
+        
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        
         [Required]
         [MaxLength(100)]
         public string ActionType { get; set; } = string.Empty; // View, Create, Update, Delete, Execute, etc.
