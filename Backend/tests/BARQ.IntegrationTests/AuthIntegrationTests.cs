@@ -9,12 +9,12 @@ using BARQ.Core.DTOs;
 
 namespace BARQ.IntegrationTests;
 
-public class AuthIntegrationTests : IClassFixture<TestWebApplicationFactory<Program>>
+public class AuthIntegrationTests : IClassFixture<TestWebApplicationFactory>
 {
-    private readonly TestWebApplicationFactory<Program> _factory;
+    private readonly TestWebApplicationFactory _factory;
     private readonly HttpClient _client;
 
-    public AuthIntegrationTests(TestWebApplicationFactory<Program> factory)
+    public AuthIntegrationTests(TestWebApplicationFactory factory)
     {
         _factory = factory;
         _client = _factory.CreateClient();

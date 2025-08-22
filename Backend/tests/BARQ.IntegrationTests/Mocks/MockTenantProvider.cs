@@ -27,4 +27,14 @@ public class MockTenantProvider : ITenantProvider
     {
         _tenantId = tenantId;
     }
+
+    public void ClearTenantContext()
+    {
+        _tenantId = Guid.Empty;
+    }
+
+    public Guid GetCurrentUserId()
+    {
+        return Guid.Parse("550e8400-e29b-41d4-a716-446655440001");
+    }
 }
