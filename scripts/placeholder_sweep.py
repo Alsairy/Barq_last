@@ -135,7 +135,9 @@ def main():
     else:
         print(f"Warning: Frontend directory {frontend_dir} does not exist")
     
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    output_dir = os.path.dirname(output_file)
+    if output_dir and output_dir.strip() != '':
+        os.makedirs(output_dir, exist_ok=True)
     sweeper.generate_report(output_file)
     
     summary = sweeper.get_summary()

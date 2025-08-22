@@ -6,7 +6,13 @@
 
 const fs = require('fs');
 const path = require('path');
-const minimist = require('minimist');
+let minimist;
+try {
+    minimist = require('minimist');
+} catch (e) {
+    console.error('Error: minimist package not found. Please install it with: npm install minimist');
+    process.exit(1);
+}
 
 class FrontendAuditor {
     constructor(srcDir) {

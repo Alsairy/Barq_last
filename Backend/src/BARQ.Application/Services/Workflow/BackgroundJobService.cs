@@ -2,19 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using BARQ.Application.Interfaces;
 
 namespace BARQ.Application.Services.Workflow
 {
-    public interface IBackgroundJobService
-    {
-        Task<string> EnqueueAsync<T>(Func<T, Task> job, TimeSpan? delay = null) where T : class;
-        Task<string> ScheduleAsync<T>(Func<T, Task> job, DateTime scheduledTime) where T : class;
-        Task<string> EnqueueRecurringAsync<T>(string jobId, Func<T, Task> job, string cronExpression) where T : class;
-        Task<bool> CancelJobAsync(string jobId);
-        Task<JobStatus> GetJobStatusAsync(string jobId);
-        Task<List<JobInfo>> GetJobsAsync(JobStatusFilter filter = JobStatusFilter.All);
-    }
-
     public class BackgroundJobService : BackgroundService, IBackgroundJobService
     {
         private readonly IServiceProvider _serviceProvider;
@@ -63,7 +54,7 @@ namespace BARQ.Application.Services.Workflow
             _logger.LogInformation("Job {JobId} of type {JobType} enqueued for execution at {ScheduledAt}", 
                 jobId, typeof(T).Name, executeAt);
 
-            return jobId;
+            return Task.FromResult(jobId);
         }
 
         public Task<string> ScheduleAsync<T>(Func<T, Task> job, DateTime scheduledTime) where T : class
@@ -91,7 +82,7 @@ namespace BARQ.Application.Services.Workflow
             _logger.LogInformation("Recurring job {JobId} of type {JobType} scheduled with cron {CronExpression}", 
                 jobId, typeof(T).Name, cronExpression);
 
-            return jobId;
+            return Task.FromResult(jobId);
         }
 
         public Task<bool> CancelJobAsync(string jobId)
@@ -104,21 +95,21 @@ namespace BARQ.Application.Services.Workflow
                     jobInfo.CompletedAt = DateTime.UtcNow;
                     
                     _logger.LogInformation("Job {JobId} cancelled", jobId);
-                    return true;
+                    return Task.FromResult(true);
                 }
             }
 
-            return false;
+            return Task.FromResult(false);
         }
 
         public Task<JobStatus> GetJobStatusAsync(string jobId)
         {
             if (_jobs.TryGetValue(jobId, out var jobInfo))
             {
-                return jobInfo.Status;
+                return Task.FromResult(jobInfo.Status);
             }
 
-            return JobStatus.NotFound;
+            return Task.FromResult(JobStatus.NotFound);
         }
 
         public Task<List<JobInfo>> GetJobsAsync(JobStatusFilter filter = JobStatusFilter.All)
@@ -137,7 +128,7 @@ namespace BARQ.Application.Services.Workflow
                 };
             }
 
-            return jobs.OrderByDescending(j => j.CreatedAt).ToList();
+            return Task.FromResult(jobs.OrderByDescending(j => j.CreatedAt).ToList());
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -252,39 +243,5 @@ namespace BARQ.Application.Services.Workflow
         public string Id { get; set; } = "";
         public Func<IServiceProvider, Task> Job { get; set; } = default!;
         public DateTime ScheduledAt { get; set; }
-    }
-
-    public class JobInfo
-    {
-        public string Id { get; set; } = "";
-        public string Type { get; set; } = "";
-        public JobStatus Status { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? ScheduledAt { get; set; }
-        public DateTime? StartedAt { get; set; }
-        public DateTime? CompletedAt { get; set; }
-        public DateTime? LastExecuted { get; set; }
-        public string? ErrorMessage { get; set; }
-        public string? CronExpression { get; set; }
-    }
-
-    public enum JobStatus
-    {
-        NotFound,
-        Enqueued,
-        Running,
-        Completed,
-        Failed,
-        Cancelled,
-        Recurring
-    }
-
-    public enum JobStatusFilter
-    {
-        All,
-        Active,
-        Completed,
-        Failed,
-        Cancelled
     }
 }

@@ -86,7 +86,7 @@ namespace BARQ.Application.Services
                            (!request.GeneratedBefore.HasValue || r.GeneratedAt <= request.GeneratedBefore.Value) &&
                            (!request.IsScheduled.HasValue || r.IsScheduled == request.IsScheduled.Value) &&
                            (string.IsNullOrEmpty(request.GeneratedBy) || r.GeneratedBy == Guid.Parse(request.GeneratedBy)))
-                .AsQueryable();</newstr>
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Search))
             {

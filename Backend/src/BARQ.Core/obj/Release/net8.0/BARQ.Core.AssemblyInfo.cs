@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BARQ.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5227e85ca5df36065596844ef69ee46d21aa86be")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4e4e29ec868376a1bad3831034dc6391f037117f")]
 [assembly: System.Reflection.AssemblyProductAttribute("BARQ.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BARQ.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -125,6 +125,8 @@ builder.Services.AddScoped<BARQ.Application.Interfaces.IFeatureFlagService, BARQ
 builder.Services.AddScoped<BARQ.Application.Interfaces.IImpersonationService, BARQ.Application.Services.ImpersonationService>();
 builder.Services.AddScoped<BARQ.Application.Interfaces.ISystemHealthService, BARQ.Application.Services.SystemHealthService>();
 builder.Services.AddScoped<BARQ.Application.Interfaces.ITenantStateService, BARQ.Application.Services.TenantStateService>();
+builder.Services.AddSingleton<IBackgroundJobService, BackgroundJobService>();
+builder.Services.AddHostedService<BackgroundJobService>();
 builder.Services.AddHttpContextAccessor(); // for TenantProvider
 builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 
