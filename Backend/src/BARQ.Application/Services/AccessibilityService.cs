@@ -2,6 +2,7 @@ using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,25 +14,27 @@ namespace BARQ.Application.Services
     {
         private readonly BarqDbContext _context;
         private readonly ILogger<AccessibilityService> _logger;
+        private readonly ITenantProvider _tenantProvider;
 
-        public AccessibilityService(BarqDbContext context, ILogger<AccessibilityService> logger)
+        public AccessibilityService(BarqDbContext context, ILogger<AccessibilityService> logger, ITenantProvider tenantProvider)
         {
             _context = context;
             _logger = logger;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<PagedResult<AccessibilityAuditDto>> GetAccessibilityAuditsAsync(ListRequest request)
         {
             try
             {
-                var query = _context.AccessibilityAudits.Include(a => a.Issues).AsQueryable();
-
-                if (!string.IsNullOrEmpty(request.SearchTerm))
-                {
-                    query = query.Where(a => a.PageUrl.Contains(request.SearchTerm) ||
-                                           a.PageTitle.Contains(request.SearchTerm) ||
-                                           a.AuditType.Contains(request.SearchTerm));
-                }
+                var query = _context.AccessibilityAudits
+                    .Include(a => a.Issues)
+                    .Where(a => a.TenantId == _tenantProvider.GetTenantId() &&
+                               (string.IsNullOrEmpty(request.SearchTerm) || 
+                                a.PageUrl.Contains(request.SearchTerm) ||
+                                a.PageTitle.Contains(request.SearchTerm) ||
+                                a.AuditType.Contains(request.SearchTerm)))
+                    .AsQueryable();
 
                 if (!string.IsNullOrEmpty(request.SortBy))
                 {
@@ -90,7 +93,7 @@ namespace BARQ.Application.Services
             {
                 var audits = await _context.AccessibilityAudits
                     .Include(a => a.Issues)
-                    .Where(a => a.PageUrl == pageUrl)
+                    .Where(a => a.TenantId == _tenantProvider.GetTenantId() && a.PageUrl == pageUrl)
                     .OrderByDescending(a => a.AuditDate)
                     .ToListAsync();
 
@@ -146,10 +149,11 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var audit = await _context.AccessibilityAudits.FindAsync(id);
+                var audit = await _context.AccessibilityAudits
+                    .FirstOrDefaultAsync(a => a.TenantId == _tenantProvider.GetTenantId() && a.Id == id);
                 if (audit == null)
                 {
-                    return null;
+                    throw new ArgumentException("Accessibility audit not found");
                 }
 
                 audit.PageTitle = request.PageTitle;
@@ -182,7 +186,8 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var audit = await _context.AccessibilityAudits.FindAsync(id);
+                var audit = await _context.AccessibilityAudits
+                    .FirstOrDefaultAsync(a => a.TenantId == _tenantProvider.GetTenantId() && a.Id == id);
                 if (audit == null)
                 {
                     return false;
@@ -263,10 +268,11 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var issue = await _context.AccessibilityIssues.FindAsync(id);
+                var issue = await _context.AccessibilityIssues
+                    .FirstOrDefaultAsync(i => i.TenantId == _tenantProvider.GetTenantId() && i.Id == id);
                 if (issue == null)
                 {
-                    return null;
+                    throw new ArgumentException("Accessibility issue not found");
                 }
 
                 var oldSeverity = issue.Severity;
@@ -320,7 +326,8 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var issue = await _context.AccessibilityIssues.FindAsync(id);
+                var issue = await _context.AccessibilityIssues
+                    .FirstOrDefaultAsync(i => i.TenantId == _tenantProvider.GetTenantId() && i.Id == id);
                 if (issue == null)
                 {
                     return false;
@@ -350,7 +357,7 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var query = _context.AccessibilityIssues.Where(i => i.AccessibilityAuditId == auditId).AsQueryable();
+                var query = _context.AccessibilityIssues.Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.AccessibilityAuditId == auditId);
 
                 if (!string.IsNullOrEmpty(request.SearchTerm))
                 {
@@ -398,7 +405,7 @@ namespace BARQ.Application.Services
             try
             {
                 var issues = await _context.AccessibilityIssues
-                    .Where(i => i.Severity == severity && i.Status == "Open")
+                    .Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Severity == severity && i.Status == "Open")
                     .OrderByDescending(i => i.CreatedAt)
                     .ToListAsync();
 
@@ -416,7 +423,7 @@ namespace BARQ.Application.Services
             try
             {
                 var issues = await _context.AccessibilityIssues
-                    .Where(i => i.Status == status)
+                    .Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Status == status)
                     .OrderByDescending(i => i.CreatedAt)
                     .ToListAsync();
 
@@ -433,7 +440,8 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var issue = await _context.AccessibilityIssues.FindAsync(id);
+                var issue = await _context.AccessibilityIssues
+                    .FirstOrDefaultAsync(i => i.TenantId == _tenantProvider.GetTenantId() && i.Id == id);
                 if (issue == null)
                 {
                     return false;
@@ -463,7 +471,8 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var issue = await _context.AccessibilityIssues.FindAsync(id);
+                var issue = await _context.AccessibilityIssues
+                    .FirstOrDefaultAsync(i => i.TenantId == _tenantProvider.GetTenantId() && i.Id == id);
                 if (issue == null)
                 {
                     return false;
@@ -494,7 +503,8 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var issue = await _context.AccessibilityIssues.FindAsync(id);
+                var issue = await _context.AccessibilityIssues
+                    .FirstOrDefaultAsync(i => i.TenantId == _tenantProvider.GetTenantId() && i.Id == id);
                 if (issue == null || issue.Status != "Fixed")
                 {
                     return false;
@@ -523,19 +533,27 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var totalAudits = await _context.AccessibilityAudits.CountAsync();
-                var totalIssues = await _context.AccessibilityIssues.CountAsync();
-                var openIssues = await _context.AccessibilityIssues.CountAsync(i => i.Status == "Open");
-                var criticalIssues = await _context.AccessibilityIssues.CountAsync(i => i.Severity == "Critical" && i.Status == "Open");
+                var totalAudits = await _context.AccessibilityAudits
+                    .Where(a => a.TenantId == _tenantProvider.GetTenantId())
+                    .CountAsync();
+                var totalIssues = await _context.AccessibilityIssues
+                    .Where(i => i.TenantId == _tenantProvider.GetTenantId())
+                    .CountAsync();
+                var openIssues = await _context.AccessibilityIssues
+                    .Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Status == "Open")
+                    .CountAsync();
+                var criticalIssues = await _context.AccessibilityIssues
+                    .Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Severity == "Critical" && i.Status == "Open")
+                    .CountAsync();
 
                 var issuesBySeverity = await _context.AccessibilityIssues
-                    .Where(i => i.Status == "Open")
+                    .Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Status == "Open")
                     .GroupBy(i => i.Severity)
                     .Select(g => new { Severity = g.Key, Count = g.Count() })
                     .ToListAsync();
 
                 var issuesByType = await _context.AccessibilityIssues
-                    .Where(i => i.Status == "Open")
+                    .Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Status == "Open")
                     .GroupBy(i => i.IssueType)
                     .Select(g => new { Type = g.Key, Count = g.Count() })
                     .OrderByDescending(x => x.Count)
@@ -543,7 +561,7 @@ namespace BARQ.Application.Services
                     .ToListAsync();
 
                 var avgComplianceScore = await _context.AccessibilityAudits
-                    .Where(a => a.Status == "Completed")
+                    .Where(a => a.TenantId == _tenantProvider.GetTenantId() && a.Status == "Completed")
                     .AverageAsync(a => (double?)a.ComplianceScore) ?? 0;
 
                 return new Dictionary<string, object>
@@ -568,7 +586,9 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var query = _context.AccessibilityAudits.AsQueryable();
+                var query = _context.AccessibilityAudits
+                    .Where(a => a.TenantId == _tenantProvider.GetTenantId())
+                    .AsQueryable();
 
                 if (!string.IsNullOrEmpty(pageUrl))
                 {
@@ -623,7 +643,7 @@ namespace BARQ.Application.Services
             try
             {
                 var issues = await _context.AccessibilityIssues
-                    .Where(i => i.Severity == "Critical" && i.Status == "Open")
+                    .Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Severity == "Critical" && i.Status == "Open")
                     .OrderByDescending(i => i.CreatedAt)
                     .ToListAsync();
 
@@ -641,7 +661,7 @@ namespace BARQ.Application.Services
             try
             {
                 var issues = await _context.AccessibilityIssues
-                    .Where(i => issueIds.Contains(i.Id))
+                    .Where(i => i.TenantId == _tenantProvider.GetTenantId() && issueIds.Contains(i.Id))
                     .ToListAsync();
 
                 foreach (var issue in issues)
@@ -679,11 +699,13 @@ namespace BARQ.Application.Services
 
         private async SystemTask UpdateAuditStatisticsAsync(Guid auditId)
         {
-            var audit = await _context.AccessibilityAudits.FindAsync(auditId);
+            var audit = await _context.AccessibilityAudits
+                .Where(a => a.TenantId == _tenantProvider.GetTenantId() && a.Id == auditId)
+                .FirstOrDefaultAsync();
             if (audit == null) return;
 
             var issues = await _context.AccessibilityIssues
-                .Where(i => i.AccessibilityAuditId == auditId && !i.IsDeleted)
+                .Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.AccessibilityAuditId == auditId && !i.IsDeleted)
                 .ToListAsync();
 
             audit.TotalIssues = issues.Count;

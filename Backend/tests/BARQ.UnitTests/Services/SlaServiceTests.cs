@@ -1,15 +1,25 @@
 using Xunit;
 using BARQ.Application.Services.Workflow;
+using BARQ.UnitTests.Mocks;
+using Microsoft.EntityFrameworkCore;
+using BARQ.Infrastructure.Data;
 
 namespace BARQ.UnitTests.Services;
 
 public class SlaServiceTests
 {
     private readonly SlaService _slaService;
+    private readonly BarqDbContext _context;
+    private readonly MockTenantProvider _tenantProvider;
 
     public SlaServiceTests()
     {
-        _slaService = new SlaService();
+        var options = new DbContextOptionsBuilder<BarqDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+        _tenantProvider = new MockTenantProvider();
+        _context = new BarqDbContext(options, _tenantProvider);
+        _slaService = new SlaService(_context, _tenantProvider);
     }
 
     [Fact]

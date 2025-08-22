@@ -2,6 +2,7 @@ using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -12,11 +13,13 @@ namespace BARQ.Application.Services
     public class LanguageService : ILanguageService
     {
         private readonly BarqDbContext _context;
+        private readonly ITenantProvider _tenantProvider;
         private readonly ILogger<LanguageService> _logger;
 
-        public LanguageService(BarqDbContext context, ILogger<LanguageService> logger)
+        public LanguageService(BarqDbContext context, ITenantProvider tenantProvider, ILogger<LanguageService> logger)
         {
             _context = context;
+            _tenantProvider = tenantProvider;
             _logger = logger;
         }
 

@@ -1,6 +1,7 @@
 using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,13 +12,16 @@ namespace BARQ.Application.Services
     public class TemplateValidationService : ITemplateValidationService
     {
         private readonly BarqDbContext _context;
+        private readonly ITenantProvider _tenantProvider;
         private readonly ILogger<TemplateValidationService> _logger;
 
         public TemplateValidationService(
             BarqDbContext context,
+            ITenantProvider tenantProvider,
             ILogger<TemplateValidationService> logger)
         {
             _context = context;
+            _tenantProvider = tenantProvider;
             _logger = logger;
         }
 
@@ -25,7 +29,9 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var template = await _context.Templates.FindAsync(templateId);
+                var template = await _context.Templates
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == templateId)
+                    .FirstOrDefaultAsync();
                 if (template == null)
                 {
                     return new TemplateValidationResult
@@ -129,13 +135,9 @@ namespace BARQ.Application.Services
                 .Include(cv => cv.Template)
                 .Include(cv => cv.Task)
                 .Include(cv => cv.ResolvedByUser)
-                .AsQueryable();
-
-            if (templateId.HasValue)
-                query = query.Where(cv => cv.TemplateId == templateId);
-
-            if (taskId.HasValue)
-                query = query.Where(cv => cv.TaskId == taskId);
+                .Where(cv => cv.TenantId == _tenantProvider.GetTenantId() && 
+                            (!templateId.HasValue || cv.TemplateId == templateId) &&
+                            (!taskId.HasValue || cv.TaskId == taskId));
 
             return await query.OrderByDescending(cv => cv.CreatedAt).ToListAsync();
         }
@@ -144,7 +146,9 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var violation = await _context.ConstraintViolations.FindAsync(violationId);
+                var violation = await _context.ConstraintViolations
+                    .Where(cv => cv.TenantId == _tenantProvider.GetTenantId() && cv.Id == violationId)
+                    .FirstOrDefaultAsync();
                 if (violation == null) return false;
 
                 violation.IsResolved = true;
@@ -167,7 +171,7 @@ namespace BARQ.Application.Services
         public async Task<IEnumerable<TechnologyConstraint>> GetActiveConstraintsAsync()
         {
             return await _context.TechnologyConstraints
-                .Where(tc => tc.IsActive)
+                .Where(tc => tc.TenantId == _tenantProvider.GetTenantId() && tc.IsActive)
                 .OrderBy(tc => tc.Priority)
                 .ToListAsync();
         }
@@ -177,6 +181,7 @@ namespace BARQ.Application.Services
             var constraint = new TechnologyConstraint
             {
                 Id = Guid.NewGuid(),
+                TenantId = _tenantProvider.GetTenantId(),
                 Name = request.Name,
                 Description = request.Description,
                 ConstraintType = request.ConstraintType,
@@ -198,7 +203,9 @@ namespace BARQ.Application.Services
 
         public async Task<TechnologyConstraint> UpdateConstraintAsync(Guid constraintId, UpdateTechnologyConstraintRequest request)
         {
-            var constraint = await _context.TechnologyConstraints.FindAsync(constraintId);
+            var constraint = await _context.TechnologyConstraints
+                .Where(tc => tc.TenantId == _tenantProvider.GetTenantId() && tc.Id == constraintId)
+                .FirstOrDefaultAsync();
             if (constraint == null) throw new ArgumentException("Constraint not found");
 
             if (!string.IsNullOrEmpty(request.Name)) constraint.Name = request.Name;
@@ -223,7 +230,9 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var constraint = await _context.TechnologyConstraints.FindAsync(constraintId);
+                var constraint = await _context.TechnologyConstraints
+                    .Where(tc => tc.TenantId == _tenantProvider.GetTenantId() && tc.Id == constraintId)
+                    .FirstOrDefaultAsync();
                 if (constraint == null) return false;
 
                 constraint.IsDeleted = true;

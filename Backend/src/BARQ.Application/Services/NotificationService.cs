@@ -2,6 +2,7 @@ using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -15,39 +16,30 @@ namespace BARQ.Application.Services
         private readonly ILogger<NotificationService> _logger;
         private readonly INotificationPreferenceService _preferenceService;
         private readonly IEmailService _emailService;
+        private readonly ITenantProvider _tenantProvider;
 
         public NotificationService(
             BarqDbContext context, 
             ILogger<NotificationService> logger,
             INotificationPreferenceService preferenceService,
-            IEmailService emailService)
+            IEmailService emailService,
+            ITenantProvider tenantProvider)
         {
             _context = context;
             _logger = logger;
             _preferenceService = preferenceService;
             _emailService = emailService;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<PagedResult<NotificationDto>> GetNotificationsAsync(Guid tenantId, NotificationListRequest request)
         {
             var query = _context.Notifications
-                .Where(n => n.TenantId == tenantId)
+                .Where(n => n.TenantId == tenantId &&
+                           (!request.UserId.HasValue || n.UserId == request.UserId.Value) &&
+                           (string.IsNullOrEmpty(request.Type) || n.Type == request.Type) &&
+                           (!request.IsRead.HasValue || n.IsRead == request.IsRead.Value))
                 .AsQueryable();
-
-            if (request.UserId.HasValue)
-            {
-                query = query.Where(n => n.UserId == request.UserId.Value);
-            }
-
-            if (!string.IsNullOrEmpty(request.Type))
-            {
-                query = query.Where(n => n.Type == request.Type);
-            }
-
-            if (request.IsRead.HasValue)
-            {
-                query = query.Where(n => n.IsRead == request.IsRead.Value);
-            }
 
             var totalCount = await query.CountAsync();
             var notifications = await query
@@ -86,6 +78,7 @@ namespace BARQ.Application.Services
         public async Task<NotificationDto?> GetNotificationByIdAsync(Guid id)
         {
             var notification = await _context.Notifications
+                .Where(n => n.TenantId == _tenantProvider.GetTenantId())
                 .FirstOrDefaultAsync(n => n.Id == id);
 
             if (notification == null)
@@ -164,6 +157,7 @@ namespace BARQ.Application.Services
         public async Task<bool> MarkNotificationAsReadAsync(Guid notificationId)
         {
             var notification = await _context.Notifications
+                .Where(n => n.TenantId == _tenantProvider.GetTenantId())
                 .FirstOrDefaultAsync(n => n.Id == notificationId);
 
             if (notification == null)
@@ -180,7 +174,7 @@ namespace BARQ.Application.Services
         public async Task<bool> MarkNotificationsAsReadAsync(MarkNotificationReadRequest request)
         {
             var notifications = await _context.Notifications
-                .Where(n => request.NotificationIds.Contains(n.Id))
+                .Where(n => n.TenantId == _tenantProvider.GetTenantId() && request.NotificationIds.Contains(n.Id))
                 .ToListAsync();
 
             foreach (var notification in notifications)
@@ -197,6 +191,7 @@ namespace BARQ.Application.Services
         public async Task<bool> DeleteNotificationAsync(Guid id)
         {
             var notification = await _context.Notifications
+                .Where(n => n.TenantId == _tenantProvider.GetTenantId())
                 .FirstOrDefaultAsync(n => n.Id == id);
 
             if (notification == null)
@@ -209,8 +204,13 @@ namespace BARQ.Application.Services
 
         public async Task<int> GetUnreadNotificationCountAsync(Guid userId)
         {
+            var user = await _context.Users
+                .Where(u => u.TenantId == _tenantProvider.GetTenantId())
+                .FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return 0;
+            
             return await _context.Notifications
-                .Where(n => n.UserId == userId && !n.IsRead)
+                .Where(n => n.TenantId == user.TenantId && n.UserId == userId && !n.IsRead)
                 .CountAsync();
         }
 
@@ -242,8 +242,13 @@ namespace BARQ.Application.Services
 
         public async Task<List<NotificationDto>> GetRecentNotificationsAsync(Guid userId, int count = 10)
         {
+            var user = await _context.Users
+                .Where(u => u.TenantId == _tenantProvider.GetTenantId())
+                .FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return new List<NotificationDto>();
+            
             return await _context.Notifications
-                .Where(n => n.UserId == userId)
+                .Where(n => n.TenantId == user.TenantId && n.UserId == userId)
                 .OrderByDescending(n => n.CreatedAt)
                 .Take(count)
                 .Select(n => new NotificationDto
@@ -268,39 +273,20 @@ namespace BARQ.Application.Services
 
         public async Task<PagedResult<NotificationCenterDto>> GetNotificationCenterAsync(Guid userId, NotificationCenterRequest request)
         {
+            var user = await _context.Users
+                .Where(u => u.TenantId == _tenantProvider.GetTenantId())
+                .FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return new PagedResult<NotificationCenterDto> { Items = new List<NotificationCenterDto>() };
+            
             var query = _context.Notifications
-                .Where(n => n.UserId == userId)
+                .Where(n => n.TenantId == user.TenantId && n.UserId == userId &&
+                           (string.IsNullOrEmpty(request.Category) || n.Category == request.Category) &&
+                           (string.IsNullOrEmpty(request.Type) || n.Type == request.Type) &&
+                           (!request.IsRead.HasValue || n.IsRead == request.IsRead.Value) &&
+                           (string.IsNullOrEmpty(request.Priority) || n.Priority == request.Priority) &&
+                           (!request.FromDate.HasValue || n.CreatedAt >= request.FromDate.Value) &&
+                           (!request.ToDate.HasValue || n.CreatedAt <= request.ToDate.Value))
                 .AsQueryable();
-
-            if (!string.IsNullOrEmpty(request.Category))
-            {
-                query = query.Where(n => n.Category == request.Category);
-            }
-
-            if (!string.IsNullOrEmpty(request.Type))
-            {
-                query = query.Where(n => n.Type == request.Type);
-            }
-
-            if (request.IsRead.HasValue)
-            {
-                query = query.Where(n => n.IsRead == request.IsRead.Value);
-            }
-
-            if (!string.IsNullOrEmpty(request.Priority))
-            {
-                query = query.Where(n => n.Priority == request.Priority);
-            }
-
-            if (request.FromDate.HasValue)
-            {
-                query = query.Where(n => n.CreatedAt >= request.FromDate.Value);
-            }
-
-            if (request.ToDate.HasValue)
-            {
-                query = query.Where(n => n.CreatedAt <= request.ToDate.Value);
-            }
 
             var totalCount = await query.CountAsync();
             var notifications = await query
@@ -340,8 +326,13 @@ namespace BARQ.Application.Services
         public async Task<NotificationStatsDto> GetNotificationStatsAsync(Guid userId)
         {
             var today = DateTime.UtcNow.Date;
+            var user = await _context.Users
+                .Where(u => u.TenantId == _tenantProvider.GetTenantId())
+                .FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return new NotificationStatsDto();
+            
             var notifications = await _context.Notifications
-                .Where(n => n.UserId == userId)
+                .Where(n => n.TenantId == user.TenantId && n.UserId == userId)
                 .ToListAsync();
 
             return new NotificationStatsDto
@@ -361,7 +352,7 @@ namespace BARQ.Application.Services
         {
             var notificationIds = request.NotificationIds;
             var notifications = await _context.Notifications
-                .Where(n => n.UserId == userId && notificationIds.Contains(n.Id))
+                .Where(n => n.TenantId == _tenantProvider.GetTenantId() && n.UserId == userId && notificationIds.Contains(n.Id))
                 .ToListAsync();
 
             foreach (var notification in notifications)
@@ -390,8 +381,13 @@ namespace BARQ.Application.Services
 
         public async Task<List<NotificationCenterDto>> GetActionRequiredNotificationsAsync(Guid userId)
         {
+            var user = await _context.Users
+                .Where(u => u.TenantId == _tenantProvider.GetTenantId())
+                .FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return new List<NotificationCenterDto>();
+            
             return await _context.Notifications
-                .Where(n => n.UserId == userId && n.RequiresAction && !n.IsRead)
+                .Where(n => n.TenantId == user.TenantId && n.UserId == userId && n.RequiresAction && !n.IsRead)
                 .OrderByDescending(n => n.CreatedAt)
                 .Select(n => new NotificationCenterDto
                 {
@@ -419,7 +415,9 @@ namespace BARQ.Application.Services
             string? actionUrl = null, string? actionData = null, string? sourceEntity = null, 
             string? sourceEntityId = null, DateTime? expiresAt = null)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await _context.Users
+                .Where(u => u.TenantId == _tenantProvider.GetTenantId())
+                .FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
                 return false;
 
@@ -454,7 +452,7 @@ namespace BARQ.Application.Services
             string type, string priority = "Medium", string? category = null)
         {
             var users = await _context.Users
-                .Where(u => userIds.Contains(u.Id))
+                .Where(u => u.TenantId == _tenantProvider.GetTenantId() && userIds.Contains(u.Id))
                 .ToListAsync();
 
             var notifications = users.Select(user => new Notification
@@ -520,10 +518,10 @@ namespace BARQ.Application.Services
                             );
                             break;
                         case "SMS":
-                            success = true; // Placeholder
+                            success = await SendEmailNotificationAsync(notification);
                             break;
                         case "InApp":
-                            success = true; // In-app notifications are already created
+                            success = true;
                             break;
                     }
 

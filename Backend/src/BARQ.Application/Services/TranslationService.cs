@@ -2,6 +2,7 @@ using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -14,20 +15,24 @@ namespace BARQ.Application.Services
         private readonly BarqDbContext _context;
         private readonly ILogger<TranslationService> _logger;
         private readonly IMemoryCache _cache;
+        private readonly ITenantProvider _tenantProvider;
         private const string TRANSLATION_CACHE_KEY = "translations_{0}_{1}"; // languageCode_category
 
-        public TranslationService(BarqDbContext context, ILogger<TranslationService> logger, IMemoryCache cache)
+        public TranslationService(BarqDbContext context, ILogger<TranslationService> logger, IMemoryCache cache, ITenantProvider tenantProvider)
         {
             _context = context;
             _logger = logger;
             _cache = cache;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<PagedResult<TranslationDto>> GetTranslationsAsync(ListRequest request)
         {
             try
             {
-                var query = _context.Translations.AsQueryable();
+                var query = _context.Translations
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId())
+                    .AsQueryable();
 
                 if (!string.IsNullOrEmpty(request.SearchTerm))
                 {
@@ -74,7 +79,9 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var translation = await _context.Translations.FindAsync(id);
+                var translation = await _context.Translations
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == id)
+                    .FirstOrDefaultAsync();
                 return translation != null ? MapToDto(translation) : null;
             }
             catch (Exception ex)
@@ -89,6 +96,7 @@ namespace BARQ.Application.Services
             try
             {
                 var translation = await _context.Translations
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId())
                     .FirstOrDefaultAsync(t => t.LanguageCode == languageCode && t.Key == key && t.IsActive);
 
                 return translation != null ? MapToDto(translation) : null;
@@ -112,12 +120,11 @@ namespace BARQ.Application.Services
                 }
 
                 var query = _context.Translations
-                    .Where(t => t.LanguageCode == languageCode && t.IsActive && t.IsApproved);
-
-                if (!string.IsNullOrEmpty(category))
-                {
-                    query = query.Where(t => t.Category == category);
-                }
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId() && 
+                               t.LanguageCode == languageCode && 
+                               t.IsActive && 
+                               t.IsApproved &&
+                               (string.IsNullOrEmpty(category) || t.Category == category));
 
                 var translations = await query
                     .OrderBy(t => t.Priority)
@@ -140,6 +147,7 @@ namespace BARQ.Application.Services
             try
             {
                 var existingTranslation = await _context.Translations
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId())
                     .FirstOrDefaultAsync(t => t.LanguageCode == request.LanguageCode && t.Key == request.Key);
 
                 if (existingTranslation != null)
@@ -188,10 +196,12 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var translation = await _context.Translations.FindAsync(id);
+                var translation = await _context.Translations
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == id)
+                    .FirstOrDefaultAsync();
                 if (translation == null)
                 {
-                    return null;
+                    throw new ArgumentException($"Translation with ID {id} not found");
                 }
 
                 var oldCategory = translation.Category;
@@ -229,7 +239,9 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var translation = await _context.Translations.FindAsync(id);
+                var translation = await _context.Translations
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId())
+                    .FirstOrDefaultAsync(t => t.Id == id);
                 if (translation == null)
                 {
                     return false;
@@ -264,6 +276,7 @@ namespace BARQ.Application.Services
                 foreach (var translationData in request.Translations)
                 {
                     var existingTranslation = await _context.Translations
+                        .Where(t => t.TenantId == _tenantProvider.GetTenantId())
                         .FirstOrDefaultAsync(t => t.LanguageCode == request.LanguageCode && t.Key == translationData.Key);
 
                     if (existingTranslation == null)
@@ -313,7 +326,9 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var translation = await _context.Translations.FindAsync(id);
+                var translation = await _context.Translations
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId())
+                    .FirstOrDefaultAsync(t => t.Id == id);
                 if (translation == null)
                 {
                     return false;
@@ -344,7 +359,9 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var translation = await _context.Translations.FindAsync(id);
+                var translation = await _context.Translations
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId())
+                    .FirstOrDefaultAsync(t => t.Id == id);
                 if (translation == null)
                 {
                     return false;
@@ -373,7 +390,7 @@ namespace BARQ.Application.Services
             try
             {
                 var translations = await _context.Translations
-                    .Where(t => t.LanguageCode == languageCode && t.Category == category && t.IsActive)
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == languageCode && t.Category == category && t.IsActive)
                     .OrderBy(t => t.Priority)
                     .ThenBy(t => t.Key)
                     .ToListAsync();
@@ -391,12 +408,11 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var query = _context.Translations.Where(t => !t.IsApproved && t.IsActive);
-
-                if (!string.IsNullOrEmpty(languageCode))
-                {
-                    query = query.Where(t => t.LanguageCode == languageCode);
-                }
+                var query = _context.Translations
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId() && 
+                               !t.IsApproved && 
+                               t.IsActive &&
+                               (string.IsNullOrEmpty(languageCode) || t.LanguageCode == languageCode));
 
                 var translations = await query
                     .OrderBy(t => t.TranslatedAt)
@@ -415,26 +431,28 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var language = await _context.Languages.FirstOrDefaultAsync(l => l.Code == languageCode);
+                var language = await _context.Languages
+                    .Where(l => l.TenantId == _tenantProvider.GetTenantId())
+                    .FirstOrDefaultAsync(l => l.Code == languageCode);
                 if (language == null)
                 {
                     throw new InvalidOperationException($"Language not found: {languageCode}");
                 }
 
                 var totalKeys = await _context.Translations
-                    .Where(t => t.LanguageCode == "en") // Assuming English is the source language
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == "en") // Assuming English is the source language
                     .CountAsync();
 
                 var translatedKeys = await _context.Translations
-                    .Where(t => t.LanguageCode == languageCode && t.IsActive)
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == languageCode && t.IsActive)
                     .CountAsync();
 
                 var approvedKeys = await _context.Translations
-                    .Where(t => t.LanguageCode == languageCode && t.IsActive && t.IsApproved)
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == languageCode && t.IsActive && t.IsApproved)
                     .CountAsync();
 
                 var categoryStats = await _context.Translations
-                    .Where(t => t.LanguageCode == languageCode && t.IsActive)
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == languageCode && t.IsActive)
                     .GroupBy(t => t.Category)
                     .Select(g => new CategoryStats
                     {
@@ -447,7 +465,7 @@ namespace BARQ.Application.Services
                 foreach (var catStat in categoryStats)
                 {
                     var totalInCategory = await _context.Translations
-                        .Where(t => t.LanguageCode == "en" && t.Category == catStat.Category)
+                        .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == "en" && t.Category == catStat.Category)
                         .CountAsync();
                     
                     catStat.TotalKeys = totalInCategory;
@@ -457,7 +475,7 @@ namespace BARQ.Application.Services
                 }
 
                 var lastUpdated = await _context.Translations
-                    .Where(t => t.LanguageCode == languageCode)
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == languageCode)
                     .MaxAsync(t => (DateTime?)t.UpdatedAt);
 
                 return new TranslationStatsDto
@@ -484,7 +502,9 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var languages = await _context.Languages.Where(l => l.IsEnabled).ToListAsync();
+                var languages = await _context.Languages
+                    .Where(l => l.TenantId == _tenantProvider.GetTenantId() && l.IsEnabled)
+                    .ToListAsync();
                 var stats = new List<TranslationStatsDto>();
 
                 foreach (var language in languages)
@@ -566,8 +586,8 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var sourceQuery = _context.Translations.Where(t => t.LanguageCode == "en" && t.IsActive);
-                var targetQuery = _context.Translations.Where(t => t.LanguageCode == languageCode && t.IsActive);
+                var sourceQuery = _context.Translations.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == "en" && t.IsActive);
+                var targetQuery = _context.Translations.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == languageCode && t.IsActive);
 
                 if (!string.IsNullOrEmpty(category))
                 {
@@ -593,7 +613,7 @@ namespace BARQ.Application.Services
             {
                 var missingKeys = await GetMissingTranslationKeysAsync(targetLanguageCode);
                 var sourceTranslations = await _context.Translations
-                    .Where(t => t.LanguageCode == sourceLanguageCode && missingKeys.Contains(t.Key) && t.IsActive)
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == sourceLanguageCode && missingKeys.Contains(t.Key) && t.IsActive)
                     .ToListAsync();
 
                 var newTranslations = sourceTranslations.Select(st => new Translation

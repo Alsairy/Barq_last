@@ -2,6 +2,7 @@ using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,11 +14,13 @@ namespace BARQ.Application.Services
     {
         private readonly BarqDbContext _context;
         private readonly ILogger<UserLanguagePreferenceService> _logger;
+        private readonly ITenantProvider _tenantProvider;
 
-        public UserLanguagePreferenceService(BarqDbContext context, ILogger<UserLanguagePreferenceService> logger)
+        public UserLanguagePreferenceService(BarqDbContext context, ILogger<UserLanguagePreferenceService> logger, ITenantProvider tenantProvider)
         {
             _context = context;
             _logger = logger;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<PagedResult<UserLanguagePreferenceDto>> GetUserLanguagePreferencesAsync(Guid userId, ListRequest request)
@@ -26,15 +29,11 @@ namespace BARQ.Application.Services
             {
                 var query = _context.UserLanguagePreferences
                     .Include(ulp => ulp.Language)
-                    .Where(ulp => ulp.UserId == userId)
-                    .AsQueryable();
-
-                if (!string.IsNullOrEmpty(request.SearchTerm))
-                {
-                    query = query.Where(ulp => ulp.Language.Name.Contains(request.SearchTerm) ||
-                                             ulp.Language.NativeName.Contains(request.SearchTerm) ||
-                                             ulp.LanguageCode.Contains(request.SearchTerm));
-                }
+                    .Where(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.UserId == userId &&
+                                  (string.IsNullOrEmpty(request.SearchTerm) ||
+                                   ulp.Language.Name.Contains(request.SearchTerm) ||
+                                   ulp.Language.NativeName.Contains(request.SearchTerm) ||
+                                   ulp.LanguageCode.Contains(request.SearchTerm)));
 
                 if (!string.IsNullOrEmpty(request.SortBy))
                 {
@@ -76,7 +75,7 @@ namespace BARQ.Application.Services
             {
                 var preference = await _context.UserLanguagePreferences
                     .Include(ulp => ulp.Language)
-                    .FirstOrDefaultAsync(ulp => ulp.Id == id);
+                    .FirstOrDefaultAsync(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.Id == id);
 
                 return preference != null ? MapToDto(preference) : null;
             }
@@ -93,7 +92,7 @@ namespace BARQ.Application.Services
             {
                 var preference = await _context.UserLanguagePreferences
                     .Include(ulp => ulp.Language)
-                    .FirstOrDefaultAsync(ulp => ulp.UserId == userId && ulp.IsDefault);
+                    .FirstOrDefaultAsync(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.UserId == userId && ulp.IsDefault);
 
                 return preference != null ? MapToDto(preference) : null;
             }
@@ -110,7 +109,7 @@ namespace BARQ.Application.Services
             {
                 var preference = await _context.UserLanguagePreferences
                     .Include(ulp => ulp.Language)
-                    .FirstOrDefaultAsync(ulp => ulp.UserId == userId && ulp.LanguageCode == languageCode);
+                    .FirstOrDefaultAsync(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.UserId == userId && ulp.LanguageCode == languageCode);
 
                 return preference != null ? MapToDto(preference) : null;
             }
@@ -125,21 +124,23 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var language = await _context.Languages.FindAsync(Guid.Parse(languageId));
+                var language = await _context.Languages
+                    .Where(l => l.TenantId == _tenantProvider.GetTenantId())
+                    .FirstOrDefaultAsync(l => l.Id == Guid.Parse(languageId));
                 if (language == null || !language.IsEnabled)
                 {
                     throw new InvalidOperationException("Language not found or not enabled");
                 }
 
                 var existingPreference = await _context.UserLanguagePreferences
-                    .FirstOrDefaultAsync(ulp => ulp.UserId == userId && ulp.LanguageCode == language.Code);
+                    .FirstOrDefaultAsync(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.UserId == userId && ulp.LanguageCode == language.Code);
 
                 if (existingPreference != null)
                 {
                     throw new InvalidOperationException($"User already has preference for language '{language.Code}'");
                 }
 
-                var isFirstPreference = !await _context.UserLanguagePreferences.AnyAsync(ulp => ulp.UserId == userId);
+                var isFirstPreference = !await _context.UserLanguagePreferences.AnyAsync(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.UserId == userId);
 
                 var preference = new UserLanguagePreference
                 {
@@ -180,16 +181,18 @@ namespace BARQ.Application.Services
             {
                 var preference = await _context.UserLanguagePreferences
                     .Include(ulp => ulp.Language)
-                    .FirstOrDefaultAsync(ulp => ulp.Id == id);
+                    .FirstOrDefaultAsync(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.Id == id);
 
                 if (preference == null)
                 {
-                    return null;
+                    throw new ArgumentException("User language preference not found");
                 }
 
                 if (request.LanguageId != null)
                 {
-                    var language = await _context.Languages.FindAsync(Guid.Parse(request.LanguageId));
+                    var language = await _context.Languages
+                        .Where(l => l.TenantId == _tenantProvider.GetTenantId())
+                        .FirstOrDefaultAsync(l => l.Id == Guid.Parse(request.LanguageId));
                     if (language == null || !language.IsEnabled)
                     {
                         throw new InvalidOperationException("Language not found or not enabled");
@@ -242,7 +245,9 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var preference = await _context.UserLanguagePreferences.FindAsync(id);
+                var preference = await _context.UserLanguagePreferences
+                    .Where(p => p.TenantId == _tenantProvider.GetTenantId())
+                    .FirstOrDefaultAsync(p => p.Id == id);
                 if (preference == null)
                 {
                     return false;
@@ -251,7 +256,7 @@ namespace BARQ.Application.Services
                 if (preference.IsDefault)
                 {
                     var otherPreference = await _context.UserLanguagePreferences
-                        .FirstOrDefaultAsync(ulp => ulp.UserId == preference.UserId && ulp.Id != id);
+                        .FirstOrDefaultAsync(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.UserId == preference.UserId && ulp.Id != id);
 
                     if (otherPreference != null)
                     {
@@ -283,7 +288,7 @@ namespace BARQ.Application.Services
             try
             {
                 var preference = await _context.UserLanguagePreferences
-                    .FirstOrDefaultAsync(ulp => ulp.Id == preferenceId && ulp.UserId == userId);
+                    .FirstOrDefaultAsync(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.Id == preferenceId && ulp.UserId == userId);
 
                 if (preference == null)
                 {
@@ -315,7 +320,7 @@ namespace BARQ.Application.Services
             try
             {
                 var preferences = await _context.UserLanguagePreferences
-                    .Where(ulp => ulp.UserId == userId)
+                    .Where(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.UserId == userId)
                     .ToListAsync();
 
                 var defaultPreference = preferences.FirstOrDefault(p => p.IsDefault);
@@ -344,7 +349,7 @@ namespace BARQ.Application.Services
             try
             {
                 var defaultPreference = await _context.UserLanguagePreferences
-                    .FirstOrDefaultAsync(ulp => ulp.UserId == userId && ulp.IsDefault);
+                    .FirstOrDefaultAsync(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.UserId == userId && ulp.IsDefault);
 
                 if (defaultPreference == null)
                 {
@@ -379,8 +384,8 @@ namespace BARQ.Application.Services
             {
                 var preferences = await _context.UserLanguagePreferences
                     .Include(ulp => ulp.Language)
-                    .Where(ulp => ulp.HighContrast || ulp.LargeText || ulp.ReducedMotion || 
-                                ulp.ScreenReaderOptimized || ulp.KeyboardNavigation != "Standard")
+                    .Where(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && (ulp.HighContrast || ulp.LargeText || ulp.ReducedMotion || 
+                                ulp.ScreenReaderOptimized || ulp.KeyboardNavigation != "Standard"))
                     .ToListAsync();
 
                 return preferences.Select(MapToDto).ToList();
@@ -398,6 +403,7 @@ namespace BARQ.Application.Services
             {
                 var languageUsage = await _context.UserLanguagePreferences
                     .Include(ulp => ulp.Language)
+                    .Where(ulp => ulp.TenantId == _tenantProvider.GetTenantId())
                     .GroupBy(ulp => ulp.LanguageCode)
                     .Select(g => new
                     {
@@ -413,11 +419,13 @@ namespace BARQ.Application.Services
                     .ToListAsync();
 
                 var totalUsers = await _context.UserLanguagePreferences
+                    .Where(ulp => ulp.TenantId == _tenantProvider.GetTenantId())
                     .Select(ulp => ulp.UserId)
                     .Distinct()
                     .CountAsync();
 
                 var accessibilityStats = await _context.UserLanguagePreferences
+                    .Where(ulp => ulp.TenantId == _tenantProvider.GetTenantId())
                     .GroupBy(ulp => 1)
                     .Select(g => new
                     {
@@ -458,7 +466,7 @@ namespace BARQ.Application.Services
         private async SystemTask ClearDefaultLanguagePreferenceAsync(Guid userId)
         {
             var currentDefault = await _context.UserLanguagePreferences
-                .FirstOrDefaultAsync(ulp => ulp.UserId == userId && ulp.IsDefault);
+                .FirstOrDefaultAsync(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.UserId == userId && ulp.IsDefault);
 
             if (currentDefault != null)
             {

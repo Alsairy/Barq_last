@@ -2,6 +2,7 @@ using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +11,12 @@ namespace BARQ.Application.Services
     public class ProjectService : IProjectService
     {
         private readonly BarqDbContext _context;
+        private readonly ITenantProvider _tenantProvider;
 
-        public ProjectService(BarqDbContext context)
+        public ProjectService(BarqDbContext context, ITenantProvider tenantProvider)
         {
             _context = context;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<PagedResult<ProjectDto>> GetProjectsAsync(Guid tenantId, ListRequest request)
@@ -80,6 +83,7 @@ namespace BARQ.Application.Services
                 .Include(p => p.Owner)
                 .Include(p => p.Tasks)
                 .ThenInclude(t => t.AssignedTo)
+                .Where(p => p.TenantId == _tenantProvider.GetTenantId())
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (project == null) return null;
@@ -159,7 +163,7 @@ namespace BARQ.Application.Services
 
         public async Task<ProjectDto> UpdateProjectAsync(Guid id, UpdateProjectRequest request)
         {
-            var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == id);
+            var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == id && p.TenantId == _tenantProvider.GetTenantId());
             if (project == null)
                 throw new ArgumentException("Project not found");
 
@@ -193,7 +197,7 @@ namespace BARQ.Application.Services
 
         public async Task<bool> DeleteProjectAsync(Guid id)
         {
-            var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == id);
+            var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == id && p.TenantId == _tenantProvider.GetTenantId());
             if (project == null) return false;
 
             project.IsDeleted = true;
@@ -205,7 +209,7 @@ namespace BARQ.Application.Services
 
         public async Task<bool> UpdateProjectStatusAsync(Guid projectId, string status)
         {
-            var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
+            var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == projectId && p.TenantId == _tenantProvider.GetTenantId());
             if (project == null) return false;
 
             project.Status = status;
@@ -223,7 +227,7 @@ namespace BARQ.Application.Services
 
         public async Task<bool> UpdateProjectProgressAsync(Guid projectId, decimal progressPercentage)
         {
-            var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
+            var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == projectId && p.TenantId == _tenantProvider.GetTenantId());
             if (project == null) return false;
 
             project.ProgressPercentage = Math.Max(0, Math.Min(100, progressPercentage));
@@ -275,7 +279,7 @@ namespace BARQ.Application.Services
         {
             var template = await _context.Projects
                 .Include(p => p.Tasks)
-                .FirstOrDefaultAsync(p => p.Id == templateId && p.IsTemplate);
+                .FirstOrDefaultAsync(p => p.Id == templateId && p.IsTemplate && p.TenantId == tenantId);
 
             if (template == null)
                 throw new ArgumentException("Template not found");
@@ -337,7 +341,7 @@ namespace BARQ.Application.Services
         public async Task<BulkOperationResult> BulkDeleteProjectsAsync(BulkDeleteRequest request)
         {
             var projects = await _context.Projects
-                .Where(p => request.Ids.Contains(p.Id))
+                .Where(p => request.Ids.Contains(p.Id) && p.TenantId == _tenantProvider.GetTenantId())
                 .ToListAsync();
 
             var successCount = 0;

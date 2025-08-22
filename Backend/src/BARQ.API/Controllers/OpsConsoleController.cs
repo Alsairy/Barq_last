@@ -77,9 +77,9 @@ public class OpsConsoleController : ControllerBase
         try
         {
             var flag = await _featureFlagService.GetFeatureFlagByNameAsync(flagName);
-            if (flag != null && Guid.TryParse(flag.Id, out var flagId))
+            if (flag != null)
             {
-                await _featureFlagService.ToggleFeatureFlagAsync(flagId, enabled, "OpsConsole", "Manual toggle from ops console");
+                await _featureFlagService.ToggleFeatureFlagAsync(flag.Id, enabled, "OpsConsole", "Manual toggle from ops console");
             }
             _logger.LogInformation("Feature flag {FlagName} set to {Enabled} by {User}", 
                 flagName, enabled, User.Identity?.Name);
@@ -115,7 +115,7 @@ public class OpsConsoleController : ControllerBase
             var currentUserId = Guid.Parse(User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value ?? "");
             var request = new CreateImpersonationSessionRequest 
             { 
-                TargetUserId = userId.ToString(), 
+                TargetUserId = userId, 
                 Reason = reason, 
                 DurationMinutes = 60 
             };
@@ -140,8 +140,9 @@ public class OpsConsoleController : ControllerBase
         {
             var currentUserId = Guid.Parse(User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value ?? "");
             var activeSessions = await _impersonationService.GetActiveImpersonationSessionsAsync();
-            if (activeSessions.Any() && Guid.TryParse(activeSessions.First().Id, out var sessionId))
+            if (activeSessions.Any())
             {
+                var sessionId = activeSessions.First().Id;
                 await _impersonationService.EndImpersonationAsync(sessionId, new EndImpersonationSessionRequest { Reason = "Manual stop from ops console" }, currentUserId.ToString());
             }
             
