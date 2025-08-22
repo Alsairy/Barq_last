@@ -124,5 +124,15 @@ public class FlowableGatewayTests : IClassFixture<TestWebApplicationFactory>
 
 public class MockTenantProvider : ITenantProvider
 {
-    public Guid GetTenantId() => Guid.Parse("12345678-1234-1234-1234-123456789012");
+    private Guid _tenantId = Guid.Parse("12345678-1234-1234-1234-123456789012");
+
+    public Guid GetTenantId() => _tenantId;
+
+    public void SetTenantId(Guid tenantId) => _tenantId = tenantId;
+
+    public string GetTenantName() => "Test Tenant";
+
+    public void ClearTenantContext() => _tenantId = Guid.Empty;
+
+    public Guid GetCurrentUserId() => Guid.Parse("12345678-1234-1234-1234-123456789013");
 }
