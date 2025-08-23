@@ -2,12 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: barq-frontend
-  namespace: barq-production
-  labels:
-    app: barq-frontend
-    version: v1.0.0
+  namespace: barq-prod
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: barq-frontend
@@ -15,63 +12,37 @@ spec:
     metadata:
       labels:
         app: barq-frontend
-        version: v1.0.0
     spec:
       containers:
-      - name: frontend
-        image: ghcr.io/alsairy/barq-frontend:v1.0.0
+      - name: app
+        image: ghcr.io/alsairy/barq-frontend:{{TAG}}
         ports:
-        - containerPort: 3000
-          name: http
+        - containerPort: 4173
         env:
         - name: VITE_API_BASE_URL
           value: "https://api.barq.tetco.sa"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
         readinessProbe:
           httpGet:
             path: /
-            port: 3000
+            port: 4173
           initialDelaySeconds: 5
           periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 3
-        securityContext:
-          allowPrivilegeEscalation: false
-          runAsNonRoot: true
-          runAsUser: 1000
-          capabilities:
-            drop:
-            - ALL
-      securityContext:
-        fsGroup: 1000
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 4173
+          initialDelaySeconds: 10
+          periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: barq-frontend-service
-  namespace: barq-production
-  labels:
-    app: barq-frontend
+  name: barq-frontend
+  namespace: barq-prod
 spec:
   selector:
     app: barq-frontend
   ports:
-  - port: 80
-    targetPort: 3000
-    protocol: TCP
-    name: http
-  type: ClusterIP
+  - name: http
+    port: 80
+    targetPort: 4173

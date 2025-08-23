@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: barq-production
+  name: barq-prod
   labels:
-    name: barq-production
+    name: barq-prod
     environment: production

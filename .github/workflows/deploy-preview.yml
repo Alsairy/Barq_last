@@ -11,8 +11,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME_API: ${{ github.repository }}/barq-api
-  IMAGE_NAME_FRONTEND: ${{ github.repository }}/barq-frontend
+  IMAGE_NAME_API: alsairy/barq-api
+  IMAGE_NAME_FRONTEND: alsairy/barq-frontend
 
 jobs:
   build-and-deploy:
@@ -90,17 +90,16 @@ jobs:
         kubectl apply -f k8s/preview/api-secrets.yaml
         
         # Patch secrets with actual values
-        kubectl patch secret barq-secrets -n barq-preview --type='json' -p='[
-          {"op": "replace", "path": "/data/ConnectionStrings__DefaultConnection", "value": "'$(echo -n "${{ secrets.SQL_CONNECTION_STRING_PREVIEW }}" | base64 -w 0)'"},
-          {"op": "replace", "path": "/data/JWT__KEY", "value": "'$(echo -n "${{ secrets.JWT_KEY }}" | base64 -w 0)'"},
-          {"op": "replace", "path": "/data/JWT__EXPIRYMINUTES", "value": "'$(echo -n "${{ secrets.JWT_EXPIRYMINUTES }}" | base64 -w 0)'"},
-          {"op": "replace", "path": "/data/FILESTORAGE__SIGNINGKEY", "value": "'$(echo -n "${{ secrets.FILESTORAGE_SIGNINGKEY }}" | base64 -w 0)'"},
-          {"op": "replace", "path": "/data/FLOWABLE__BASEURL", "value": "'$(echo -n "${{ secrets.FLOWABLE_BASEURL }}" | base64 -w 0)'"}
+        kubectl patch secret barq-api-secrets -n barq-preview --type='json' -p='[
+          {"op": "replace", "path": "/stringData/ConnectionStrings__DefaultConnection", "value": "${{ secrets.SQL_SA_PASSWORD }}"},
+          {"op": "replace", "path": "/stringData/Jwt__Key", "value": "${{ secrets.JWT__KEY }}"},
+          {"op": "replace", "path": "/stringData/FileStorage__SigningKey", "value": "${{ secrets.FILESTORAGE__SIGNINGKEY }}"},
+          {"op": "replace", "path": "/stringData/Flowable__BaseUrl", "value": "${{ secrets.FLOWABLE__BASEURL }}"}
         ]'
         
         # Update image tags in deployments
         kubectl set image deployment/barq-api api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:${{ inputs.tag }} -n barq-preview
-        kubectl set image deployment/barq-frontend frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ inputs.tag }} -n barq-preview
+        kubectl set image deployment/barq-frontend app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ inputs.tag }} -n barq-preview
         
         # Apply deployments and services
         kubectl apply -f k8s/preview/api-deployment.yaml

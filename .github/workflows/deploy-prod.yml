@@ -20,8 +20,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME_API: ${{ github.repository }}/barq-api
-  IMAGE_NAME_FRONTEND: ${{ github.repository }}/barq-frontend
+  IMAGE_NAME_API: alsairy/barq-api
+  IMAGE_NAME_FRONTEND: alsairy/barq-frontend
 
 jobs:
   deploy-production:
@@ -99,12 +99,11 @@ jobs:
         kubectl apply -f k8s/prod/api-secrets.yaml
         
         # Patch secrets with actual values
-        kubectl patch secret barq-secrets -n barq-production --type='json' -p='[
-          {"op": "replace", "path": "/data/ConnectionStrings__DefaultConnection", "value": "'$(echo -n "${{ secrets.SQL_CONNECTION_STRING_PROD }}" | base64 -w 0)'"},
-          {"op": "replace", "path": "/data/JWT__KEY", "value": "'$(echo -n "${{ secrets.JWT_KEY }}" | base64 -w 0)'"},
-          {"op": "replace", "path": "/data/JWT__EXPIRYMINUTES", "value": "'$(echo -n "${{ secrets.JWT_EXPIRYMINUTES }}" | base64 -w 0)'"},
-          {"op": "replace", "path": "/data/FILESTORAGE__SIGNINGKEY", "value": "'$(echo -n "${{ secrets.FILESTORAGE_SIGNINGKEY }}" | base64 -w 0)'"},
-          {"op": "replace", "path": "/data/FLOWABLE__BASEURL", "value": "'$(echo -n "${{ secrets.FLOWABLE_BASEURL }}" | base64 -w 0)'"}
+        kubectl patch secret barq-api-secrets -n barq-prod --type='json' -p='[
+          {"op": "replace", "path": "/stringData/ConnectionStrings__DefaultConnection", "value": "${{ secrets.SQL_SA_PASSWORD }}"},
+          {"op": "replace", "path": "/stringData/Jwt__Key", "value": "${{ secrets.JWT__KEY }}"},
+          {"op": "replace", "path": "/stringData/FileStorage__SigningKey", "value": "${{ secrets.FILESTORAGE__SIGNINGKEY }}"},
+          {"op": "replace", "path": "/stringData/Flowable__BaseUrl", "value": "${{ secrets.FLOWABLE__BASEURL }}"}
         ]'
         
         # Apply deployments and services
@@ -112,8 +111,8 @@ jobs:
         kubectl apply -f k8s/prod/app-deployment.yaml
         
         # Update image tags in deployments
-        kubectl set image deployment/barq-api api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:${{ inputs.tag }} -n barq-production
-        kubectl set image deployment/barq-frontend frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ inputs.tag }} -n barq-production
+        kubectl set image deployment/barq-api api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:${{ inputs.tag }} -n barq-prod
+        kubectl set image deployment/barq-frontend app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ inputs.tag }} -n barq-prod
         
         # Apply ingress based on canary weight
         if [ "${{ inputs.canary_weight }}" = "100" ]; then
@@ -132,8 +131,8 @@ jobs:
     - name: Wait for deployment rollout
       run: |
         export KUBECONFIG=kubeconfig
-        kubectl rollout status deployment/barq-api -n barq-production --timeout=600s
-        kubectl rollout status deployment/barq-frontend -n barq-production --timeout=600s
+        kubectl rollout status deployment/barq-api -n barq-prod --timeout=600s
+        kubectl rollout status deployment/barq-frontend -n barq-prod --timeout=600s
         
     - name: Verify health endpoints
       run: |
