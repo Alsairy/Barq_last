@@ -28,7 +28,7 @@ export function Header({
 }: HeaderProps) {
   return (
     <header className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-full items-center justify-between px-4">
+      <nav className="flex h-full items-center justify-between px-4" role="navigation">
         {/* Left Section */}
         <div className="flex items-center gap-2">
           <Button
@@ -102,7 +102,7 @@ export function Header({
             )}
           </Button>
         </div>
-      </div>
+      </nav>
     </header>
   );
 }

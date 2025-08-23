@@ -19,7 +19,7 @@ export function ThreePanelLayout() {
         rightPanelCollapsed={rightPanelCollapsed}
       />
       
-      <div className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden" role="main">
         <PanelGroup direction="horizontal" className="h-full">
           {/* Left Panel - Task Management */}
           <Panel
@@ -58,7 +58,7 @@ export function ThreePanelLayout() {
             <ProgressPanel collapsed={rightPanelCollapsed} />
           </Panel>
         </PanelGroup>
-      </div>
+      </main>
     </div>
   );
 }
