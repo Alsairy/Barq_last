@@ -7,11 +7,20 @@ export default function RecycleBinPage() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
+    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+      return;
+    }
+    
     fetch(`/api/recycle-bin?entity=${entity}&page=${page}`, { credentials: 'include' })
       .then(r => r.json()).then(d => setItems(d?.data?.items || [])).catch(() => {});
   }, [entity, page]);
 
   const restore = async (id: string) => {
+    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+      setItems(x => x.filter(i => i.id !== id));
+      return;
+    }
+    
     await fetch(`/api/recycle-bin/${entity}/${id}/restore`, { method: 'POST', credentials: 'include' });
     setItems(x => x.filter(i => i.id !== id));
   };

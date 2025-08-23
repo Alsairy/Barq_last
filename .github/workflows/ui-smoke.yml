@@ -35,11 +35,21 @@ jobs:
     - name: Frontend build & preview
       working-directory: Frontend/barq-frontend
       run: |
+        pkill -f "vite preview" || true
+        sleep 2
         npm run preview -- --host 127.0.0.1 --port 5173 > fe.log 2>&1 &
         for i in {1..60}; do
-          curl -fsSL http://127.0.0.1:5173/ && break
+          if curl -fsSL http://127.0.0.1:5173/ >/dev/null 2>&1; then
+            echo "Frontend server ready on port 5173"
+            break
+          fi
           echo "waiting for FE... ($i)"; sleep 2
         done
+        if ! curl -fsSL http://127.0.0.1:5173/ >/dev/null 2>&1; then
+          echo "Frontend server failed to start, checking logs:"
+          cat fe.log
+          exit 1
+        fi
     
     - name: Playwright install & smoke
       working-directory: Frontend/barq-frontend

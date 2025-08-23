@@ -6,6 +6,10 @@ export default function TenantSwitcher() {
   const [current, setCurrent] = useState('');
 
   useEffect(() => {
+    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+      return;
+    }
+    
     fetch('/api/tenants', { credentials: 'include' })
       .then(r => r.json()).then(d => setTenants(d?.data?.items || [])).catch(()=>{});
   }, []);

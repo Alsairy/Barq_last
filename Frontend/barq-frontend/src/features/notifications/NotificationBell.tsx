@@ -5,6 +5,10 @@ export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   
   useEffect(() => {
+    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+      return;
+    }
+    
     const interval = setInterval(() => {
       fetch('/api/notifications?unreadOnly=true', { credentials: 'include' })
         .then(r => r.json()).then(d => setUnread(d?.data?.length || 0)).catch(() => {});
