@@ -54,7 +54,7 @@ namespace BARQ.Application.Services
                 throw new FileNotFoundException($"File not found: {filePath}");
             }
 
-            return Task.FromResult<Stream>(new FileStream(fullPath, FileMode.Open, FileAccess.Read));
+            return new FileStream(fullPath, FileMode.Open, FileAccess.Read);
         }
 
         public Task<bool> DeleteFileAsync(string filePath)
@@ -63,19 +63,19 @@ namespace BARQ.Application.Services
             
             if (!File.Exists(fullPath))
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             try
             {
                 File.Delete(fullPath);
                 _logger.LogInformation("File deleted successfully: {FilePath}", filePath);
-                return true;
+                return Task.FromResult(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to delete file: {FilePath}", filePath);
-                return false;
+                return Task.FromResult(false);
             }
         }
 
@@ -107,7 +107,7 @@ namespace BARQ.Application.Services
             }
 
             var fileInfo = new FileInfo(fullPath);
-            return fileInfo.Length;
+            return Task.FromResult(fileInfo.Length);
         }
 
         public async Task<string> CopyFileAsync(string sourceFilePath, string destinationFilePath)

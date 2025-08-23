@@ -454,9 +454,9 @@ namespace BARQ.Application.Services
             }
         }
 
-        private Task<AuditReportDto> MapToDto(AuditReport report)
+        private System.Threading.Tasks.Task<AuditReportDto> MapToDto(AuditReport report)
         {
-            return Task.FromResult(new AuditReportDto
+            return System.Threading.Tasks.Task.FromResult(new AuditReportDto
             {
                 Id = report.Id.ToString(),
                 Name = report.Name,

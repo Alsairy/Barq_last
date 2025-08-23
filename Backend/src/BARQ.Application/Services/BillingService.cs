@@ -1008,7 +1008,7 @@ namespace BARQ.Application.Services
             };
         }
 
-        private Task CreateInitialQuotasAsync(Guid tenantId, BillingPlan plan)
+        private System.Threading.Tasks.Task CreateInitialQuotasAsync(Guid tenantId, BillingPlan plan)
         {
             var quotaTypes = new[]
             {
@@ -1043,7 +1043,7 @@ namespace BARQ.Application.Services
                 }
             }
             
-            return Task.CompletedTask;
+            return System.Threading.Tasks.Task.CompletedTask;
         }
 
         private async System.Threading.Tasks.Task UpdateQuotasForPlanChange(Guid tenantId, BillingPlan newPlan)
