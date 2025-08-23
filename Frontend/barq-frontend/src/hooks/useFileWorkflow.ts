@@ -6,6 +6,7 @@ const notificationService = {
   sendFileNotification: async (file: FileAttachment, status: string, message: string) => {
     try {
       await notificationApi.sendNotification({
+        title: 'File Status Update',
         type: 'file_status',
         message,
         metadata: { fileId: file.id, fileName: file.fileName, status }
