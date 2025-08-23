@@ -9,7 +9,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     launchOptions: {
-      args: ['--no-sandbox','--disable-dev-shm-usage','--disable-gpu']
+      args: ['--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--disable-web-security','--disable-features=TranslateUI']
     }
   },
   webServer: {
