@@ -1,0 +1,157 @@
+name: Deploy BARQ Preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker image tag to deploy'
+        required: true
+        default: 'v1.0.0'
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_API: ${{ github.repository }}/barq-api
+  IMAGE_NAME_FRONTEND: ${{ github.repository }}/barq-frontend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: Preview
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Extract metadata for API
+      id: meta-api
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}
+        tags: |
+          type=raw,value=${{ inputs.tag }}
+          
+    - name: Extract metadata for Frontend
+      id: meta-frontend
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}
+        tags: |
+          type=raw,value=${{ inputs.tag }}
+          
+    - name: Build and push API Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: Backend/Dockerfile
+        push: true
+        tags: ${{ steps.meta-api.outputs.tags }}
+        labels: ${{ steps.meta-api.outputs.labels }}
+        
+    - name: Build and push Frontend Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: Frontend/barq-frontend
+        file: Frontend/barq-frontend/Dockerfile
+        push: true
+        tags: ${{ steps.meta-frontend.outputs.tags }}
+        labels: ${{ steps.meta-frontend.outputs.labels }}
+        
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+        
+    - name: Configure kubectl
+      run: |
+        echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > kubeconfig
+        export KUBECONFIG=kubeconfig
+        kubectl config current-context
+        
+    - name: Apply Kubernetes manifests
+      run: |
+        export KUBECONFIG=kubeconfig
+        
+        # Apply namespace first
+        kubectl apply -f k8s/preview/namespace.yaml
+        
+        # Apply config and secrets
+        kubectl apply -f k8s/preview/api-config.yaml
+        kubectl apply -f k8s/preview/api-secrets.yaml
+        
+        # Patch secrets with actual values
+        kubectl patch secret barq-secrets -n barq-preview --type='json' -p='[
+          {"op": "replace", "path": "/data/ConnectionStrings__DefaultConnection", "value": "'$(echo -n "${{ secrets.SQL_CONNECTION_STRING_PREVIEW }}" | base64 -w 0)'"},
+          {"op": "replace", "path": "/data/JWT__KEY", "value": "'$(echo -n "${{ secrets.JWT_KEY }}" | base64 -w 0)'"},
+          {"op": "replace", "path": "/data/JWT__EXPIRYMINUTES", "value": "'$(echo -n "${{ secrets.JWT_EXPIRYMINUTES }}" | base64 -w 0)'"},
+          {"op": "replace", "path": "/data/FILESTORAGE__SIGNINGKEY", "value": "'$(echo -n "${{ secrets.FILESTORAGE_SIGNINGKEY }}" | base64 -w 0)'"},
+          {"op": "replace", "path": "/data/FLOWABLE__BASEURL", "value": "'$(echo -n "${{ secrets.FLOWABLE_BASEURL }}" | base64 -w 0)'"}
+        ]'
+        
+        # Update image tags in deployments
+        kubectl set image deployment/barq-api api=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:${{ inputs.tag }} -n barq-preview
+        kubectl set image deployment/barq-frontend frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ inputs.tag }} -n barq-preview
+        
+        # Apply deployments and services
+        kubectl apply -f k8s/preview/api-deployment.yaml
+        kubectl apply -f k8s/preview/app-deployment.yaml
+        
+        # Apply ingress
+        kubectl apply -f k8s/preview/api-ingress.yaml
+        kubectl apply -f k8s/preview/app-ingress.yaml
+        
+    - name: Wait for deployment rollout
+      run: |
+        export KUBECONFIG=kubeconfig
+        kubectl rollout status deployment/barq-api -n barq-preview --timeout=600s
+        kubectl rollout status deployment/barq-frontend -n barq-preview --timeout=600s
+        
+    - name: Verify health endpoints
+      run: |
+        sleep 30
+        for i in {1..10}; do
+          if curl -f https://api.barq-preview.tetco.sa/health/ready; then
+            echo "API health check passed"
+            break
+          fi
+          echo "Waiting for API to be ready... ($i/10)"
+          sleep 30
+        done
+        
+        for i in {1..10}; do
+          if curl -f https://barq-preview.tetco.sa/; then
+            echo "Frontend health check passed"
+            break
+          fi
+          echo "Waiting for Frontend to be ready... ($i/10)"
+          sleep 30
+        done
+        
+    - name: Run E2E Tests
+      run: |
+        cd Frontend/barq-frontend
+        npm ci
+        npx playwright install --with-deps
+        PLAYWRIGHT_BASE_URL="https://barq-preview.tetco.sa" npx playwright test tests/journeys.e2e.spec.ts --reporter=html --workers=1
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-preview
+        path: Frontend/barq-frontend/playwright-report/
+        retention-days: 30
+        
+    - name: Cleanup kubeconfig
+      if: always()
+      run: rm -f kubeconfig
