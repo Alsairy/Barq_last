@@ -134,7 +134,7 @@ class FrontendAuditor {
                 const fullPath = path.join(dir, entry.name);
                 
                 if (entry.isDirectory() && !entry.name.startsWith('.') && 
-                    !['node_modules', 'dist', 'build', 'coverage', '.next', 'out'].includes(entry.name)) {
+                    !['node_modules', 'dist', 'build', 'coverage', '.next', 'out', '.vite', 'public', 'assets'].includes(entry.name)) {
                     scanDir(fullPath);
                 } else if (entry.isFile() && (entry.name.endsWith('.tsx') || entry.name.endsWith('.ts') || entry.name.endsWith('.jsx') || entry.name.endsWith('.js'))) {
                     const fileIssues = this.scanFile(fullPath);
