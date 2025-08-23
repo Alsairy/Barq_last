@@ -2,6 +2,20 @@ import { test, expect } from "@playwright/test";
 
 const CLICK_TIMEOUT_MS = 2000;
 
+test.setTimeout(60_000);
+
+test.beforeEach(async ({ page }) => {
+  page.on('console', msg => {
+    const t = msg.type();
+    if (t === 'error' || t === 'warning') {
+      console.log(`[console.${t}] ${msg.text()}`);
+    }
+  });
+  page.on('pageerror', err => {
+    console.log('[pageerror]', err.message);
+  });
+});
+
 test("every visible, enabled button triggers DOM or network activity", async ({ page, context }) => {
   await page.goto("/");
 

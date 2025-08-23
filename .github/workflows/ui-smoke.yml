@@ -32,29 +32,19 @@ jobs:
         cd Frontend/barq-frontend
         npm run build
     
-    - name: Frontend build & preview
-      working-directory: Frontend/barq-frontend
+    - name: Kill stray preview if any
       run: |
-        pkill -f "vite preview" || true
-        sleep 2
-        npm run preview -- --host 127.0.0.1 --port 5173 > fe.log 2>&1 &
-        for i in {1..60}; do
-          if curl -fsSL http://127.0.0.1:5173/ >/dev/null 2>&1; then
-            echo "Frontend server ready on port 5173"
-            break
-          fi
-          echo "waiting for FE... ($i)"; sleep 2
-        done
-        if ! curl -fsSL http://127.0.0.1:5173/ >/dev/null 2>&1; then
-          echo "Frontend server failed to start, checking logs:"
-          cat fe.log
-          exit 1
+        if lsof -i:5173 -t >/dev/null 2>&1; then
+          kill -9 $(lsof -i:5173 -t) || true
         fi
-    
-    - name: Playwright install & smoke
+
+    - name: Playwright test (webServer managed by Playwright config)
       working-directory: Frontend/barq-frontend
-      env: 
+      env:
         PLAYWRIGHT_BASE_URL: http://127.0.0.1:5173
+        PLAYWRIGHT_HOST: 127.0.0.1
+        PLAYWRIGHT_PORT: 5173
+        CI: "true"
       run: |
         npx playwright install --with-deps
         npx playwright test tests/wiring.smoke.spec.ts --reporter=line
