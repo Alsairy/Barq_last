@@ -48,7 +48,7 @@ jobs:
     
     - name: Build & apply EF migrations
       run: |
-        dotnet tool install --global dotnet-ef || true
+        dotnet tool install --global dotnet-ef
         echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
         dotnet build Backend/BARQ.sln -c Release
         dotnet ef database update --project Backend/src/BARQ.Infrastructure --startup-project Backend/src/BARQ.API
@@ -72,12 +72,12 @@ jobs:
       run: |
         mkdir -p audit
         python3 scripts/controller_routes.py Backend/src/BARQ.API/Controllers > controller_routes.json
-        python3 scripts/api_probe.py "$API_BASE_URL" controller_routes.json audit/audit_api.csv || true
-        tail -n +1 audit/audit_api.csv | head -n 100 || true
+        python3 scripts/api_probe.py "$API_BASE_URL" controller_routes.json audit/audit_api.csv
+        tail -n +1 audit/audit_api.csv | head -n 100
     
     - name: Run Placeholder Sweep
       run: |
-        python3 scripts/placeholder_sweep.py Backend Frontend audit/audit_placeholders.csv || true
+        python3 scripts/placeholder_sweep.py Backend Frontend audit/audit_placeholders.csv
     
     - name: Upload Audit Results
       uses: actions/upload-artifact@v4

@@ -6,6 +6,11 @@ using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace BARQ.Application.Services
 {
@@ -15,13 +20,15 @@ namespace BARQ.Application.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly ITenantProvider _tenantProvider;
+        private readonly IConfiguration _configuration;
 
-        public UserService(BarqDbContext context, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, ITenantProvider tenantProvider)
+        public UserService(BarqDbContext context, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, ITenantProvider tenantProvider, IConfiguration configuration)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _tenantProvider = tenantProvider;
+            _configuration = configuration;
         }
 
         public async Task<PagedResult<UserDto>> GetUsersAsync(Guid tenantId, ListRequest request)
@@ -32,10 +39,10 @@ namespace BARQ.Application.Services
 
             if (!string.IsNullOrEmpty(request.SearchTerm))
             {
-                query = query.Where(u => u.UserName.Contains(request.SearchTerm) || 
-                                        u.Email.Contains(request.SearchTerm) ||
-                                        u.FirstName.Contains(request.SearchTerm) ||
-                                        u.LastName.Contains(request.SearchTerm));
+                query = query.Where(u => u.UserName!.Contains(request.SearchTerm) || 
+                                        u.Email!.Contains(request.SearchTerm) ||
+                                        (u.FirstName != null && u.FirstName.Contains(request.SearchTerm)) ||
+                                        (u.LastName != null && u.LastName.Contains(request.SearchTerm)));
             }
 
             var totalCount = await query.CountAsync();
@@ -150,11 +157,19 @@ namespace BARQ.Application.Services
             };
         }
 
+        private void EnsureSameTenant(ApplicationUser user)
+        {
+            if (user.TenantId != _tenantProvider.GetTenantId())
+                throw new UnauthorizedAccessException("Cross-tenant access denied.");
+        }
+
         public async Task<UserDto> UpdateUserAsync(Guid id, UpdateUserRequest request)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
                 throw new ArgumentException("User not found");
+
+            EnsureSameTenant(user);
 
             user.FirstName = request.FirstName;
             user.LastName = request.LastName;
@@ -201,6 +216,8 @@ namespace BARQ.Application.Services
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null) return false;
 
+            EnsureSameTenant(user);
+
             user.IsDeleted = true;
             user.DeletedAt = DateTime.UtcNow;
             user.IsActive = false;
@@ -232,6 +249,8 @@ namespace BARQ.Application.Services
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null) return false;
 
+            EnsureSameTenant(user);
+
             var result = await _userManager.AddToRoleAsync(user, roleName);
             return result.Succeeded;
         }
@@ -240,6 +259,8 @@ namespace BARQ.Application.Services
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null) return false;
+
+            EnsureSameTenant(user);
 
             var result = await _userManager.RemoveFromRoleAsync(user, roleName);
             return result.Succeeded;
@@ -309,10 +330,13 @@ namespace BARQ.Application.Services
 
             var roles = await _userManager.GetRolesAsync(user);
 
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var expiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"] ?? "60");
+            
             return new LoginResponse
             {
                 Token = GenerateJwtToken(user),
-                ExpiresAt = DateTime.UtcNow.AddHours(24),
+                ExpiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes),
                 User = new UserDto
                 {
                     Id = user.Id,
@@ -345,6 +369,8 @@ namespace BARQ.Application.Services
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null) return false;
 
+            EnsureSameTenant(user);
+
             var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
             return result.Succeeded;
         }
@@ -354,6 +380,8 @@ namespace BARQ.Application.Services
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null) return false;
 
+            EnsureSameTenant(user);
+
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
             return result.Succeeded;
@@ -361,15 +389,45 @@ namespace BARQ.Application.Services
 
         private string GenerateJwtToken(ApplicationUser user)
         {
-            return $"jwt-{user.Id}-{DateTime.UtcNow.Ticks}";
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var secretKey = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+            var issuer = jwtSettings["Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
+            var audience = jwtSettings["Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
+            var expiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"] ?? "60");
+
+            var keyBytes = Encoding.UTF8.GetBytes(secretKey);
+            if (keyBytes.Length < 32)
+                throw new InvalidOperationException("JWT Key must be at least 256 bits (32 bytes)");
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            
+            var claims = new List<Claim>
+            {
+                new("sub", user.Id.ToString()),
+                new("tenant_id", user.TenantId.ToString()),
+                new(ClaimTypes.Name, user.UserName ?? ""),
+                new(ClaimTypes.Email, user.Email ?? "")
+            };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(expiryMinutes),
+                Issuer = issuer,
+                Audience = audience,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
     }
 
     public class InviteUserRequest
     {
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Role { get; set; }
+        public required string Email { get; set; }
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
+        public required string Role { get; set; }
     }
 }

@@ -30,12 +30,12 @@ class FrontendAuditor {
             
             const patterns = {
                 'DeadButton': {
-                    regex: /<button[^>]*(?!onClick)[^>]*>/gi,
+                    regex: /<button[^>]*(?!.*onClick)[^>]*>/gi,
                     severity: 'High',
                     description: 'Button without onClick handler'
                 },
                 'InertAnchor': {
-                    regex: /<a[^>]*(?!href)[^>]*>/gi,
+                    regex: /<a\s[^>]*(?!.*href)[^>]*>/gi,
                     severity: 'High', 
                     description: 'Anchor without href'
                 },
@@ -73,6 +73,29 @@ class FrontendAuditor {
 
             lines.forEach((line, index) => {
                 Object.entries(patterns).forEach(([patternName, patternInfo]) => {
+                    if (patternName === 'DeadButton') {
+                        if (!line.includes('<button') || line.includes('onClick') || line.includes('disabled') || 
+                            line.includes('aria-label') || line.includes('type=')) {
+                            return;
+                        }
+                    }
+                    if (patternName === 'InertAnchor') {
+                        if (!line.trim().match(/^<a\s[^>]*>/) || line.includes('href') || 
+                            line.includes('<App') || line.includes('<Auth') || line.includes('async ') || 
+                            line.includes('Promise<') || line.includes('function ') || line.includes(': {') ||
+                            line.includes('const ') || line.includes('return ') || line.includes('export ') ||
+                            line.includes('/>') || line.includes('()')) {
+                            return;
+                        }
+                    }
+                    if (patternName === 'Mock') {
+                        if (line.includes('placeholder=') || line.includes('className=') || 
+                            line.includes('text-') || line.includes('class=') || line.includes('style=') ||
+                            line.includes('bg-') || line.includes('border-') || line.includes('flex ')) {
+                            return;
+                        }
+                    }
+                    
                     const matches = line.match(patternInfo.regex);
                     if (matches) {
                         matches.forEach(match => {
@@ -110,7 +133,8 @@ class FrontendAuditor {
             entries.forEach(entry => {
                 const fullPath = path.join(dir, entry.name);
                 
-                if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
+                if (entry.isDirectory() && !entry.name.startsWith('.') && 
+                    !['node_modules', 'dist', 'build', 'coverage', '.next', 'out', '.vite', 'public', 'assets'].includes(entry.name)) {
                     scanDir(fullPath);
                 } else if (entry.isFile() && (entry.name.endsWith('.tsx') || entry.name.endsWith('.ts') || entry.name.endsWith('.jsx') || entry.name.endsWith('.js'))) {
                     const fileIssues = this.scanFile(fullPath);

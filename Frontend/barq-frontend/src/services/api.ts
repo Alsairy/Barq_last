@@ -1,5 +1,23 @@
 import axios from 'axios';
 
+if (typeof window !== 'undefined') {
+  const allowedHost = window.location.host;
+  
+  axios.interceptors.request.use((config) => {
+    try {
+      const url = new URL(config.url!, config.baseURL || window.location.origin);
+      const isExternal = url.host !== allowedHost;
+      if (isExternal) {
+        console.warn('Blocked external request', url.href);
+        return Promise.reject({ __cancelled: true, reason: 'blocked-external' });
+      }
+    } catch (e) {
+      console.warn('Request URL parse issue, allowing request', e);
+    }
+    return config;
+  }, (error) => Promise.reject(error));
+}
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;

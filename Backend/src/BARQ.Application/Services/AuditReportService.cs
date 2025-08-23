@@ -454,9 +454,9 @@ namespace BARQ.Application.Services
             }
         }
 
-        private async Task<AuditReportDto> MapToDto(AuditReport report)
+        private System.Threading.Tasks.Task<AuditReportDto> MapToDto(AuditReport report)
         {
-            return new AuditReportDto
+            return System.Threading.Tasks.Task.FromResult(new AuditReportDto
             {
                 Id = report.Id.ToString(),
                 Name = report.Name,
@@ -477,7 +477,7 @@ namespace BARQ.Application.Services
                 NextRunAt = report.NextRunAt,
                 CanDownload = report.Status == "Completed" && !string.IsNullOrEmpty(report.FilePath),
                 TenantId = report.TenantId.ToString()
-            };
+            });
         }
 
         private string? GenerateChangesSummary(string? oldValues, string? newValues)

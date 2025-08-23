@@ -1,7 +1,5 @@
-title = "BARQ gitleaks"
-
-[allowlist]
-description = "Dev/test placeholders"
+[[allowlist]]
+description = "Dev/test placeholders (scoped)"
 paths = [
   "Backend/src/BARQ.API/appsettings.Development.json",
   "Backend/src/BARQ.API/appsettings.Docker.json",

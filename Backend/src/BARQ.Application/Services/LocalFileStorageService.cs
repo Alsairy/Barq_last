@@ -57,47 +57,51 @@ namespace BARQ.Application.Services
             return new FileStream(fullPath, FileMode.Open, FileAccess.Read);
         }
 
-        public async Task<bool> DeleteFileAsync(string filePath)
+        public Task<bool> DeleteFileAsync(string filePath)
         {
             var fullPath = Path.Combine(_basePath, filePath);
             
             if (!File.Exists(fullPath))
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             try
             {
                 File.Delete(fullPath);
                 _logger.LogInformation("File deleted successfully: {FilePath}", filePath);
-                return true;
+                return Task.FromResult(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to delete file: {FilePath}", filePath);
-                return false;
+                return Task.FromResult(false);
             }
         }
 
-        public async Task<bool> FileExistsAsync(string filePath)
+        public Task<bool> FileExistsAsync(string filePath)
         {
             var fullPath = Path.Combine(_basePath, filePath);
-            return File.Exists(fullPath);
+            return Task.FromResult(File.Exists(fullPath));
         }
 
-        public async Task<string> GenerateSignedUrlAsync(string filePath, TimeSpan expiry, string accessType = "read")
+        public Task<string> GenerateSignedUrlAsync(string filePath, TimeSpan expiry, string accessType = "read")
         {
             var token = GenerateAccessToken(filePath, expiry, accessType);
-            return $"{_baseUrl}/download/{Uri.EscapeDataString(filePath)}?token={token}&expires={DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds()}";
+            var encodedToken = Uri.EscapeDataString(token);
+            var exp = DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds();
+            return Task.FromResult($"{_baseUrl}/download/{Uri.EscapeDataString(filePath)}?token={encodedToken}&expires={exp}");
         }
 
-        public async Task<string> GenerateUploadUrlAsync(string fileName, string contentType, TimeSpan expiry)
+        public Task<string> GenerateUploadUrlAsync(string fileName, string contentType, TimeSpan expiry)
         {
             var token = GenerateAccessToken(fileName, expiry, "write");
-            return $"{_baseUrl}/upload?filename={Uri.EscapeDataString(fileName)}&contentType={Uri.EscapeDataString(contentType)}&token={token}&expires={DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds()}";
+            var encodedToken = Uri.EscapeDataString(token);
+            var exp = DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds();
+            return Task.FromResult($"{_baseUrl}/upload?filename={Uri.EscapeDataString(fileName)}&contentType={Uri.EscapeDataString(contentType)}&token={encodedToken}&expires={exp}");
         }
 
-        public async Task<long> GetFileSizeAsync(string filePath)
+        public Task<long> GetFileSizeAsync(string filePath)
         {
             var fullPath = Path.Combine(_basePath, filePath);
             
@@ -107,7 +111,7 @@ namespace BARQ.Application.Services
             }
 
             var fileInfo = new FileInfo(fullPath);
-            return fileInfo.Length;
+            return Task.FromResult(fileInfo.Length);
         }
 
         public async Task<string> CopyFileAsync(string sourceFilePath, string destinationFilePath)

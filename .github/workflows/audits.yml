@@ -43,7 +43,7 @@ jobs:
             /opt/mssql-tools/bin/sqlcmd -S localhost,1433 -U sa -P '${{ secrets.SQL_SA_PASSWORD }}' -Q "SELECT 1" && break
             echo "waiting for SQL... ($i)"; sleep 2
           done
-          dotnet tool install --global dotnet-ef || true
+          dotnet tool install --global dotnet-ef
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
           dotnet ef database update --project Backend/src/BARQ.Infrastructure --startup-project Backend/src/BARQ.API
 
@@ -70,25 +70,25 @@ jobs:
         run: |
           mkdir -p audit
           python3 scripts/controller_routes.py Backend/src/BARQ.API/Controllers > controller_routes.json
-          python3 scripts/api_probe.py "$API_BASE_URL" controller_routes.json audit/audit_api.csv || true
+          python3 scripts/api_probe.py "$API_BASE_URL" controller_routes.json audit/audit_api.csv
 
       - name: Placeholder sweep
         run: |
           mkdir -p audit
-          python3 scripts/placeholder_sweep.py Backend Frontend audit/audit_placeholders.csv || true
+          python3 scripts/placeholder_sweep.py Backend Frontend audit/audit_placeholders.csv
 
       - name: Backend Functional Audit
         run: |
           mkdir -p audit
-          python3 scripts/backend_audit.py --src Backend --out audit/audit_backend.csv --fail-on High || true
-          tail -n +1 audit/audit_backend.csv | head -n 100 || true
+          python3 scripts/backend_audit.py --src Backend --out audit/audit_backend.csv --fail-on High
+          tail -n +1 audit/audit_backend.csv | head -n 100
 
       - name: Frontend Functional Audit
         run: |
           mkdir -p audit
           npm i minimist --prefix scripts --no-save
-          node scripts/frontend_audit.js --src Frontend/barq-frontend --out audit/audit_frontend.csv --fail-on High || true
-          tail -n +1 audit/audit_frontend.csv | head -n 100 || true
+          node scripts/frontend_audit.js --src Frontend/barq-frontend --out audit/audit_frontend.csv --fail-on High
+          tail -n +1 audit/audit_frontend.csv | head -n 100
 
       - name: Frontend build & preview
         working-directory: Frontend/barq-frontend
@@ -107,7 +107,7 @@ jobs:
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:5173
         run: |
           npx playwright install --with-deps
-          npx playwright test tests/wiring.smoke.spec.ts --reporter=line || true
+          npx playwright test tests/wiring.smoke.spec.ts --reporter=line
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
