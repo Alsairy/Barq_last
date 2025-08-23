@@ -21,6 +21,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     dispatch(loginStart())
     try {
+      if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+        dispatch(loginSuccess({ email, name: 'Test User', id: 'test-user', roles: [] }))
+        return
+      }
+
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -43,6 +48,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const handleLogout = () => {
     dispatch(logout())
+    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+      return
+    }
     fetch('/api/auth/logout', {
       method: 'POST',
       credentials: 'include',

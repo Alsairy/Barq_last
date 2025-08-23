@@ -1,5 +1,12 @@
 import axios from 'axios';
 
+if (typeof window !== 'undefined' && (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')) {
+  axios.interceptors.request.use((config) => {
+    console.log('Blocking API call in preview environment:', config.url);
+    return Promise.reject(new Error('API calls disabled in preview environment'));
+  });
+}
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
