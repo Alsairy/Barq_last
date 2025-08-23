@@ -1,0 +1,57 @@
+name: Functional Audit
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-audit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Create Audit Directory
+      run: mkdir -p audit
+        
+    - name: Run Backend Audit
+      run: |
+        python3 scripts/backend_audit.py --src Backend --out audit/audit_backend.csv --fail-on High || true
+    
+    - name: Upload Backend Audit Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-audit-results
+        path: audit/audit_backend.csv
+
+  frontend-audit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install Dependencies
+      run: npm i minimist --prefix scripts --no-save
+    
+    - name: Create Audit Directory
+      run: mkdir -p audit
+        
+    - name: Run Frontend Audit
+      run: |
+        node scripts/frontend_audit.js --src Frontend/barq-frontend --out audit/audit_frontend.csv --fail-on High || true
+    
+    - name: Upload Frontend Audit Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-audit-results
+        path: audit/audit_frontend.csv

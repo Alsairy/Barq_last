@@ -37,13 +37,8 @@ public class EscalationService : IEscalationService
         var tenantId = _tenantProvider.GetTenantId();
         var query = _context.EscalationRules
             .Include(r => r.SlaPolicy)
-            .Where(r => r.TenantId == tenantId)
+            .Where(r => r.TenantId == tenantId && (!slaPolicyId.HasValue || r.SlaPolicyId == slaPolicyId.Value))
             .AsQueryable();
-
-        if (slaPolicyId.HasValue)
-        {
-            query = query.Where(r => r.SlaPolicyId == slaPolicyId.Value);
-        }
 
         var total = await query.CountAsync(cancellationToken);
         var items = await query
@@ -65,6 +60,7 @@ public class EscalationService : IEscalationService
     {
         return await _context.EscalationRules
             .Include(r => r.SlaPolicy)
+            .Where(r => r.TenantId == _tenantProvider.GetTenantId())
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
     }
 
@@ -83,11 +79,11 @@ public class EscalationService : IEscalationService
 
     public async System.Threading.Tasks.Task<EscalationRule> UpdateEscalationRuleAsync(EscalationRule rule, CancellationToken cancellationToken = default)
     {
-        var existing = await _context.EscalationRules.FindAsync(rule.Id);
+        var existing = await _context.EscalationRules
+            .Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == rule.Id)
+            .FirstOrDefaultAsync();
         if (existing == null)
             throw new InvalidOperationException($"Escalation rule {rule.Id} not found");
-        if (existing.TenantId != _tenantProvider.GetTenantId())
-            throw new UnauthorizedAccessException("Cross-tenant update blocked");
 
         existing.Level = rule.Level;
         existing.TriggerAfterMinutes = rule.TriggerAfterMinutes;
@@ -105,11 +101,11 @@ public class EscalationService : IEscalationService
 
     public async System.Threading.Tasks.Task DeleteEscalationRuleAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var rule = await _context.EscalationRules.FindAsync(id);
+        var rule = await _context.EscalationRules
+            .Where(r => r.TenantId == _tenantProvider.GetTenantId())
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
         if (rule != null)
         {
-            if (rule.TenantId != _tenantProvider.GetTenantId())
-                throw new UnauthorizedAccessException("Cross-tenant delete blocked");
             rule.IsDeleted = true;
             rule.UpdatedAt = DateTime.UtcNow;
             rule.UpdatedBy = null;
@@ -125,13 +121,8 @@ public class EscalationService : IEscalationService
         var query = _context.EscalationActions
             .Include(a => a.SlaViolation)
             .Include(a => a.EscalationRule)
-            .Where(a => a.TenantId == tenantId)
+            .Where(a => a.TenantId == tenantId && (!violationId.HasValue || a.SlaViolationId == violationId.Value))
             .AsQueryable();
-
-        if (violationId.HasValue)
-        {
-            query = query.Where(a => a.SlaViolationId == violationId.Value);
-        }
 
         var total = await query.CountAsync(cancellationToken);
         var items = await query
@@ -164,7 +155,9 @@ public class EscalationService : IEscalationService
 
     public async System.Threading.Tasks.Task<EscalationAction> UpdateEscalationActionAsync(EscalationAction action, CancellationToken cancellationToken = default)
     {
-        var existing = await _context.EscalationActions.FindAsync(action.Id);
+        var existing = await _context.EscalationActions
+            .Where(a => a.TenantId == _tenantProvider.GetTenantId())
+            .FirstOrDefaultAsync(a => a.Id == action.Id, cancellationToken);
         if (existing == null)
             throw new InvalidOperationException($"Escalation action {action.Id} not found");
 
@@ -187,7 +180,7 @@ public class EscalationService : IEscalationService
         var openViolations = await _context.SlaViolations
             .Include(v => v.SlaPolicy)
             .ThenInclude(p => p.EscalationRules.Where(r => r.IsActive))
-            .Where(v => v.Status == "Open")
+            .Where(v => v.TenantId == _tenantProvider.GetTenantId() && v.Status == "Open")
             .ToListAsync(cancellationToken);
 
         foreach (var violation in openViolations)
@@ -199,7 +192,7 @@ public class EscalationService : IEscalationService
         }
 
         var pendingActions = await _context.EscalationActions
-            .Where(a => a.Status == "Pending" && 
+            .Where(a => a.TenantId == _tenantProvider.GetTenantId() && a.Status == "Pending" && 
                        (a.NextRetryAt == null || a.NextRetryAt <= DateTime.UtcNow))
             .ToListAsync(cancellationToken);
 
@@ -215,6 +208,7 @@ public class EscalationService : IEscalationService
             .Include(a => a.SlaViolation)
             .ThenInclude(v => v.Task)
             .Include(a => a.EscalationRule)
+            .Where(a => a.TenantId == _tenantProvider.GetTenantId())
             .FirstOrDefaultAsync(a => a.Id == actionId, cancellationToken);
 
         if (action == null)
@@ -270,6 +264,7 @@ public class EscalationService : IEscalationService
         var violation = await _context.SlaViolations
             .Include(v => v.SlaPolicy)
             .ThenInclude(p => p.EscalationRules.Where(r => r.IsActive))
+            .Where(v => v.TenantId == _tenantProvider.GetTenantId())
             .FirstOrDefaultAsync(v => v.Id == violationId, cancellationToken);
 
         if (violation == null || violation.Status != "Open")
@@ -378,7 +373,9 @@ public class EscalationService : IEscalationService
             return false;
         }
 
-        var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == action.SlaViolation.TaskId, cancellationToken);
+        var task = await _context.Tasks
+            .Where(t => t.TenantId == _tenantProvider.GetTenantId())
+            .FirstOrDefaultAsync(t => t.Id == action.SlaViolation.TaskId, cancellationToken);
         if (task == null)
         {
             action.ErrorMessage = "Task not found";
@@ -422,7 +419,9 @@ public class EscalationService : IEscalationService
             return false;
         }
 
-        var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == action.SlaViolation.TaskId, cancellationToken);
+        var task = await _context.Tasks
+            .Where(t => t.TenantId == _tenantProvider.GetTenantId())
+            .FirstOrDefaultAsync(t => t.Id == action.SlaViolation.TaskId, cancellationToken);
         if (task == null)
         {
             action.ErrorMessage = "Task not found";

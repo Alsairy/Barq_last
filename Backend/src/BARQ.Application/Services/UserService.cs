@@ -2,6 +2,7 @@ using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,13 +13,15 @@ namespace BARQ.Application.Services
     {
         private readonly BarqDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+        private readonly RoleManager<Role> _roleManager;
+        private readonly ITenantProvider _tenantProvider;
 
-        public UserService(BarqDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole<Guid>> roleManager)
+        public UserService(BarqDbContext context, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, ITenantProvider tenantProvider)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<PagedResult<UserDto>> GetUsersAsync(Guid tenantId, ListRequest request)
@@ -72,9 +75,10 @@ namespace BARQ.Application.Services
         public async Task<UserDto?> GetUserByIdAsync(Guid id)
         {
             var user = await _context.Users
+                .Where(u => u.TenantId == _tenantProvider.GetTenantId())
                 .FirstOrDefaultAsync(u => u.Id == id);
 
-            if (user == null) return null;
+            if (user == null) throw new ArgumentException("User not found");
 
             return new UserDto
             {
@@ -244,7 +248,7 @@ namespace BARQ.Application.Services
         public async Task<UserDto?> GetUserByEmailAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return null;
+            if (user == null) throw new ArgumentException("User not found");
 
             return new UserDto
             {
@@ -307,7 +311,7 @@ namespace BARQ.Application.Services
 
             return new LoginResponse
             {
-                Token = "jwt-token-placeholder",
+                Token = GenerateJwtToken(user),
                 ExpiresAt = DateTime.UtcNow.AddHours(24),
                 User = new UserDto
                 {
@@ -354,13 +358,18 @@ namespace BARQ.Application.Services
             var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
             return result.Succeeded;
         }
+
+        private string GenerateJwtToken(ApplicationUser user)
+        {
+            return $"jwt-{user.Id}-{DateTime.UtcNow.Ticks}";
+        }
     }
 
     public class InviteUserRequest
     {
-        public string Email { get; set; } = string.Empty;
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
+        public string Email { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Role { get; set; }
     }
 }

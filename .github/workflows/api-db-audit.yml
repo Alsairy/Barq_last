@@ -1,0 +1,89 @@
+name: API & Database Audit
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  api-db-audit:
+    runs-on: ubuntu-latest
+    env:
+      SQL_SA_PASSWORD: ${{ secrets.SQL_SA_PASSWORD }}
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          SA_PASSWORD: ${{ env.SQL_SA_PASSWORD }}
+          ACCEPT_EULA: "Y"
+        ports: ["1433:1433"]
+        options: >-
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${{ env.SQL_SA_PASSWORD }} -Q 'SELECT 1' || exit 1"
+          --health-interval 10s --health-timeout 5s --health-retries 30
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install sqlcmd
+      run: |
+        sudo ACCEPT_EULA=Y apt-get update
+        sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18
+        echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
+    
+    - name: Install Dependencies
+      run: |
+        pip install requests
+        dotnet restore Backend/BARQ.sln
+    
+    - name: Build & apply EF migrations
+      run: |
+        dotnet tool install --global dotnet-ef || true
+        echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+        dotnet build Backend/BARQ.sln -c Release
+        dotnet ef database update --project Backend/src/BARQ.Infrastructure --startup-project Backend/src/BARQ.API
+    
+    - name: Run API (Dev on 5000) and wait
+      env:
+        ASPNETCORE_ENVIRONMENT: Development
+        ASPNETCORE_URLS: "http://127.0.0.1:5000"
+        ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=BarqDev;User Id=sa;Password=${{ env.SQL_SA_PASSWORD }};TrustServerCertificate=True;"
+      run: |
+        nohup dotnet run --project Backend/src/BARQ.API/BARQ.API.csproj --no-build > api.log 2>&1 &
+        for i in {1..60}; do
+          curl -fsSL http://127.0.0.1:5000/health/ready && break
+          echo "waiting for API... ($i)"; sleep 2
+        done
+        curl -fsSL http://127.0.0.1:5000/health/ready || (echo "API not ready" && tail -n 200 api.log && exit 1)
+    
+    - name: API Routes & Probe
+      env: 
+        API_BASE_URL: http://127.0.0.1:5000
+      run: |
+        mkdir -p audit
+        python3 scripts/controller_routes.py Backend/src/BARQ.API/Controllers > controller_routes.json
+        python3 scripts/api_probe.py "$API_BASE_URL" controller_routes.json audit/audit_api.csv || true
+        tail -n +1 audit/audit_api.csv | head -n 100 || true
+    
+    - name: Run Placeholder Sweep
+      run: |
+        python3 scripts/placeholder_sweep.py Backend Frontend audit/audit_placeholders.csv || true
+    
+    - name: Upload Audit Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: api-db-audit-results
+        path: |
+          audit/audit_api.csv
+          audit/audit_db.txt
+          audit/audit_placeholders.csv

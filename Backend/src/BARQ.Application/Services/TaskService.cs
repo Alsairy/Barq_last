@@ -2,6 +2,7 @@ using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,16 +11,18 @@ namespace BARQ.Application.Services
     public class TaskService : ITaskService
     {
         private readonly BarqDbContext _context;
+        private readonly ITenantProvider _tenantProvider;
 
-        public TaskService(BarqDbContext context)
+        public TaskService(BarqDbContext context, ITenantProvider tenantProvider)
         {
             _context = context;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<PagedResult<TaskDto>> GetTasksAsync(Guid tenantId, TaskListRequest request)
         {
             var query = _context.Tasks
-                .Where(t => t.TenantId == tenantId)
+                .Where(t => t.TenantId == _tenantProvider.GetTenantId())
                 .AsQueryable();
 
             if (request.ProjectId.HasValue)
@@ -119,9 +122,9 @@ namespace BARQ.Application.Services
                 .Include(t => t.Project)
                 .Include(t => t.ParentTask)
                 .Include(t => t.SubTasks)
-                .FirstOrDefaultAsync(t => t.Id == id);
+                .FirstOrDefaultAsync(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == id);
 
-            if (task == null) return null;
+            if (task == null) throw new ArgumentException("Task not found");
 
             return new TaskDto
             {
@@ -169,7 +172,7 @@ namespace BARQ.Application.Services
             var task = new Core.Entities.Task
             {
                 Id = Guid.NewGuid(),
-                TenantId = tenantId,
+                TenantId = _tenantProvider.GetTenantId(),
                 Name = request.Name,
                 Description = request.Description,
                 Status = request.Status,
@@ -199,7 +202,7 @@ namespace BARQ.Application.Services
 
         public async Task<TaskDto> UpdateTaskAsync(Guid id, UpdateTaskRequest request)
         {
-            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == id);
             if (task == null)
                 throw new ArgumentException("Task not found");
 
@@ -232,7 +235,7 @@ namespace BARQ.Application.Services
 
         public async Task<bool> DeleteTaskAsync(Guid id)
         {
-            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == id);
             if (task == null) return false;
 
             task.IsDeleted = true;
@@ -244,7 +247,7 @@ namespace BARQ.Application.Services
 
         public async Task<bool> AssignTaskAsync(Guid taskId, Guid userId)
         {
-            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == taskId);
             if (task == null) return false;
 
             task.AssignedToId = userId;
@@ -256,7 +259,7 @@ namespace BARQ.Application.Services
 
         public async Task<bool> UnassignTaskAsync(Guid taskId)
         {
-            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == taskId);
             if (task == null) return false;
 
             task.AssignedToId = null;
@@ -268,7 +271,7 @@ namespace BARQ.Application.Services
 
         public async Task<bool> UpdateTaskStatusAsync(Guid taskId, string status)
         {
-            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == taskId);
             if (task == null) return false;
 
             task.Status = status;
@@ -286,7 +289,7 @@ namespace BARQ.Application.Services
 
         public async Task<bool> UpdateTaskProgressAsync(Guid taskId, decimal progressPercentage)
         {
-            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == taskId);
             if (task == null) return false;
 
             task.ProgressPercentage = Math.Max(0, Math.Min(100, progressPercentage));
@@ -306,7 +309,7 @@ namespace BARQ.Application.Services
         public async Task<List<TaskDto>> GetSubTasksAsync(Guid parentTaskId)
         {
             var subTasks = await _context.Tasks
-                .Where(t => t.ParentTaskId == parentTaskId)
+                .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.ParentTaskId == parentTaskId)
                 .Include(t => t.AssignedTo)
                 .Select(t => new TaskDto
                 {
@@ -332,7 +335,7 @@ namespace BARQ.Application.Services
         public async Task<List<TaskDto>> GetTasksByProjectAsync(Guid projectId)
         {
             var tasks = await _context.Tasks
-                .Where(t => t.ProjectId == projectId)
+                .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.ProjectId == projectId)
                 .Include(t => t.AssignedTo)
                 .Select(t => new TaskDto
                 {
@@ -358,7 +361,7 @@ namespace BARQ.Application.Services
         public async Task<List<TaskDto>> GetTasksByUserAsync(Guid userId)
         {
             var tasks = await _context.Tasks
-                .Where(t => t.AssignedToId == userId)
+                .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.AssignedToId == userId)
                 .Include(t => t.Project)
                 .Select(t => new TaskDto
                 {
@@ -384,7 +387,7 @@ namespace BARQ.Application.Services
         public async Task<BulkOperationResult> BulkDeleteTasksAsync(BulkDeleteRequest request)
         {
             var tasks = await _context.Tasks
-                .Where(t => request.Ids.Contains(t.Id))
+                .Where(t => t.TenantId == _tenantProvider.GetTenantId() && request.Ids.Contains(t.Id))
                 .ToListAsync();
 
             var successCount = 0;
@@ -417,7 +420,7 @@ namespace BARQ.Application.Services
         public async Task<BulkOperationResult> BulkUpdateTaskStatusAsync(List<Guid> taskIds, string status)
         {
             var tasks = await _context.Tasks
-                .Where(t => taskIds.Contains(t.Id))
+                .Where(t => t.TenantId == _tenantProvider.GetTenantId() && taskIds.Contains(t.Id))
                 .ToListAsync();
 
             var successCount = 0;

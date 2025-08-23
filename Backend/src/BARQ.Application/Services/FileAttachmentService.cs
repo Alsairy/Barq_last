@@ -2,6 +2,7 @@ using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -15,17 +16,20 @@ namespace BARQ.Application.Services
         private readonly BarqDbContext _context;
         private readonly IFileStorageService _fileStorage;
         private readonly IAntiVirusService _antiVirus;
+        private readonly ITenantProvider _tenantProvider;
         private readonly ILogger<FileAttachmentService> _logger;
 
         public FileAttachmentService(
             BarqDbContext context,
             IFileStorageService fileStorage,
             IAntiVirusService antiVirus,
+            ITenantProvider tenantProvider,
             ILogger<FileAttachmentService> logger)
         {
             _context = context;
             _fileStorage = fileStorage;
             _antiVirus = antiVirus;
+            _tenantProvider = tenantProvider;
             _logger = logger;
         }
 
@@ -103,14 +107,14 @@ namespace BARQ.Application.Services
         public async Task<FileAttachmentDto?> GetFileAsync(string fileId, Guid userId)
         {
             if (!Guid.TryParse(fileId, out var fileGuid))
-                return null;
+                throw new ArgumentException("Invalid file ID format");
 
             var file = await _context.FileAttachments
                 .Include(f => f.UploadedByUser)
                 .FirstOrDefaultAsync(f => f.Id == fileGuid);
 
             if (file == null || !CanUserAccessFile(file, userId))
-                return null;
+                throw new UnauthorizedAccessException("File not found or access denied");
 
             await LogFileAccessAsync(fileId, userId, "View");
 
@@ -121,31 +125,31 @@ namespace BARQ.Application.Services
         {
             var query = _context.FileAttachments
                 .Include(f => f.UploadedByUser)
-                .Where(f => f.TenantId == tenantId || f.IsPublic);
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic);
 
             if (!string.IsNullOrEmpty(request.Status))
-                query = query.Where(f => f.Status == request.Status);
+                query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.Status == request.Status);
 
             if (!string.IsNullOrEmpty(request.ContentType))
-                query = query.Where(f => f.ContentType.Contains(request.ContentType));
+                query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.ContentType.Contains(request.ContentType));
 
             if (request.UploadedAfter.HasValue)
-                query = query.Where(f => f.CreatedAt >= request.UploadedAfter.Value);
+                query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.CreatedAt >= request.UploadedAfter.Value);
 
             if (request.UploadedBefore.HasValue)
-                query = query.Where(f => f.CreatedAt <= request.UploadedBefore.Value);
+                query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.CreatedAt <= request.UploadedBefore.Value);
 
             if (request.MinSize.HasValue)
-                query = query.Where(f => f.FileSize >= request.MinSize.Value);
+                query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.FileSize >= request.MinSize.Value);
 
             if (request.MaxSize.HasValue)
-                query = query.Where(f => f.FileSize <= request.MaxSize.Value);
+                query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.FileSize <= request.MaxSize.Value);
 
             if (request.IsPublic.HasValue)
-                query = query.Where(f => f.IsPublic == request.IsPublic.Value);
+                query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.IsPublic == request.IsPublic.Value);
 
             if (!string.IsNullOrEmpty(request.SearchTerm))
-                query = query.Where(f => f.FileName.Contains(request.SearchTerm) || f.OriginalFileName.Contains(request.SearchTerm));
+                query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && (f.FileName.Contains(request.SearchTerm) || f.OriginalFileName.Contains(request.SearchTerm)));
 
             var totalCount = await query.CountAsync();
             var files = await query
@@ -169,7 +173,9 @@ namespace BARQ.Application.Services
             if (!Guid.TryParse(fileId, out var fileGuid))
                 throw new ArgumentException("Invalid file ID");
 
-            var file = await _context.FileAttachments.FindAsync(fileGuid);
+            var file = await _context.FileAttachments
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+                .FirstOrDefaultAsync();
             if (file == null || !CanUserAccessFile(file, userId))
                 throw new UnauthorizedAccessException("File not found or access denied");
 
@@ -192,7 +198,9 @@ namespace BARQ.Application.Services
             if (!Guid.TryParse(fileId, out var fileGuid))
                 return false;
 
-            var file = await _context.FileAttachments.FindAsync(fileGuid);
+            var file = await _context.FileAttachments
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+                .FirstOrDefaultAsync();
             if (file == null || !CanUserDeleteFile(file, userId))
                 return false;
 
@@ -213,7 +221,9 @@ namespace BARQ.Application.Services
             if (!Guid.TryParse(fileId, out var fileGuid))
                 throw new ArgumentException("Invalid file ID");
 
-            var file = await _context.FileAttachments.FindAsync(fileGuid);
+            var file = await _context.FileAttachments
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+                .FirstOrDefaultAsync();
             if (file == null)
                 throw new ArgumentException("File not found");
 
@@ -258,7 +268,9 @@ namespace BARQ.Application.Services
             if (!Guid.TryParse(fileId, out var fileGuid))
                 return false;
 
-            var file = await _context.FileAttachments.FindAsync(fileGuid);
+            var file = await _context.FileAttachments
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+                .FirstOrDefaultAsync();
             if (file == null)
                 return false;
 
@@ -273,8 +285,12 @@ namespace BARQ.Application.Services
             if (!Guid.TryParse(fileId, out var fileGuid))
                 return false;
 
-            var file = await _context.FileAttachments.FindAsync(fileGuid);
-            var quarantine = await _context.FileQuarantines.FirstOrDefaultAsync(q => q.FileAttachmentId == fileGuid && q.Status == "Quarantined");
+            var file = await _context.FileAttachments
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+                .FirstOrDefaultAsync();
+            var quarantine = await _context.FileQuarantines
+                .Where(q => q.TenantId == _tenantProvider.GetTenantId())
+                .FirstOrDefaultAsync(q => q.FileAttachmentId == fileGuid && q.Status == "Quarantined");
 
             if (file == null || quarantine == null)
                 return false;
@@ -296,14 +312,16 @@ namespace BARQ.Application.Services
         public async Task<Stream?> DownloadFileAsync(string fileId, Guid userId, string accessToken)
         {
             if (!Guid.TryParse(fileId, out var fileGuid))
-                return null;
+                throw new ArgumentException("Invalid file ID format");
 
-            var file = await _context.FileAttachments.FindAsync(fileGuid);
+            var file = await _context.FileAttachments
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+                .FirstOrDefaultAsync();
             if (file == null || !CanUserAccessFile(file, userId))
-                return null;
+                throw new UnauthorizedAccessException("File not found or access denied");
 
             if (!ValidateAccessToken(accessToken, fileId, userId))
-                return null;
+                throw new UnauthorizedAccessException("Invalid access token");
 
             await LogFileAccessAsync(fileId, userId, "Download");
             return await _fileStorage.DownloadFileAsync(file.StoragePath);
@@ -312,11 +330,13 @@ namespace BARQ.Application.Services
         public async Task<Stream?> GetThumbnailAsync(string fileId, Guid userId)
         {
             if (!Guid.TryParse(fileId, out var fileGuid))
-                return null;
+                throw new ArgumentException("Invalid file ID format");
 
-            var file = await _context.FileAttachments.FindAsync(fileGuid);
+            var file = await _context.FileAttachments
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+                .FirstOrDefaultAsync();
             if (file == null || !CanUserAccessFile(file, userId) || string.IsNullOrEmpty(file.ThumbnailPath))
-                return null;
+                throw new UnauthorizedAccessException("File not found, access denied, or thumbnail not available");
 
             return await _fileStorage.DownloadFileAsync(file.ThumbnailPath);
         }
@@ -326,7 +346,9 @@ namespace BARQ.Application.Services
             if (!Guid.TryParse(fileId, out var fileGuid))
                 return null;
 
-            var file = await _context.FileAttachments.FindAsync(fileGuid);
+            var file = await _context.FileAttachments
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+                .FirstOrDefaultAsync();
             if (file == null || !CanUserAccessFile(file, userId) || string.IsNullOrEmpty(file.PreviewPath))
                 return null;
 
@@ -346,7 +368,7 @@ namespace BARQ.Application.Services
         public async Task<IEnumerable<FileAttachmentDto>> GetExpiredFilesAsync()
         {
             var expiredFiles = await _context.FileAttachments
-                .Where(f => f.ExpiresAt.HasValue && f.ExpiresAt.Value <= DateTime.UtcNow && f.Status != "Deleted")
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.ExpiresAt.HasValue && f.ExpiresAt.Value <= DateTime.UtcNow && f.Status != "Deleted")
                 .ToListAsync();
 
             return expiredFiles.Select(MapToDto);
@@ -355,7 +377,7 @@ namespace BARQ.Application.Services
         public async System.Threading.Tasks.Task<bool> CleanupExpiredFilesAsync()
         {
             var expiredFiles = await _context.FileAttachments
-                .Where(f => f.ExpiresAt.HasValue && f.ExpiresAt.Value <= DateTime.UtcNow && f.Status != "Deleted")
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.ExpiresAt.HasValue && f.ExpiresAt.Value <= DateTime.UtcNow && f.Status != "Deleted")
                 .ToListAsync();
 
             foreach (var file in expiredFiles)
@@ -376,7 +398,9 @@ namespace BARQ.Application.Services
             if (!Guid.TryParse(fileId, out var fileGuid))
                 return false;
 
-            var file = await _context.FileAttachments.FindAsync(fileGuid);
+            var file = await _context.FileAttachments
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+                .FirstOrDefaultAsync();
             if (file == null || !CanUserAccessFile(file, userId))
                 return false;
 
@@ -390,7 +414,7 @@ namespace BARQ.Application.Services
         public async Task<IEnumerable<FileAttachmentDto>> GetQuarantinedFilesAsync(Guid userId)
         {
             var quarantinedFiles = await _context.FileAttachments
-                .Where(f => f.Status == "Quarantined")
+                .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Status == "Quarantined")
                 .ToListAsync();
 
             return quarantinedFiles.Select(MapToDto);
@@ -422,7 +446,9 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var file = await _context.FileAttachments.FindAsync(fileId);
+                var file = await _context.FileAttachments
+                    .Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileId)
+                    .FirstOrDefaultAsync();
                 if (file == null) return;
 
                 var scanResult = await _antiVirus.ScanFileAsync(Path.Combine("uploads", file.StoragePath));

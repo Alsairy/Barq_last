@@ -7,11 +7,20 @@ namespace BARQ.Core.Entities
         [Required]
         public Guid AdminUserId { get; set; }
         
+        [MaxLength(100)]
+        public string? AdminUserName { get; set; }
+        
         [Required]
         public Guid TargetUserId { get; set; }
         
+        [MaxLength(100)]
+        public string? TargetUserName { get; set; }
+        
         [Required]
         public new Guid TenantId { get; set; }
+        
+        [MaxLength(100)]
+        public string? TenantName { get; set; }
         
         [Required]
         [MaxLength(100)]

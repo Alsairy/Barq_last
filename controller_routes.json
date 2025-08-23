@@ -1,0 +1,492 @@
+[
+  {
+    "controller": "Files",
+    "action": "DownloadFile",
+    "method": "GET",
+    "route": "/api/files/{fileId}/download",
+    "file": "Controllers/FilesController.cs"
+  },
+  {
+    "controller": "Files",
+    "action": "GetThumbnail",
+    "method": "GET",
+    "route": "/api/files/{fileId}/thumbnail",
+    "file": "Controllers/FilesController.cs"
+  },
+  {
+    "controller": "Files",
+    "action": "GetPreview",
+    "method": "GET",
+    "route": "/api/files/{fileId}/preview",
+    "file": "Controllers/FilesController.cs"
+  },
+  {
+    "controller": "Files",
+    "action": "DeleteFile",
+    "method": "DELETE",
+    "route": "/api/files/{fileId}",
+    "file": "Controllers/FilesController.cs"
+  },
+  {
+    "controller": "Files",
+    "action": "QuarantineFile",
+    "method": "POST",
+    "route": "/api/files/{fileId}/quarantine",
+    "file": "Controllers/FilesController.cs"
+  },
+  {
+    "controller": "Files",
+    "action": "ReleaseFromQuarantine",
+    "method": "POST",
+    "route": "/api/files/{fileId}/release",
+    "file": "Controllers/FilesController.cs"
+  },
+  {
+    "controller": "Files",
+    "action": "CleanupExpiredFiles",
+    "method": "POST",
+    "route": "/api/files/cleanup-expired",
+    "file": "Controllers/FilesController.cs"
+  },
+  {
+    "controller": "Files",
+    "action": "UpdateFileMetadata",
+    "method": "PUT",
+    "route": "/api/files/{fileId}/metadata",
+    "file": "Controllers/FilesController.cs"
+  },
+  {
+    "controller": "RecycleBin",
+    "action": "List",
+    "method": "GET",
+    "route": "/api/recycle-bin/list",
+    "file": "Controllers/RecycleBinController.cs"
+  },
+  {
+    "controller": "RecycleBin",
+    "action": "Restore",
+    "method": "POST",
+    "route": "/api/recycle-bin/{entity}/{id:guid}/restore",
+    "file": "Controllers/RecycleBinController.cs"
+  },
+  {
+    "controller": "OpsDashboard",
+    "action": "RefreshAllHealthChecks",
+    "method": "POST",
+    "route": "/api/opsdashboard/system-health/refresh",
+    "file": "Controllers/OpsDashboardController.cs"
+  },
+  {
+    "controller": "OpsDashboard",
+    "action": "CleanupOldHealthRecords",
+    "method": "POST",
+    "route": "/api/opsdashboard/system-health/cleanup",
+    "file": "Controllers/OpsDashboardController.cs"
+  },
+  {
+    "controller": "Impersonation",
+    "action": "EndImpersonation",
+    "method": "POST",
+    "route": "/api/impersonation/sessions/{id}/end",
+    "file": "Controllers/ImpersonationController.cs"
+  },
+  {
+    "controller": "Impersonation",
+    "action": "ExpireOldSessions",
+    "method": "POST",
+    "route": "/api/impersonation/validate-token",
+    "file": "Controllers/ImpersonationController.cs"
+  },
+  {
+    "controller": "UserLanguagePreferences",
+    "action": "DeleteUserLanguagePreference",
+    "method": "DELETE",
+    "route": "/api/userlanguagepreferences/{id}",
+    "file": "Controllers/UserLanguagePreferencesController.cs"
+  },
+  {
+    "controller": "UserLanguagePreferences",
+    "action": "SetDefaultLanguagePreference",
+    "method": "POST",
+    "route": "/api/userlanguagepreferences/user/{userId}/preference/{preferenceId}/set-default",
+    "file": "Controllers/UserLanguagePreferencesController.cs"
+  },
+  {
+    "controller": "UserLanguagePreferences",
+    "action": "UpdateUserAccessibilitySettings",
+    "method": "PUT",
+    "route": "/api/userlanguagepreferences/user/{userId}/accessibility",
+    "file": "Controllers/UserLanguagePreferencesController.cs"
+  },
+  {
+    "controller": "FeatureFlags",
+    "action": "DeleteFeatureFlag",
+    "method": "POST",
+    "route": "/api/featureflags/deletefeatureflag",
+    "file": "Controllers/FeatureFlagsController.cs"
+  },
+  {
+    "controller": "FeatureFlags",
+    "action": "ToggleFeatureFlag",
+    "method": "POST",
+    "route": "/api/featureflags/{id}/toggle",
+    "file": "Controllers/FeatureFlagsController.cs"
+  },
+  {
+    "controller": "FeatureFlags",
+    "action": "RefreshFeatureFlagCache",
+    "method": "POST",
+    "route": "/api/featureflags/refresh-cache",
+    "file": "Controllers/FeatureFlagsController.cs"
+  },
+  {
+    "controller": "NotificationPreferences",
+    "action": "DeletePreference",
+    "method": "DELETE",
+    "route": "/api/notificationpreferences/{preferenceId}",
+    "file": "Controllers/NotificationPreferencesController.cs"
+  },
+  {
+    "controller": "NotificationPreferences",
+    "action": "SetDefaultPreferences",
+    "method": "POST",
+    "route": "/api/notificationpreferences/defaults",
+    "file": "Controllers/NotificationPreferencesController.cs"
+  },
+  {
+    "controller": "Sla",
+    "action": "DeleteSlaPolicy",
+    "method": "DELETE",
+    "route": "/api/sla/policies/{id}",
+    "file": "Controllers/SlaController.cs"
+  },
+  {
+    "controller": "Sla",
+    "action": "DeleteEscalationRule",
+    "method": "DELETE",
+    "route": "/api/sla/escalation-rules/{id}",
+    "file": "Controllers/SlaController.cs"
+  },
+  {
+    "controller": "Sla",
+    "action": "RetryEscalationAction",
+    "method": "POST",
+    "route": "/api/sla/escalation-actions/{id}/retry",
+    "file": "Controllers/SlaController.cs"
+  },
+  {
+    "controller": "Sla",
+    "action": "CheckViolations",
+    "method": "POST",
+    "route": "/api/sla/check-violations",
+    "file": "Controllers/SlaController.cs"
+  },
+  {
+    "controller": "Sla",
+    "action": "ProcessEscalations",
+    "method": "POST",
+    "route": "/api/sla/process-escalations",
+    "file": "Controllers/SlaController.cs"
+  },
+  {
+    "controller": "Translations",
+    "action": "DeleteTranslation",
+    "method": "POST",
+    "route": "/api/translations/deletetranslation",
+    "file": "Controllers/TranslationsController.cs"
+  },
+  {
+    "controller": "Translations",
+    "action": "ApproveTranslation",
+    "method": "POST",
+    "route": "/api/translations/bulk",
+    "file": "Controllers/TranslationsController.cs"
+  },
+  {
+    "controller": "Translations",
+    "action": "RejectTranslation",
+    "method": "POST",
+    "route": "/api/translations/{id}/reject",
+    "file": "Controllers/TranslationsController.cs"
+  },
+  {
+    "controller": "Translations",
+    "action": "ImportTranslations",
+    "method": "GET",
+    "route": "/api/translations/pending",
+    "file": "Controllers/TranslationsController.cs"
+  },
+  {
+    "controller": "Translations",
+    "action": "SyncTranslationKeys",
+    "method": "GET",
+    "route": "/api/translations/missing/{languageCode}",
+    "file": "Controllers/TranslationsController.cs"
+  },
+  {
+    "controller": "Accessibility",
+    "action": "DeleteAccessibilityAudit",
+    "method": "POST",
+    "route": "/api/accessibility/audits",
+    "file": "Controllers/AccessibilityController.cs"
+  },
+  {
+    "controller": "Accessibility",
+    "action": "DeleteAccessibilityIssue",
+    "method": "POST",
+    "route": "/api/accessibility/issues",
+    "file": "Controllers/AccessibilityController.cs"
+  },
+  {
+    "controller": "Accessibility",
+    "action": "AssignAccessibilityIssue",
+    "method": "POST",
+    "route": "/api/accessibility/issues/{id}/assign",
+    "file": "Controllers/AccessibilityController.cs"
+  },
+  {
+    "controller": "Accessibility",
+    "action": "ResolveAccessibilityIssue",
+    "method": "POST",
+    "route": "/api/accessibility/issues/{id}/resolve",
+    "file": "Controllers/AccessibilityController.cs"
+  },
+  {
+    "controller": "Accessibility",
+    "action": "VerifyAccessibilityIssue",
+    "method": "POST",
+    "route": "/api/accessibility/issues/{id}/verify",
+    "file": "Controllers/AccessibilityController.cs"
+  },
+  {
+    "controller": "Accessibility",
+    "action": "BulkUpdateAccessibilityIssues",
+    "method": "GET",
+    "route": "/api/accessibility/stats",
+    "file": "Controllers/AccessibilityController.cs"
+  },
+  {
+    "controller": "AuditReports",
+    "action": "DownloadReport",
+    "method": "GET",
+    "route": "/api/auditreports/{id}/download",
+    "file": "Controllers/AuditReportsController.cs"
+  },
+  {
+    "controller": "AuditReports",
+    "action": "ExportAuditLogs",
+    "method": "POST",
+    "route": "/api/auditreports/audit-logs/export",
+    "file": "Controllers/AuditReportsController.cs"
+  },
+  {
+    "controller": "OpsConsole",
+    "action": "ToggleFeatureFlag",
+    "method": "POST",
+    "route": "/api/opsconsole/feature-flags/{flagName}/toggle",
+    "file": "Controllers/OpsConsoleController.cs"
+  },
+  {
+    "controller": "OpsConsole",
+    "action": "StartImpersonation",
+    "method": "POST",
+    "route": "/api/opsconsole/impersonate/{userId}",
+    "file": "Controllers/OpsConsoleController.cs"
+  },
+  {
+    "controller": "OpsConsole",
+    "action": "StopImpersonation",
+    "method": "POST",
+    "route": "/api/opsconsole/impersonate/stop",
+    "file": "Controllers/OpsConsoleController.cs"
+  },
+  {
+    "controller": "Languages",
+    "action": "DeleteLanguage",
+    "method": "POST",
+    "route": "/api/languages/deletelanguage",
+    "file": "Controllers/LanguagesController.cs"
+  },
+  {
+    "controller": "Languages",
+    "action": "SetDefaultLanguage",
+    "method": "POST",
+    "route": "/api/languages/{id}/set-default",
+    "file": "Controllers/LanguagesController.cs"
+  },
+  {
+    "controller": "Languages",
+    "action": "ToggleLanguage",
+    "method": "POST",
+    "route": "/api/languages/{id}/toggle",
+    "file": "Controllers/LanguagesController.cs"
+  },
+  {
+    "controller": "Languages",
+    "action": "RefreshLanguageCompletion",
+    "method": "GET",
+    "route": "/api/languages/stats",
+    "file": "Controllers/LanguagesController.cs"
+  },
+  {
+    "controller": "AdminConstraints",
+    "action": "ValidateTemplate",
+    "method": "POST",
+    "route": "/api/adminconstraints/validate-template/{templateId}",
+    "file": "Controllers/AdminConstraintsController.cs"
+  },
+  {
+    "controller": "AdminConstraints",
+    "action": "ValidateTemplateContent",
+    "method": "POST",
+    "route": "/api/adminconstraints/validate-template-content",
+    "file": "Controllers/AdminConstraintsController.cs"
+  },
+  {
+    "controller": "AdminConstraints",
+    "action": "TestConnection",
+    "method": "POST",
+    "route": "/api/adminconstraints/test-connection",
+    "file": "Controllers/AdminConstraintsController.cs"
+  },
+  {
+    "controller": "AdminConstraints",
+    "action": "GetViolations",
+    "method": "GET",
+    "route": "/api/adminconstraints/violations",
+    "file": "Controllers/AdminConstraintsController.cs"
+  },
+  {
+    "controller": "AdminConstraints",
+    "action": "ResolveViolation",
+    "method": "POST",
+    "route": "/api/adminconstraints/violations/{violationId}/resolve",
+    "file": "Controllers/AdminConstraintsController.cs"
+  },
+  {
+    "controller": "AdminConstraints",
+    "action": "GetConstraints",
+    "method": "GET",
+    "route": "/api/adminconstraints/constraints",
+    "file": "Controllers/AdminConstraintsController.cs"
+  },
+  {
+    "controller": "AdminConstraints",
+    "action": "CreateConstraint",
+    "method": "POST",
+    "route": "/api/adminconstraints/constraints",
+    "file": "Controllers/AdminConstraintsController.cs"
+  },
+  {
+    "controller": "AdminConstraints",
+    "action": "UpdateConstraint",
+    "method": "PUT",
+    "route": "/api/adminconstraints/constraints/{constraintId}",
+    "file": "Controllers/AdminConstraintsController.cs"
+  },
+  {
+    "controller": "AdminConstraints",
+    "action": "DeleteConstraint",
+    "method": "DELETE",
+    "route": "/api/adminconstraints/constraints/{constraintId}",
+    "file": "Controllers/AdminConstraintsController.cs"
+  },
+  {
+    "controller": "NotificationCenter",
+    "action": "MarkNotifications",
+    "method": "POST",
+    "route": "/api/notificationcenter/mark",
+    "file": "Controllers/NotificationCenterController.cs"
+  },
+  {
+    "controller": "NotificationCenter",
+    "action": "SendNotification",
+    "method": "POST",
+    "route": "/api/notificationcenter/send",
+    "file": "Controllers/NotificationCenterController.cs"
+  },
+  {
+    "controller": "NotificationCenter",
+    "action": "SendBulkNotification",
+    "method": "POST",
+    "route": "/api/notificationcenter/send-bulk",
+    "file": "Controllers/NotificationCenterController.cs"
+  },
+  {
+    "controller": "NotificationCenter",
+    "action": "DeleteExpiredNotifications",
+    "method": "DELETE",
+    "route": "/api/notificationcenter/expired",
+    "file": "Controllers/NotificationCenterController.cs"
+  },
+  {
+    "controller": "Health",
+    "action": "GetLiveness",
+    "method": "GET",
+    "route": "/health/live",
+    "file": "Controllers/HealthController.cs"
+  },
+  {
+    "controller": "Health",
+    "action": "GetReadiness",
+    "method": "GET",
+    "route": "/health/ready",
+    "file": "Controllers/HealthController.cs"
+  },
+  {
+    "controller": "Health",
+    "action": "GetFlowableHealth",
+    "method": "GET",
+    "route": "/health/flowable",
+    "file": "Controllers/HealthController.cs"
+  },
+  {
+    "controller": "Health",
+    "action": "GetAiHealth",
+    "method": "GET",
+    "route": "/health/ai",
+    "file": "Controllers/HealthController.cs"
+  },
+  {
+    "controller": "TenantStates",
+    "action": "RefreshTenantState",
+    "method": "POST",
+    "route": "/api/tenantstates/tenant/{tenantId}/refresh",
+    "file": "Controllers/TenantStatesController.cs"
+  },
+  {
+    "controller": "TenantStates",
+    "action": "RefreshAllTenantStates",
+    "method": "POST",
+    "route": "/api/tenantstates/refresh-all",
+    "file": "Controllers/TenantStatesController.cs"
+  },
+  {
+    "controller": "TenantStates",
+    "action": "MarkTenantForAttention",
+    "method": "POST",
+    "route": "/api/tenantstates/tenant/{tenantId}/mark-attention",
+    "file": "Controllers/TenantStatesController.cs"
+  },
+  {
+    "controller": "TenantStates",
+    "action": "ClearTenantAttention",
+    "method": "POST",
+    "route": "/api/tenantstates/tenant/{tenantId}/clear-attention",
+    "file": "Controllers/TenantStatesController.cs"
+  },
+  {
+    "controller": "TenantStates",
+    "action": "UpdateTenantUsageStats",
+    "method": "POST",
+    "route": "/api/tenantstates/tenant/{tenantId}/update-usage",
+    "file": "Controllers/TenantStatesController.cs"
+  },
+  {
+    "controller": "Billing",
+    "action": "DownloadInvoice",
+    "method": "GET",
+    "route": "/api/billing/plans",
+    "file": "Controllers/BillingController.cs"
+  }
+]

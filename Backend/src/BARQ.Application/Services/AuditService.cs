@@ -1,5 +1,6 @@
 using BARQ.Application.Interfaces;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
@@ -10,11 +11,13 @@ namespace BARQ.Application.Services
     {
         private readonly BarqDbContext _context;
         private readonly ILogger<AuditService> _logger;
+        private readonly ITenantProvider _tenantProvider;
 
-        public AuditService(BarqDbContext context, ILogger<AuditService> logger)
+        public AuditService(BarqDbContext context, ILogger<AuditService> logger, ITenantProvider tenantProvider)
         {
             _context = context;
             _logger = logger;
+            _tenantProvider = tenantProvider;
         }
 
         public async System.Threading.Tasks.Task LogAsync(string entityType, string action, object data)
@@ -51,16 +54,11 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var query = _context.AuditLogs.AsQueryable();
-
-                if (!string.IsNullOrEmpty(entityType))
-                    query = query.Where(al => al.EntityType == entityType);
-
-                if (fromDate.HasValue)
-                    query = query.Where(al => al.Timestamp >= fromDate.Value);
-
-                if (toDate.HasValue)
-                    query = query.Where(al => al.Timestamp <= toDate.Value);
+                var query = _context.AuditLogs
+                    .Where(al => al.TenantId == _tenantProvider.GetTenantId() &&
+                                (string.IsNullOrEmpty(entityType) || al.EntityType == entityType) &&
+                                (!fromDate.HasValue || al.Timestamp >= fromDate.Value) &&
+                                (!toDate.HasValue || al.Timestamp <= toDate.Value));
 
                 var logs = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(
                     query.OrderByDescending(al => al.Timestamp).Take(1000));

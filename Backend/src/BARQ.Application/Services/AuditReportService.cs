@@ -4,6 +4,7 @@ using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.DTOs.Common;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using System.Text.Json;
 
@@ -13,11 +14,13 @@ namespace BARQ.Application.Services
     {
         private readonly BarqDbContext _context;
         private readonly ILogger<AuditReportService> _logger;
+        private readonly ITenantProvider _tenantProvider;
 
-        public AuditReportService(BarqDbContext context, ILogger<AuditReportService> logger)
+        public AuditReportService(BarqDbContext context, ILogger<AuditReportService> logger, ITenantProvider tenantProvider)
         {
             _context = context;
             _logger = logger;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<AuditReportDto> CreateReportAsync(Guid userId, Guid? tenantId, CreateAuditReportRequest request)
@@ -61,13 +64,12 @@ namespace BARQ.Application.Services
         {
             var report = await _context.AuditReports
                 .Include(r => r.GeneratedByUser)
-                .Where(r => r.Id == Guid.Parse(reportId))
-                .Where(r => tenantId == null || r.TenantId == tenantId)
+                .Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == Guid.Parse(reportId))
                 .FirstOrDefaultAsync();
 
             if (report == null)
             {
-                return null;
+                throw new ArgumentException("Report not found");
             }
 
             return await MapToDto(report);
@@ -77,38 +79,14 @@ namespace BARQ.Application.Services
         {
             var query = _context.AuditReports
                 .Include(r => r.GeneratedByUser)
-                .Where(r => tenantId == null || r.TenantId == tenantId)
+                .Where(r => r.TenantId == _tenantProvider.GetTenantId() &&
+                           (string.IsNullOrEmpty(request.Status) || r.Status == request.Status) &&
+                           (string.IsNullOrEmpty(request.Format) || r.Format == request.Format) &&
+                           (!request.GeneratedAfter.HasValue || r.GeneratedAt >= request.GeneratedAfter.Value) &&
+                           (!request.GeneratedBefore.HasValue || r.GeneratedAt <= request.GeneratedBefore.Value) &&
+                           (!request.IsScheduled.HasValue || r.IsScheduled == request.IsScheduled.Value) &&
+                           (string.IsNullOrEmpty(request.GeneratedBy) || r.GeneratedBy == Guid.Parse(request.GeneratedBy)))
                 .AsQueryable();
-
-            if (!string.IsNullOrEmpty(request.Status))
-            {
-                query = query.Where(r => r.Status == request.Status);
-            }
-
-            if (!string.IsNullOrEmpty(request.Format))
-            {
-                query = query.Where(r => r.Format == request.Format);
-            }
-
-            if (request.GeneratedAfter.HasValue)
-            {
-                query = query.Where(r => r.GeneratedAt >= request.GeneratedAfter.Value);
-            }
-
-            if (request.GeneratedBefore.HasValue)
-            {
-                query = query.Where(r => r.GeneratedAt <= request.GeneratedBefore.Value);
-            }
-
-            if (request.IsScheduled.HasValue)
-            {
-                query = query.Where(r => r.IsScheduled == request.IsScheduled.Value);
-            }
-
-            if (!string.IsNullOrEmpty(request.GeneratedBy))
-            {
-                query = query.Where(r => r.GeneratedBy == Guid.Parse(request.GeneratedBy));
-            }
 
             if (!string.IsNullOrEmpty(request.Search))
             {
@@ -142,8 +120,7 @@ namespace BARQ.Application.Services
         public async Task<bool> DeleteReportAsync(string reportId, Guid userId, Guid? tenantId)
         {
             var report = await _context.AuditReports
-                .Where(r => r.Id == Guid.Parse(reportId))
-                .Where(r => tenantId == null || r.TenantId == tenantId)
+                .Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == Guid.Parse(reportId))
                 .FirstOrDefaultAsync();
 
             if (report == null)
@@ -174,8 +151,7 @@ namespace BARQ.Application.Services
         public async Task<string> GenerateReportAsync(string reportId, Guid userId, Guid? tenantId)
         {
             var report = await _context.AuditReports
-                .Where(r => r.Id == Guid.Parse(reportId))
-                .Where(r => tenantId == null || r.TenantId == tenantId)
+                .Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == Guid.Parse(reportId))
                 .FirstOrDefaultAsync();
 
             if (report == null)
@@ -201,14 +177,12 @@ namespace BARQ.Application.Services
         public async Task<Stream?> DownloadReportAsync(string reportId, Guid userId, Guid? tenantId)
         {
             var report = await _context.AuditReports
-                .Where(r => r.Id == Guid.Parse(reportId))
-                .Where(r => tenantId == null || r.TenantId == tenantId)
-                .Where(r => r.Status == "Completed")
+                .Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == Guid.Parse(reportId) && r.Status == "Completed")
                 .FirstOrDefaultAsync();
 
             if (report == null || string.IsNullOrEmpty(report.FilePath) || !File.Exists(report.FilePath))
             {
-                return null;
+                throw new ArgumentException("Report file not found or not available for download");
             }
 
             return new FileStream(report.FilePath, FileMode.Open, FileAccess.Read);
@@ -219,43 +193,15 @@ namespace BARQ.Application.Services
             var query = _context.AuditLogs
                 .Include(a => a.User)
                 .Include(a => a.Tenant)
-                .Where(a => tenantId == null || a.TenantId == tenantId)
+                .Where(a => a.TenantId == _tenantProvider.GetTenantId() &&
+                           (string.IsNullOrEmpty(request.EntityType) || a.EntityType == request.EntityType) &&
+                           (string.IsNullOrEmpty(request.EntityId) || a.EntityId.ToString() == request.EntityId) &&
+                           (string.IsNullOrEmpty(request.Action) || a.Action == request.Action) &&
+                           (string.IsNullOrEmpty(request.UserId) || a.UserId == Guid.Parse(request.UserId)) &&
+                           (!request.StartDate.HasValue || a.Timestamp >= request.StartDate.Value) &&
+                           (!request.EndDate.HasValue || a.Timestamp <= request.EndDate.Value) &&
+                           (string.IsNullOrEmpty(request.IpAddress) || a.IpAddress == request.IpAddress))
                 .AsQueryable();
-
-            if (!string.IsNullOrEmpty(request.EntityType))
-            {
-                query = query.Where(a => a.EntityType == request.EntityType);
-            }
-
-            if (!string.IsNullOrEmpty(request.EntityId))
-            {
-                query = query.Where(a => a.EntityId.ToString() == request.EntityId);
-            }
-
-            if (!string.IsNullOrEmpty(request.Action))
-            {
-                query = query.Where(a => a.Action == request.Action);
-            }
-
-            if (!string.IsNullOrEmpty(request.UserId))
-            {
-                query = query.Where(a => a.UserId == Guid.Parse(request.UserId));
-            }
-
-            if (request.StartDate.HasValue)
-            {
-                query = query.Where(a => a.Timestamp >= request.StartDate.Value);
-            }
-
-            if (request.EndDate.HasValue)
-            {
-                query = query.Where(a => a.Timestamp <= request.EndDate.Value);
-            }
-
-            if (!string.IsNullOrEmpty(request.IpAddress))
-            {
-                query = query.Where(a => a.IpAddress == request.IpAddress);
-            }
 
             if (!string.IsNullOrEmpty(request.SearchTerm))
             {
@@ -283,7 +229,7 @@ namespace BARQ.Application.Services
                 NewValues = a.NewValue,
                 Changes = GenerateChangesSummary(a.OldValue, a.NewValue),
                 Timestamp = a.Timestamp,
-                UserId = a.UserId?.ToString() ?? string.Empty,
+                UserId = a.UserId?.ToString() ?? "Unknown",
                 UserName = a.User?.UserName ?? "Unknown",
                 UserEmail = a.User?.Email,
                 IpAddress = a.IpAddress,
@@ -339,7 +285,7 @@ namespace BARQ.Application.Services
         public async System.Threading.Tasks.Task ProcessScheduledReportsAsync()
         {
             var scheduledReports = await _context.AuditReports
-                .Where(r => r.IsScheduled && r.NextRunAt <= DateTime.UtcNow)
+                .Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.IsScheduled && r.NextRunAt <= DateTime.UtcNow)
                 .ToListAsync();
 
             foreach (var report in scheduledReports)
@@ -379,7 +325,7 @@ namespace BARQ.Application.Services
         public async System.Threading.Tasks.Task CleanupExpiredReportsAsync()
         {
             var expiredReports = await _context.AuditReports
-                .Where(r => r.ExpiresAt <= DateTime.UtcNow)
+                .Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.ExpiresAt <= DateTime.UtcNow)
                 .ToListAsync();
 
             foreach (var report in expiredReports)
@@ -410,7 +356,9 @@ namespace BARQ.Application.Services
         {
             try
             {
-                var report = await _context.AuditReports.FindAsync(Guid.Parse(reportId));
+                var report = await _context.AuditReports
+                    .Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == Guid.Parse(reportId))
+                    .FirstOrDefaultAsync();
                 if (report == null) return;
 
                 report.Status = "Generating";
@@ -423,7 +371,8 @@ namespace BARQ.Application.Services
                 
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
 
-                await File.WriteAllTextAsync(filePath, $"Mock audit report content for {report.Name}");
+                var auditData = await GenerateAuditReportDataAsync(report);
+                await File.WriteAllTextAsync(filePath, auditData);
 
                 report.Status = "Completed";
                 report.FilePath = filePath;
@@ -438,13 +387,70 @@ namespace BARQ.Application.Services
             {
                 _logger.LogError(ex, "Failed to generate audit report: {ReportId}", reportId);
                 
-                var report = await _context.AuditReports.FindAsync(Guid.Parse(reportId));
+                var report = await _context.AuditReports
+                    .Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == Guid.Parse(reportId))
+                    .FirstOrDefaultAsync();
                 if (report != null)
                 {
                     report.Status = "Failed";
                     report.ErrorMessage = ex.Message;
                     await _context.SaveChangesAsync();
                 }
+            }
+        }
+
+        private async Task<string> GenerateAuditReportDataAsync(AuditReport report)
+        {
+            var auditLogs = await _context.AuditLogs
+                .Where(a => a.TenantId == report.TenantId && 
+                           a.Timestamp >= report.StartDate && 
+                           a.Timestamp <= report.EndDate)
+                .Include(a => a.User)
+                .OrderByDescending(a => a.Timestamp)
+                .ToListAsync();
+
+            if (report.Format.ToUpper() == "JSON")
+            {
+                return JsonSerializer.Serialize(auditLogs.Select(a => new
+                {
+                    a.Id,
+                    a.EntityType,
+                    a.EntityId,
+                    a.Action,
+                    a.Timestamp,
+                    UserName = a.User?.UserName,
+                    a.IpAddress,
+                    a.OldValue,
+                    a.NewValue
+                }), new JsonSerializerOptions { WriteIndented = true });
+            }
+            else if (report.Format.ToUpper() == "CSV")
+            {
+                var csv = new System.Text.StringBuilder();
+                csv.AppendLine("Timestamp,EntityType,EntityId,Action,UserName,IpAddress,OldValue,NewValue");
+                
+                foreach (var log in auditLogs)
+                {
+                    csv.AppendLine($"{log.Timestamp:yyyy-MM-dd HH:mm:ss},{log.EntityType},{log.EntityId},{log.Action},{log.User?.UserName},{log.IpAddress},\"{log.OldValue}\",\"{log.NewValue}\"");
+                }
+                
+                return csv.ToString();
+            }
+            else
+            {
+                var report_content = new System.Text.StringBuilder();
+                report_content.AppendLine($"Audit Report: {report.Name}");
+                report_content.AppendLine($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}");
+                report_content.AppendLine($"Period: {report.StartDate:yyyy-MM-dd} to {report.EndDate:yyyy-MM-dd}");
+                report_content.AppendLine($"Total Records: {auditLogs.Count}");
+                report_content.AppendLine();
+                
+                foreach (var log in auditLogs)
+                {
+                    report_content.AppendLine($"[{log.Timestamp:yyyy-MM-dd HH:mm:ss}] {log.EntityType} {log.Action} by {log.User?.UserName} from {log.IpAddress}");
+                }
+                
+                return report_content.ToString();
             }
         }
 

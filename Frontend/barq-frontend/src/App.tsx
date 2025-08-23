@@ -27,6 +27,14 @@ const queryClient = new QueryClient({
 });
 
 function AppContent() {
+  return (
+    <Router>
+      <AppWithRouter />
+    </Router>
+  );
+}
+
+function AppWithRouter() {
   const { handle402Response } = useBillingWorkflow();
 
   useEffect(() => {
@@ -46,19 +54,17 @@ function AppContent() {
   }, [handle402Response]);
 
   return (
-    <Router>
-      <div className="min-h-screen bg-background" dir="ltr">
-        <Routes>
-          <Route path="/*" element={<ThreePanelLayout />} />
-        </Routes>
-        <Toaster 
-          position="top-right" 
-          expand={true}
-          richColors={true}
-          closeButton={true}
-        />
-      </div>
-    </Router>
+    <div className="min-h-screen bg-background" dir="ltr">
+      <Routes>
+        <Route path="/*" element={<ThreePanelLayout />} />
+      </Routes>
+      <Toaster 
+        position="top-right" 
+        expand={true}
+        richColors={true}
+        closeButton={true}
+      />
+    </div>
   );
 }
 

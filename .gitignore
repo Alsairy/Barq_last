@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 
 # Coverage reports
 coverage/
@@ -33,3 +32,7 @@ obj/
 *.dll
 *.pdb
 *.exe
+
+# Frontend build caches
+Frontend/barq-frontend/tsconfig.tsbuildinfo
+Frontend/barq-frontend/*.tsbuildinfo

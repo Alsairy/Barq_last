@@ -84,7 +84,7 @@ export function useSLAWorkflow() {
               duration: 10000,
               action: {
                 label: 'View Task',
-                onClick: () => console.log('Navigate to task:', violation.taskId)
+                onClick: () => window.location.href = `/tasks/${violation.taskId}`
               }
             });
           });
@@ -97,7 +97,6 @@ export function useSLAWorkflow() {
         loading: false, 
         error: errorMessage 
       }));
-      console.error('Failed to load SLA violations:', error);
     }
   }, [executeWithRetry]);
 

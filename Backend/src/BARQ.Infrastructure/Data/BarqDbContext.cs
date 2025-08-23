@@ -76,7 +76,7 @@ public sealed class BarqDbContext
     public DbSet<TenantStateHistory> TenantStateHistory => Set<TenantStateHistory>();
     public DbSet<ImpersonationSession> ImpersonationSessions => Set<ImpersonationSession>();
     public DbSet<ImpersonationAction> ImpersonationActions => Set<ImpersonationAction>();
-    public DbSet<SystemHealth> SystemHealth => Set<SystemHealth>();
+    public DbSet<SystemHealth> SystemHealths => Set<SystemHealth>();
     
     public DbSet<BusinessCalendar> BusinessCalendars => Set<BusinessCalendar>();
     public DbSet<SlaPolicy> SlaPolicies => Set<SlaPolicy>();

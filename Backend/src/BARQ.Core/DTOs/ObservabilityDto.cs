@@ -2,7 +2,7 @@ namespace BARQ.Core.DTOs
 {
     public class FeatureFlagDto
     {
-        public string Id { get; set; } = string.Empty;
+        public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public string? Description { get; set; }
@@ -27,6 +27,7 @@ namespace BARQ.Core.DTOs
         public string Name { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public string? Description { get; set; }
+        public bool IsEnabled { get; set; } = false;
         public string Environment { get; set; } = "Development";
         public string? Category { get; set; }
         public string? ImpactDescription { get; set; }
@@ -87,13 +88,14 @@ namespace BARQ.Core.DTOs
 
     public class ImpersonationSessionDto
     {
-        public string Id { get; set; } = string.Empty;
-        public string AdminUserId { get; set; } = string.Empty;
+        public Guid Id { get; set; }
+        public Guid AdminUserId { get; set; }
         public string AdminUserName { get; set; } = string.Empty;
-        public string TargetUserId { get; set; } = string.Empty;
+        public Guid TargetUserId { get; set; }
         public string TargetUserName { get; set; } = string.Empty;
-        public string TenantId { get; set; } = string.Empty;
+        public Guid TenantId { get; set; }
         public string TenantName { get; set; } = string.Empty;
+        public string SessionToken { get; set; } = string.Empty;
         public DateTime StartedAt { get; set; }
         public DateTime? EndedAt { get; set; }
         public string Status { get; set; } = string.Empty;
@@ -114,12 +116,13 @@ namespace BARQ.Core.DTOs
 
     public class CreateImpersonationSessionRequest
     {
-        public string TargetUserId { get; set; } = string.Empty;
+        public Guid TargetUserId { get; set; }
         public string TenantId { get; set; } = string.Empty;
         public string Reason { get; set; } = string.Empty;
         public string? TicketNumber { get; set; }
         public string? Notes { get; set; }
         public int DurationMinutes { get; set; } = 60;
+        public int? DurationHours { get; set; }
     }
 
     public class EndImpersonationSessionRequest
@@ -130,6 +133,7 @@ namespace BARQ.Core.DTOs
     public class ImpersonationActionDto
     {
         public string Id { get; set; } = string.Empty;
+        public string? SessionId { get; set; }
         public string ActionType { get; set; } = string.Empty;
         public string EntityType { get; set; } = string.Empty;
         public string? EntityId { get; set; }
@@ -139,7 +143,9 @@ namespace BARQ.Core.DTOs
         public string? HttpMethod { get; set; }
         public string? RequestPath { get; set; }
         public int ResponseStatusCode { get; set; }
+        public int StatusCode { get; set; }
         public long ResponseTimeMs { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public string? RiskLevel { get; set; }
         public bool RequiresApproval { get; set; }
         public bool IsApproved { get; set; }
@@ -154,6 +160,7 @@ namespace BARQ.Core.DTOs
         public string Status { get; set; } = string.Empty;
         public string? StatusMessage { get; set; }
         public DateTime CheckedAt { get; set; }
+        public DateTime LastChecked { get; set; }
         public long ResponseTimeMs { get; set; }
         public string? Version { get; set; }
         public bool IsEnabled { get; set; }
@@ -192,6 +199,10 @@ namespace BARQ.Core.DTOs
         public Dictionary<string, decimal> ProviderCost { get; set; } = new();
         public int SlaViolations { get; set; }
         public int QueueDepth { get; set; }
+        public int TotalTasks { get; set; }
+        public int CompletedTasks { get; set; }
+        public int ActiveTasks { get; set; }
+        public long AverageResponseTimeMs { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 

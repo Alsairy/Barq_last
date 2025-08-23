@@ -1,0 +1,661 @@
+file,line,severity,type,description,code
+src/BARQ.Application/Services/AccessibilityService.cs,32,High,TenantGap,Query without tenant filtering,.Where(a => a.TenantId == _tenantProvider.GetTenantId() &&
+src/BARQ.Application/Services/AccessibilityService.cs,96,High,TenantGap,Query without tenant filtering,.Where(a => a.TenantId == _tenantProvider.GetTenantId() && a.PageUrl == pageUrl)
+src/BARQ.Application/Services/AccessibilityService.cs,360,High,TenantGap,Query without tenant filtering,var query = _context.AccessibilityIssues.Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.AccessibilityAuditId == auditId);
+src/BARQ.Application/Services/AccessibilityService.cs,408,High,TenantGap,Query without tenant filtering,".Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Severity == severity && i.Status == ""Open"")"
+src/BARQ.Application/Services/AccessibilityService.cs,426,High,TenantGap,Query without tenant filtering,.Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Status == status)
+src/BARQ.Application/Services/AccessibilityService.cs,537,High,TenantGap,Query without tenant filtering,.Where(a => a.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/AccessibilityService.cs,540,High,TenantGap,Query without tenant filtering,.Where(i => i.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/AccessibilityService.cs,543,High,TenantGap,Query without tenant filtering,".Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Status == ""Open"")"
+src/BARQ.Application/Services/AccessibilityService.cs,546,High,TenantGap,Query without tenant filtering,".Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Severity == ""Critical"" && i.Status == ""Open"")"
+src/BARQ.Application/Services/AccessibilityService.cs,550,High,TenantGap,Query without tenant filtering,".Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Status == ""Open"")"
+src/BARQ.Application/Services/AccessibilityService.cs,556,High,TenantGap,Query without tenant filtering,".Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Status == ""Open"")"
+src/BARQ.Application/Services/AccessibilityService.cs,564,High,TenantGap,Query without tenant filtering,".Where(a => a.TenantId == _tenantProvider.GetTenantId() && a.Status == ""Completed"")"
+src/BARQ.Application/Services/AccessibilityService.cs,590,High,TenantGap,Query without tenant filtering,.Where(a => a.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/AccessibilityService.cs,595,High,TenantGap,Query without tenant filtering,query = query.Where(a => a.TenantId == _tenantProvider.GetTenantId() && a.PageUrl == pageUrl);
+src/BARQ.Application/Services/AccessibilityService.cs,599,High,TenantGap,Query without tenant filtering,".Where(a => a.TenantId == _tenantProvider.GetTenantId() && a.Status == ""Completed"")"
+src/BARQ.Application/Services/AccessibilityService.cs,646,High,TenantGap,Query without tenant filtering,".Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Severity == ""Critical"" && i.Status == ""Open"")"
+src/BARQ.Application/Services/AccessibilityService.cs,664,High,TenantGap,Query without tenant filtering,.Where(i => i.TenantId == _tenantProvider.GetTenantId() && issueIds.Contains(i.Id))
+src/BARQ.Application/Services/AccessibilityService.cs,703,High,TenantGap,Query without tenant filtering,.Where(a => a.TenantId == _tenantProvider.GetTenantId() && a.Id == auditId)
+src/BARQ.Application/Services/AccessibilityService.cs,708,High,TenantGap,Query without tenant filtering,.Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.AccessibilityAuditId == auditId && !i.IsDeleted)
+src/BARQ.Application/Services/AuditReportService.cs,67,High,TenantGap,Query without tenant filtering,.Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == Guid.Parse(reportId))
+src/BARQ.Application/Services/AuditReportService.cs,82,High,TenantGap,Query without tenant filtering,.Where(r => r.TenantId == _tenantProvider.GetTenantId() &&
+src/BARQ.Application/Services/AuditReportService.cs,123,High,TenantGap,Query without tenant filtering,.Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == Guid.Parse(reportId))
+src/BARQ.Application/Services/AuditReportService.cs,154,High,TenantGap,Query without tenant filtering,.Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == Guid.Parse(reportId))
+src/BARQ.Application/Services/AuditReportService.cs,180,High,TenantGap,Query without tenant filtering,".Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == Guid.Parse(reportId) && r.Status == ""Completed"")"
+src/BARQ.Application/Services/AuditReportService.cs,196,High,TenantGap,Query without tenant filtering,.Where(a => a.TenantId == _tenantProvider.GetTenantId() &&
+src/BARQ.Application/Services/AuditReportService.cs,288,High,TenantGap,Query without tenant filtering,.Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.IsScheduled && r.NextRunAt <= DateTime.UtcNow)
+src/BARQ.Application/Services/AuditReportService.cs,328,High,TenantGap,Query without tenant filtering,.Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.ExpiresAt <= DateTime.UtcNow)
+src/BARQ.Application/Services/AuditReportService.cs,360,High,TenantGap,Query without tenant filtering,.Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == Guid.Parse(reportId))
+src/BARQ.Application/Services/AuditReportService.cs,391,High,TenantGap,Query without tenant filtering,.Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == Guid.Parse(reportId))
+src/BARQ.Application/Services/AuditService.cs,58,High,TenantGap,Query without tenant filtering,.Where(al => al.TenantId == _tenantProvider.GetTenantId() &&
+src/BARQ.Application/Services/BillingService.cs,31,High,TenantGap,Query without tenant filtering,.Where(bp => bp.TenantId == _tenantProvider.GetTenantId() && (includeInactive || bp.IsActive));
+src/BARQ.Application/Services/BillingService.cs,60,High,TenantGap,Query without tenant filtering,.Where(bp => bp.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/BillingService.cs,118,High,TenantGap,Query without tenant filtering,.Where(bp => bp.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/BillingService.cs,161,High,TenantGap,Query without tenant filtering,.Where(bp => bp.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/BillingService.cs,216,High,TenantGap,Query without tenant filtering,.Where(bp => bp.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/BillingService.cs,279,High,TenantGap,Query without tenant filtering,.Where(bp => bp.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/BillingService.cs,351,High,TenantGap,Query without tenant filtering,.Where(bp => bp.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/BillingService.cs,390,High,TenantGap,Query without tenant filtering,.Where(uq => uq.TenantId == tenantId && uq.IsActive)
+src/BARQ.Application/Services/BillingService.cs,730,High,TenantGap,Query without tenant filtering,".Where(ts => ts.TenantId == _tenantProvider.GetTenantId() && ts.Status == ""Active"" && ts.NextBillingDate <= DateTime.UtcNow)"
+src/BARQ.Application/Services/BillingService.cs,768,High,TenantGap,Query without tenant filtering,".Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.Status == ""Sent"" && i.DueDate < DateTime.UtcNow)"
+src/BARQ.Application/Services/BillingService.cs,1050,High,TenantGap,Query without tenant filtering,.Where(uq => uq.TenantId == tenantId)
+src/BARQ.Application/Services/BillingService.cs,1157,High,TenantGap,Query without tenant filtering,.Where(uq => uq.TenantId == tenantId && uq.OverageRate.HasValue)
+src/BARQ.Application/Services/BillingService.cs,1209,High,TenantGap,Query without tenant filtering,".Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.InvoiceNumber.StartsWith($""INV-{year:D4}-{month:D2}""))"
+src/BARQ.Application/Services/EmailService.cs,104,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/EmailService.cs,131,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/EscalationService.cs,40,High,TenantGap,Query without tenant filtering,.Where(r => r.TenantId == tenantId && (!slaPolicyId.HasValue || r.SlaPolicyId == slaPolicyId.Value))
+src/BARQ.Application/Services/EscalationService.cs,63,High,TenantGap,Query without tenant filtering,.Where(r => r.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/EscalationService.cs,83,High,TenantGap,Query without tenant filtering,.Where(r => r.TenantId == _tenantProvider.GetTenantId() && r.Id == rule.Id)
+src/BARQ.Application/Services/EscalationService.cs,105,High,TenantGap,Query without tenant filtering,.Where(r => r.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/EscalationService.cs,124,High,TenantGap,Query without tenant filtering,.Where(a => a.TenantId == tenantId && (!violationId.HasValue || a.SlaViolationId == violationId.Value))
+src/BARQ.Application/Services/EscalationService.cs,159,High,TenantGap,Query without tenant filtering,.Where(a => a.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/EscalationService.cs,183,High,TenantGap,Query without tenant filtering,".Where(v => v.TenantId == _tenantProvider.GetTenantId() && v.Status == ""Open"")"
+src/BARQ.Application/Services/EscalationService.cs,195,High,TenantGap,Query without tenant filtering,".Where(a => a.TenantId == _tenantProvider.GetTenantId() && a.Status == ""Pending"" &&"
+src/BARQ.Application/Services/EscalationService.cs,211,High,TenantGap,Query without tenant filtering,.Where(a => a.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/EscalationService.cs,267,High,TenantGap,Query without tenant filtering,.Where(v => v.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/EscalationService.cs,277,High,TenantGap,Query without tenant filtering,.Where(r => r.Level == nextEscalationLevel)
+src/BARQ.Application/Services/EscalationService.cs,290,High,TenantGap,Query without tenant filtering,.Where(r => r.Level == nextEscalationLevel && r.IsActive)
+src/BARQ.Application/Services/EscalationService.cs,377,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/EscalationService.cs,393,High,TenantGap,Query without tenant filtering,.Where(u => u.TenantId == tenantId && u.UserRoles.Any(ur => ur.Role.Name == backupRole))
+src/BARQ.Application/Services/EscalationService.cs,423,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/FeatureFlagService.cs,29,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && !f.IsDeleted);
+src/BARQ.Application/Services/FeatureFlagService.cs,61,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == id && !f.IsDeleted)
+src/BARQ.Application/Services/FeatureFlagService.cs,81,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Name == name && !f.IsDeleted)
+src/BARQ.Application/Services/FeatureFlagService.cs,130,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == id && !f.IsDeleted)
+src/BARQ.Application/Services/FeatureFlagService.cs,160,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == id)
+src/BARQ.Application/Services/FeatureFlagService.cs,177,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == id)
+src/BARQ.Application/Services/FeatureFlagService.cs,194,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Name == featureName && !f.IsDeleted)
+src/BARQ.Application/Services/FeatureFlagService.cs,195,High,TenantGap,Query without tenant filtering,.Where(f => environment == null || f.Environment == environment)
+src/BARQ.Application/Services/FeatureFlagService.cs,204,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Environment == environment && !f.IsDeleted)
+src/BARQ.Application/Services/FeatureFlagService.cs,214,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Category == category && !f.IsDeleted)
+src/BARQ.Application/Services/FileAttachmentService.cs,128,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic);
+src/BARQ.Application/Services/FileAttachmentService.cs,131,High,TenantGap,Query without tenant filtering,query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.Status == request.Status);
+src/BARQ.Application/Services/FileAttachmentService.cs,134,High,TenantGap,Query without tenant filtering,query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.ContentType.Contains(request.ContentType));
+src/BARQ.Application/Services/FileAttachmentService.cs,137,High,TenantGap,Query without tenant filtering,query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.CreatedAt >= request.UploadedAfter.Value);
+src/BARQ.Application/Services/FileAttachmentService.cs,140,High,TenantGap,Query without tenant filtering,query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.CreatedAt <= request.UploadedBefore.Value);
+src/BARQ.Application/Services/FileAttachmentService.cs,143,High,TenantGap,Query without tenant filtering,query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.FileSize >= request.MinSize.Value);
+src/BARQ.Application/Services/FileAttachmentService.cs,146,High,TenantGap,Query without tenant filtering,query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.FileSize <= request.MaxSize.Value);
+src/BARQ.Application/Services/FileAttachmentService.cs,149,High,TenantGap,Query without tenant filtering,query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && f.IsPublic == request.IsPublic.Value);
+src/BARQ.Application/Services/FileAttachmentService.cs,152,High,TenantGap,Query without tenant filtering,query = query.Where(f => (f.TenantId == _tenantProvider.GetTenantId() || f.IsPublic) && (f.FileName.Contains(request.SearchTerm) || f.OriginalFileName.Contains(request.SearchTerm)));
+src/BARQ.Application/Services/FileAttachmentService.cs,177,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+src/BARQ.Application/Services/FileAttachmentService.cs,202,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+src/BARQ.Application/Services/FileAttachmentService.cs,225,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+src/BARQ.Application/Services/FileAttachmentService.cs,272,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+src/BARQ.Application/Services/FileAttachmentService.cs,289,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+src/BARQ.Application/Services/FileAttachmentService.cs,292,High,TenantGap,Query without tenant filtering,.Where(q => q.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/FileAttachmentService.cs,318,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+src/BARQ.Application/Services/FileAttachmentService.cs,336,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+src/BARQ.Application/Services/FileAttachmentService.cs,350,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+src/BARQ.Application/Services/FileAttachmentService.cs,371,High,TenantGap,Query without tenant filtering,".Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.ExpiresAt.HasValue && f.ExpiresAt.Value <= DateTime.UtcNow && f.Status != ""Deleted"")"
+src/BARQ.Application/Services/FileAttachmentService.cs,380,High,TenantGap,Query without tenant filtering,".Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.ExpiresAt.HasValue && f.ExpiresAt.Value <= DateTime.UtcNow && f.Status != ""Deleted"")"
+src/BARQ.Application/Services/FileAttachmentService.cs,402,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileGuid)
+src/BARQ.Application/Services/FileAttachmentService.cs,417,High,TenantGap,Query without tenant filtering,".Where(f => f.Status == ""Quarantined"")"
+src/BARQ.Application/Services/FileAttachmentService.cs,450,High,TenantGap,Query without tenant filtering,.Where(f => f.TenantId == _tenantProvider.GetTenantId() && f.Id == fileId)
+src/BARQ.Application/Services/ImpersonationService.cs,26,High,TenantGap,Query without tenant filtering,.Where(s => s.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/ImpersonationService.cs,61,High,TenantGap,Query without tenant filtering,.Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.Id == id)
+src/BARQ.Application/Services/ImpersonationService.cs,121,High,TenantGap,Query without tenant filtering,".Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.Id == sessionId && s.Status == ""Active"")"
+src/BARQ.Application/Services/ImpersonationService.cs,152,High,TenantGap,Query without tenant filtering,".Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.SessionToken == token && s.Status == ""Active"" && s.ExpiresAt > DateTime.UtcNow)"
+src/BARQ.Application/Services/ImpersonationService.cs,172,High,TenantGap,Query without tenant filtering,".Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.SessionToken == token && s.Status == ""Active"" && s.ExpiresAt > DateTime.UtcNow)"
+src/BARQ.Application/Services/ImpersonationService.cs,233,High,TenantGap,Query without tenant filtering,".Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.Status == ""Active"" && s.ExpiresAt > DateTime.UtcNow)"
+src/BARQ.Application/Services/ImpersonationService.cs,261,High,TenantGap,Query without tenant filtering,.Where(a => a.ImpersonationSessionId == sessionId)
+src/BARQ.Application/Services/ImpersonationService.cs,311,High,TenantGap,Query without tenant filtering,.Where(u => u.TenantId == tenantId && u.Id == userId && !u.IsDeleted)
+src/BARQ.Application/Services/ImpersonationService.cs,318,High,TenantGap,Query without tenant filtering,".Where(s => s.TenantId == tenantId && s.TargetUserId == userId && s.Status == ""Active"")"
+src/BARQ.Application/Services/ImpersonationService.cs,335,High,TenantGap,Query without tenant filtering,.Where(s => s.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/ImpersonationService.cs,339,High,TenantGap,Query without tenant filtering,".Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.Status == ""Active"")"
+src/BARQ.Application/Services/ImpersonationService.cs,343,High,TenantGap,Query without tenant filtering,.Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.StartedAt.Date == DateTime.UtcNow.Date)
+src/BARQ.Application/Services/ImpersonationService.cs,347,High,TenantGap,Query without tenant filtering,.Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.EndedAt.HasValue)
+src/BARQ.Application/Services/LanguageService.cs,401,High,TenantGap,Query without tenant filtering,.Where(l => l.Direction == direction && l.IsEnabled)
+src/BARQ.Application/Services/NotificationPreferenceService.cs,42,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == _tenantProvider.GetTenantId() && p.UserId == userGuid)
+src/BARQ.Application/Services/NotificationPreferenceService.cs,204,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == _tenantProvider.GetTenantId() && p.UserId == userGuid)
+src/BARQ.Application/Services/NotificationService.cs,81,High,TenantGap,Query without tenant filtering,.Where(n => n.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/NotificationService.cs,160,High,TenantGap,Query without tenant filtering,.Where(n => n.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/NotificationService.cs,177,High,TenantGap,Query without tenant filtering,.Where(n => n.TenantId == _tenantProvider.GetTenantId() && request.NotificationIds.Contains(n.Id))
+src/BARQ.Application/Services/NotificationService.cs,194,High,TenantGap,Query without tenant filtering,.Where(n => n.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/NotificationService.cs,208,High,TenantGap,Query without tenant filtering,.Where(u => u.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/NotificationService.cs,213,High,TenantGap,Query without tenant filtering,.Where(n => n.TenantId == user.TenantId && n.UserId == userId && !n.IsRead)
+src/BARQ.Application/Services/NotificationService.cs,246,High,TenantGap,Query without tenant filtering,.Where(u => u.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/NotificationService.cs,251,High,TenantGap,Query without tenant filtering,.Where(n => n.TenantId == user.TenantId && n.UserId == userId)
+src/BARQ.Application/Services/NotificationService.cs,277,High,TenantGap,Query without tenant filtering,.Where(u => u.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/NotificationService.cs,330,High,TenantGap,Query without tenant filtering,.Where(u => u.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/NotificationService.cs,335,High,TenantGap,Query without tenant filtering,.Where(n => n.TenantId == user.TenantId && n.UserId == userId)
+src/BARQ.Application/Services/NotificationService.cs,355,High,TenantGap,Query without tenant filtering,.Where(n => n.UserId == userId && notificationIds.Contains(n.Id))
+src/BARQ.Application/Services/NotificationService.cs,385,High,TenantGap,Query without tenant filtering,.Where(u => u.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/NotificationService.cs,390,High,TenantGap,Query without tenant filtering,.Where(n => n.TenantId == user.TenantId && n.UserId == userId && n.RequiresAction && !n.IsRead)
+src/BARQ.Application/Services/NotificationService.cs,419,High,TenantGap,Query without tenant filtering,.Where(u => u.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/NotificationService.cs,455,High,TenantGap,Query without tenant filtering,.Where(u => u.TenantId == _tenantProvider.GetTenantId() && userIds.Contains(u.Id))
+src/BARQ.Application/Services/ProjectService.cs,25,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == tenantId)
+src/BARQ.Application/Services/ProjectService.cs,86,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/ProjectService.cs,250,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == tenantId && p.IsTemplate)
+src/BARQ.Application/Services/SlaService.cs,27,High,TenantGap,Query without tenant filtering,.Where(s => s.TenantId == _tenantProvider.GetTenantId() &&
+src/BARQ.Application/Services/SlaService.cs,71,High,TenantGap,Query without tenant filtering,.Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.Id == slaPolicy.Id)
+src/BARQ.Application/Services/SlaService.cs,96,High,TenantGap,Query without tenant filtering,.Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.Id == id)
+src/BARQ.Application/Services/SlaService.cs,112,High,TenantGap,Query without tenant filtering,.Where(v => v.TenantId == _tenantProvider.GetTenantId() &&
+src/BARQ.Application/Services/SlaService.cs,158,High,TenantGap,Query without tenant filtering,.Where(v => v.TenantId == _tenantProvider.GetTenantId() && v.Id == violation.Id)
+src/BARQ.Application/Services/SlaService.cs,235,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == taskId)
+src/BARQ.Application/Services/SlaService.cs,238,High,TenantGap,Query without tenant filtering,.Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.Id == slaPolicyId)
+src/BARQ.Application/Services/SlaService.cs,251,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == _tenantProvider.GetTenantId() && p.IsActive)
+src/BARQ.Application/Services/SystemHealthService.cs,59,High,TenantGap,Query without tenant filtering,.Where(h => h.Id == id && !h.IsDeleted && h.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/SystemHealthService.cs,108,High,TenantGap,Query without tenant filtering,.Where(h => h.Component == component && !h.IsDeleted && h.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/SystemHealthService.cs,158,High,TenantGap,Query without tenant filtering,.Where(h => h.Status == status && !h.IsDeleted && h.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/SystemHealthService.cs,208,High,TenantGap,Query without tenant filtering,.Where(h => h.Component == component && !h.IsDeleted && h.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/SystemHealthService.cs,265,High,TenantGap,Query without tenant filtering,".Where(h => h.Status == ""Healthy"" && !h.IsDeleted && h.TenantId == _tenantProvider.GetTenantId())"
+src/BARQ.Application/Services/SystemHealthService.cs,269,High,TenantGap,Query without tenant filtering,".Where(h => h.Status != ""Healthy"" && !h.IsDeleted && h.TenantId == _tenantProvider.GetTenantId())"
+src/BARQ.Application/Services/SystemHealthService.cs,277,High,TenantGap,Query without tenant filtering,.Where(h => !h.IsDeleted && h.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/SystemHealthService.cs,283,High,TenantGap,Query without tenant filtering,.Where(h => !h.IsDeleted && h.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/SystemHealthService.cs,300,High,TenantGap,Query without tenant filtering,.Where(f => !f.IsDeleted && f.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/SystemHealthService.cs,334,High,TenantGap,Query without tenant filtering,.Where(i => i.EndedAt == null && i.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/SystemHealthService.cs,355,High,TenantGap,Query without tenant filtering,"ActiveFeatureFlags = await _context.FeatureFlags.Where(f => f.IsEnabled && f.TenantId == _tenantProvider.GetTenantId()).CountAsync(),"
+src/BARQ.Application/Services/SystemHealthService.cs,417,High,TenantGap,Query without tenant filtering,".Where(h => h.Status == ""Healthy"" && !h.IsDeleted && h.TenantId == _tenantProvider.GetTenantId())"
+src/BARQ.Application/Services/SystemHealthService.cs,421,High,TenantGap,Query without tenant filtering,".Where(h => h.Status != ""Healthy"" && !h.IsDeleted && h.TenantId == _tenantProvider.GetTenantId())"
+src/BARQ.Application/Services/SystemHealthService.cs,425,High,TenantGap,Query without tenant filtering,.Where(h => !h.IsDeleted && h.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/SystemHealthService.cs,431,High,TenantGap,Query without tenant filtering,.Where(h => !h.IsDeleted && h.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/SystemHealthService.cs,528,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == tenantId && !t.IsDeleted)
+src/BARQ.Application/Services/SystemHealthService.cs,532,High,TenantGap,Query without tenant filtering,".Where(t => t.TenantId == tenantId && !t.IsDeleted && t.Status == ""Completed"")"
+src/BARQ.Application/Services/SystemHealthService.cs,536,High,TenantGap,Query without tenant filtering,".Where(t => t.TenantId == tenantId && !t.IsDeleted && t.Status != ""Completed"")"
+src/BARQ.Application/Services/SystemHealthService.cs,540,High,TenantGap,Query without tenant filtering,.Where(h => h.TenantId == tenantId && !h.IsDeleted)
+src/BARQ.Application/Services/SystemHealthService.cs,568,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == tenantId && !p.IsDeleted)
+src/BARQ.Application/Services/SystemHealthService.cs,576,High,TenantGap,Query without tenant filtering,.Where(h => h.Component == provider.Name && h.TenantId == tenantId && !h.IsDeleted)
+src/BARQ.Application/Services/SystemHealthService.cs,582,High,TenantGap,Query without tenant filtering,.Where(h => h.Component == provider.Name && h.TenantId == tenantId && !h.IsDeleted)
+src/BARQ.Application/Services/SystemHealthService.cs,585,High,TenantGap,Query without tenant filtering,.Where(h => h.Component == provider.Name && h.TenantId == tenantId && !h.IsDeleted)
+src/BARQ.Application/Services/SystemHealthService.cs,594,High,TenantGap,Query without tenant filtering,.Where(h => h.Component == provider.Name && h.TenantId == tenantId && !h.IsDeleted)
+src/BARQ.Application/Services/TaskService.cs,25,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/TaskService.cs,29,High,TenantGap,Query without tenant filtering,query = query.Where(t => t.ProjectId == request.ProjectId);
+src/BARQ.Application/Services/TaskService.cs,32,High,TenantGap,Query without tenant filtering,query = query.Where(t => t.AssignedToId == request.AssignedToId);
+src/BARQ.Application/Services/TaskService.cs,35,High,TenantGap,Query without tenant filtering,query = query.Where(t => t.Status == request.Status);
+src/BARQ.Application/Services/TaskService.cs,38,High,TenantGap,Query without tenant filtering,query = query.Where(t => t.Priority == request.Priority);
+src/BARQ.Application/Services/TaskService.cs,41,High,TenantGap,Query without tenant filtering,query = query.Where(t => t.TaskType == request.TaskType);
+src/BARQ.Application/Services/TaskService.cs,312,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.ParentTaskId == parentTaskId)
+src/BARQ.Application/Services/TaskService.cs,338,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.ProjectId == projectId)
+src/BARQ.Application/Services/TaskService.cs,364,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.AssignedToId == userId)
+src/BARQ.Application/Services/TaskService.cs,390,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && request.Ids.Contains(t.Id))
+src/BARQ.Application/Services/TaskService.cs,423,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && taskIds.Contains(t.Id))
+src/BARQ.Application/Services/TemplateValidationService.cs,33,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == templateId)
+src/BARQ.Application/Services/TemplateValidationService.cs,72,High,TenantGap,Query without tenant filtering,"foreach (var constraint in constraints.Where(c => c.ConstraintType == ""Template"" || c.ConstraintType == templateType))"
+src/BARQ.Application/Services/TemplateValidationService.cs,138,High,TenantGap,Query without tenant filtering,.Where(cv => cv.TenantId == _tenantProvider.GetTenantId() &&
+src/BARQ.Application/Services/TemplateValidationService.cs,150,High,TenantGap,Query without tenant filtering,.Where(cv => cv.TenantId == _tenantProvider.GetTenantId() && cv.Id == violationId)
+src/BARQ.Application/Services/TemplateValidationService.cs,174,High,TenantGap,Query without tenant filtering,.Where(tc => tc.TenantId == _tenantProvider.GetTenantId() && tc.IsActive)
+src/BARQ.Application/Services/TemplateValidationService.cs,207,High,TenantGap,Query without tenant filtering,.Where(tc => tc.TenantId == _tenantProvider.GetTenantId() && tc.Id == constraintId)
+src/BARQ.Application/Services/TemplateValidationService.cs,234,High,TenantGap,Query without tenant filtering,.Where(tc => tc.TenantId == _tenantProvider.GetTenantId() && tc.Id == constraintId)
+src/BARQ.Application/Services/TenantStateService.cs,27,High,TenantGap,Query without tenant filtering,.Where(ts => ts.TenantId == _tenantProvider.GetTenantId() &&
+src/BARQ.Application/Services/TenantStateService.cs,58,High,TenantGap,Query without tenant filtering,.Where(ts => ts.Id == id && ts.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/TenantStateService.cs,79,High,TenantGap,Query without tenant filtering,.Where(ts => ts.TenantId == tenantId)
+src/BARQ.Application/Services/TenantStateService.cs,99,High,TenantGap,Query without tenant filtering,.Where(ts => ts.TenantId == tenantId)
+src/BARQ.Application/Services/TenantStateService.cs,125,High,TenantGap,Query without tenant filtering,.Where(ts => ts.TenantId == tenantId)
+src/BARQ.Application/Services/TenantStateService.cs,157,High,TenantGap,Query without tenant filtering,.Where(ts => ts.RequiresAttention && ts.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/TenantStateService.cs,176,High,TenantGap,Query without tenant filtering,".Where(ts => (ts.Status == ""Unhealthy"" || ts.Status == ""Critical"") && ts.TenantId == _tenantProvider.GetTenantId())"
+src/BARQ.Application/Services/TenantStateService.cs,214,High,TenantGap,Query without tenant filtering,.Where(ts => ts.TenantId == tenantId)
+src/BARQ.Application/Services/TenantStateService.cs,230,High,TenantGap,Query without tenant filtering,.Where(ts => ts.TenantId == tenantId)
+src/BARQ.Application/Services/TenantStateService.cs,246,High,TenantGap,Query without tenant filtering,.Where(ts => ts.TenantId == tenantId)
+src/BARQ.Application/Services/TranslationService.cs,34,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/TranslationService.cs,83,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == id)
+src/BARQ.Application/Services/TranslationService.cs,99,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/TranslationService.cs,123,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() &&
+src/BARQ.Application/Services/TranslationService.cs,150,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/TranslationService.cs,200,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == id)
+src/BARQ.Application/Services/TranslationService.cs,243,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/TranslationService.cs,279,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/TranslationService.cs,330,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/TranslationService.cs,363,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/TranslationService.cs,393,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == languageCode && t.Category == category && t.IsActive)
+src/BARQ.Application/Services/TranslationService.cs,412,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() &&
+src/BARQ.Application/Services/TranslationService.cs,435,High,TenantGap,Query without tenant filtering,.Where(l => l.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/TranslationService.cs,443,High,TenantGap,Query without tenant filtering,".Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == ""en"") // Assuming English is the source language"
+src/BARQ.Application/Services/TranslationService.cs,447,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == languageCode && t.IsActive)
+src/BARQ.Application/Services/TranslationService.cs,451,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == languageCode && t.IsActive && t.IsApproved)
+src/BARQ.Application/Services/TranslationService.cs,455,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == languageCode && t.IsActive)
+src/BARQ.Application/Services/TranslationService.cs,468,High,TenantGap,Query without tenant filtering,".Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == ""en"" && t.Category == catStat.Category)"
+src/BARQ.Application/Services/TranslationService.cs,478,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == languageCode)
+src/BARQ.Application/Services/TranslationService.cs,506,High,TenantGap,Query without tenant filtering,.Where(l => l.TenantId == _tenantProvider.GetTenantId() && l.IsEnabled)
+src/BARQ.Application/Services/TranslationService.cs,589,High,TenantGap,Query without tenant filtering,"var sourceQuery = _context.Translations.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == ""en"" && t.IsActive);"
+src/BARQ.Application/Services/TranslationService.cs,590,High,TenantGap,Query without tenant filtering,var targetQuery = _context.Translations.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == languageCode && t.IsActive);
+src/BARQ.Application/Services/TranslationService.cs,594,High,TenantGap,Query without tenant filtering,sourceQuery = sourceQuery.Where(t => t.Category == category);
+src/BARQ.Application/Services/TranslationService.cs,595,High,TenantGap,Query without tenant filtering,targetQuery = targetQuery.Where(t => t.Category == category);
+src/BARQ.Application/Services/TranslationService.cs,616,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.LanguageCode == sourceLanguageCode && missingKeys.Contains(t.Key) && t.IsActive)
+src/BARQ.Application/Services/UserLanguagePreferenceService.cs,32,High,TenantGap,Query without tenant filtering,.Where(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.UserId == userId &&
+src/BARQ.Application/Services/UserLanguagePreferenceService.cs,128,High,TenantGap,Query without tenant filtering,.Where(l => l.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/UserLanguagePreferenceService.cs,194,High,TenantGap,Query without tenant filtering,.Where(l => l.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/UserLanguagePreferenceService.cs,249,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/UserLanguagePreferenceService.cs,323,High,TenantGap,Query without tenant filtering,.Where(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && ulp.UserId == userId)
+src/BARQ.Application/Services/UserLanguagePreferenceService.cs,387,High,TenantGap,Query without tenant filtering,.Where(ulp => ulp.TenantId == _tenantProvider.GetTenantId() && (ulp.HighContrast || ulp.LargeText || ulp.ReducedMotion ||
+src/BARQ.Application/Services/UserLanguagePreferenceService.cs,406,High,TenantGap,Query without tenant filtering,.Where(ulp => ulp.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/UserLanguagePreferenceService.cs,422,High,TenantGap,Query without tenant filtering,.Where(ulp => ulp.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/UserLanguagePreferenceService.cs,428,High,TenantGap,Query without tenant filtering,.Where(ulp => ulp.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/UserService.cs,30,High,TenantGap,Query without tenant filtering,.Where(u => u.TenantId == tenantId)
+src/BARQ.Application/Services/UserService.cs,78,High,TenantGap,Query without tenant filtering,.Where(u => u.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/Workflow/BackgroundJobService.cs,132,High,TenantGap,Query without tenant filtering,"JobStatusFilter.Active => jobs.Where(j => j.Status == JobStatus.Enqueued || j.Status == JobStatus.Running),"
+src/BARQ.Application/Services/Workflow/BackgroundJobService.cs,133,High,TenantGap,Query without tenant filtering,"JobStatusFilter.Completed => jobs.Where(j => j.Status == JobStatus.Completed),"
+src/BARQ.Application/Services/Workflow/BackgroundJobService.cs,134,High,TenantGap,Query without tenant filtering,"JobStatusFilter.Failed => jobs.Where(j => j.Status == JobStatus.Failed),"
+src/BARQ.Application/Services/Workflow/BackgroundJobService.cs,135,High,TenantGap,Query without tenant filtering,"JobStatusFilter.Cancelled => jobs.Where(j => j.Status == JobStatus.Cancelled),"
+src/BARQ.Application/Services/Workflow/BackgroundJobService.cs,229,High,TenantGap,Query without tenant filtering,var recurringJobs = _jobs.Values.Where(j => j.Status == JobStatus.Recurring).ToList();
+src/BARQ.Application/Services/Workflow/SlaService.cs,23,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == _tenantProvider.GetTenantId() &&
+src/BARQ.Application/Services/Workflow/SlaService.cs,44,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == _tenantProvider.GetTenantId() && p.Id == id)
+src/BARQ.Application/Services/Workflow/SlaService.cs,63,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == _tenantProvider.GetTenantId() && p.Id == slaPolicy.Id)
+src/BARQ.Application/Services/Workflow/SlaService.cs,82,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == _tenantProvider.GetTenantId() && p.Id == id)
+src/BARQ.Application/Services/Workflow/SlaService.cs,96,High,TenantGap,Query without tenant filtering,.Where(v => v.TenantId == _tenantProvider.GetTenantId() &&
+src/BARQ.Application/Services/Workflow/SlaService.cs,117,High,TenantGap,Query without tenant filtering,.Where(v => v.TenantId == _tenantProvider.GetTenantId() && v.Id == id)
+src/BARQ.Application/Services/Workflow/SlaService.cs,136,High,TenantGap,Query without tenant filtering,.Where(v => v.TenantId == _tenantProvider.GetTenantId() && v.Id == violation.Id)
+src/BARQ.Application/Services/Workflow/SlaService.cs,153,High,TenantGap,Query without tenant filtering,.Where(p => p.TenantId == _tenantProvider.GetTenantId() && p.Id == slaPolicyId)
+src/BARQ.Application/Services/Workflow/SlaService.cs,165,High,TenantGap,Query without tenant filtering,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == taskId)
+src/BARQ.Application/Services/Workflow/SlaService.cs,177,High,TenantGap,Query without tenant filtering,".Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.Status != ""Completed"")"
+src/BARQ.Application/Services/Workflow/SlaService.cs,181,High,TenantGap,Query without tenant filtering,".Where(p => p.TenantId == _tenantProvider.GetTenantId() && p.Name == ""Default"")"
+src/BARQ.Application/Services/Workflow/SlaService.cs,192,High,TenantGap,Query without tenant filtering,.Where(v => v.TenantId == _tenantProvider.GetTenantId() && v.TaskId == task.Id)
+src/BARQ.Application/Services/WorkflowService.cs,42,High,TenantGap,Query without tenant filtering,.Where(w => w.TenantId == tenantId)
+src/BARQ.Application/Services/WorkflowService.cs,112,High,TenantGap,Query without tenant filtering,.Where(w => w.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/WorkflowService.cs,207,High,TenantGap,Query without tenant filtering,.Where(w => w.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/WorkflowService.cs,251,High,TenantGap,Query without tenant filtering,.Where(w => w.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/WorkflowService.cs,323,High,TenantGap,Query without tenant filtering,.Where(i => i.TenantId == _tenantProvider.GetTenantId() && i.WorkflowId == workflowId)
+src/BARQ.Application/Services/WorkflowService.cs,352,High,TenantGap,Query without tenant filtering,.Where(i => i.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/WorkflowService.cs,380,High,TenantGap,Query without tenant filtering,.Where(i => i.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/WorkflowService.cs,415,High,TenantGap,Query without tenant filtering,.Where(i => i.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.Application/Services/WorkflowService.cs,472,High,TenantGap,Query without tenant filtering,.Where(i => i.TenantId == _tenantProvider.GetTenantId())
+src/BARQ.API/Controllers/AdminConstraintsController.cs,14,Medium,Placeholder,Placeholder text in code,private readonly ITemplateValidationService _templateValidationService;
+src/BARQ.API/Controllers/AdminConstraintsController.cs,18,Medium,Placeholder,Placeholder text in code,"ITemplateValidationService templateValidationService,"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,21,Medium,Placeholder,Placeholder text in code,_templateValidationService = templateValidationService;
+src/BARQ.API/Controllers/AdminConstraintsController.cs,25,Medium,Placeholder,Placeholder text in code,"[HttpPost(""validate-template/{templateId}"")]"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,26,Medium,Placeholder,Placeholder text in code,public async Task<IActionResult> ValidateTemplate(Guid templateId)
+src/BARQ.API/Controllers/AdminConstraintsController.cs,30,Medium,Placeholder,Placeholder text in code,var result = await _templateValidationService.ValidateTemplateAsync(templateId);
+src/BARQ.API/Controllers/AdminConstraintsController.cs,42,Medium,Placeholder,Placeholder text in code,"_logger.LogError(ex, ""Error validating template {TemplateId}"", templateId);"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,43,Medium,Placeholder,Placeholder text in code,"return StatusCode(500, new { Message = ""Internal server error during template validation"" });"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,47,Medium,Placeholder,Placeholder text in code,"[HttpPost(""validate-template-content"")]"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,48,Medium,Placeholder,Placeholder text in code,public async Task<IActionResult> ValidateTemplateContent([FromBody] ValidateTemplateContentRequest request)
+src/BARQ.API/Controllers/AdminConstraintsController.cs,52,Medium,Placeholder,Placeholder text in code,"var result = await _templateValidationService.ValidateTemplateContentAsync(request.Content, request.TemplateType);"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,64,Medium,Placeholder,Placeholder text in code,"_logger.LogError(ex, ""Error validating template content"");"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,65,Medium,Placeholder,Placeholder text in code,"return StatusCode(500, new { Message = ""Internal server error during template content validation"" });"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,74,Medium,Placeholder,Placeholder text in code,"var isConnected = await _templateValidationService.TestConnectionAsync(request.ConnectionString, request.ConnectionType);"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,90,Medium,Placeholder,Placeholder text in code,"public async Task<IActionResult> GetViolations([FromQuery] Guid? templateId = null, [FromQuery] Guid? taskId = null)"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,94,Medium,Placeholder,Placeholder text in code,"var violations = await _templateValidationService.GetViolationsAsync(templateId, taskId);"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,98,Medium,Placeholder,Placeholder text in code,"v.TemplateId,"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,123,Medium,Placeholder,Placeholder text in code,"var success = await _templateValidationService.ResolveViolationAsync(violationId, request.ResolutionNotes);"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,142,Medium,Placeholder,Placeholder text in code,var constraints = await _templateValidationService.GetActiveConstraintsAsync();
+src/BARQ.API/Controllers/AdminConstraintsController.cs,170,Medium,Placeholder,Placeholder text in code,var constraint = await _templateValidationService.CreateConstraintAsync(request);
+src/BARQ.API/Controllers/AdminConstraintsController.cs,197,Medium,Placeholder,Placeholder text in code,"var constraint = await _templateValidationService.UpdateConstraintAsync(constraintId, request);"
+src/BARQ.API/Controllers/AdminConstraintsController.cs,228,Medium,Placeholder,Placeholder text in code,var success = await _templateValidationService.DeleteConstraintAsync(constraintId);
+src/BARQ.API/Controllers/AdminConstraintsController.cs,243,Medium,Placeholder,Placeholder text in code,public class ValidateTemplateContentRequest
+src/BARQ.API/Controllers/AdminConstraintsController.cs,246,Medium,Placeholder,Placeholder text in code,public string TemplateType { get; set; } = string.Empty;
+src/BARQ.API/Controllers/ProjectsController.cs,107,Medium,Placeholder,Placeholder text in code,"[HttpGet(""templates"")]"
+src/BARQ.API/Controllers/ProjectsController.cs,108,Medium,Placeholder,Placeholder text in code,public async Task<ActionResult<ApiResponse<List<ProjectDto>>>> GetProjectTemplates()
+src/BARQ.API/Controllers/ProjectsController.cs,113,Medium,Placeholder,Placeholder text in code,var templates = await _projectService.GetProjectTemplatesAsync(tenantId);
+src/BARQ.API/Controllers/ProjectsController.cs,114,Medium,Placeholder,Placeholder text in code,return Ok(ApiResponse<List<ProjectDto>>.Ok(templates));
+src/BARQ.API/Controllers/ProjectsController.cs,122,Medium,Placeholder,Placeholder text in code,"[HttpPost(""from-template"")]"
+src/BARQ.API/Controllers/ProjectsController.cs,123,Medium,Placeholder,Placeholder text in code,public async Task<ActionResult<ApiResponse<ProjectDto>>> CreateProjectFromTemplate([FromBody] CreateFromTemplateRequest request)
+src/BARQ.API/Controllers/ProjectsController.cs,128,Medium,Placeholder,Placeholder text in code,"var project = await _projectService.CreateProjectFromTemplateAsync(tenantId, request.TemplateId, request.Name);"
+src/BARQ.API/Controllers/ProjectsController.cs,130,Medium,Placeholder,Placeholder text in code,"ApiResponse<ProjectDto>.Ok(project, ""Project created from template successfully""));"
+src/BARQ.API/Controllers/ProjectsController.cs,139,Medium,Placeholder,Placeholder text in code,public class CreateFromTemplateRequest
+src/BARQ.API/Controllers/ProjectsController.cs,141,Medium,Placeholder,Placeholder text in code,public Guid TemplateId { get; set; }
+src/BARQ.API/Program.cs,28,Medium,Placeholder,Placeholder text in code,".WriteTo.Console(outputTemplate: ""[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}"")"
+src/BARQ.API/Program.cs,32,Medium,Placeholder,Placeholder text in code,"outputTemplate: ""{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}"")"
+src/BARQ.API/Program.cs,37,Medium,Placeholder,Placeholder text in code,"outputTemplate: ""{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] SECURITY: {Message:lj} {Properties:j}{NewLine}{Exception}"")"
+src/BARQ.API/Program.cs,39,Medium,Placeholder,Placeholder text in code,"logEvent.MessageTemplate.Text.Contains(""password"", StringComparison.OrdinalIgnoreCase) ||"
+src/BARQ.API/Program.cs,40,Medium,Placeholder,Placeholder text in code,"logEvent.MessageTemplate.Text.Contains(""token"", StringComparison.OrdinalIgnoreCase) ||"
+src/BARQ.API/Program.cs,41,Medium,Placeholder,Placeholder text in code,"logEvent.MessageTemplate.Text.Contains(""secret"", StringComparison.OrdinalIgnoreCase))"
+src/BARQ.API/Program.cs,68,Medium,Placeholder,Placeholder text in code,options.Lockout.MaxFailedAccessAttempts = 5;
+src/BARQ.API/Program.cs,150,Medium,Placeholder,Placeholder text in code,"builder.Services.AddScoped<BARQ.Application.Interfaces.ITemplateValidationService, BARQ.Application.Services.TemplateValidationService>();"
+src/BARQ.API/Program.cs,198,Medium,Placeholder,Placeholder text in code,"options.MessageTemplate = ""HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms"";"
+src/BARQ.Application/Interfaces/IEmailService.cs,7,Medium,Placeholder,Placeholder text in code,"Task<bool> SendTemplatedEmailAsync(string to, string templateName, object templateData, string? language = ""en"");"
+src/BARQ.Application/Interfaces/IEmailService.cs,8,Medium,Placeholder,Placeholder text in code,"Task<bool> SendTemplatedEmailAsync(List<string> to, string templateName, object templateData, string? language = ""en"");"
+src/BARQ.Application/Interfaces/IEmailService.cs,9,Medium,Placeholder,Placeholder text in code,"Task<string> RenderTemplateAsync(string templateName, object templateData, string? language = ""en"");"
+src/BARQ.Application/Interfaces/IProjectService.cs,15,Medium,Placeholder,Placeholder text in code,Task<List<ProjectDto>> GetProjectTemplatesAsync(Guid tenantId);
+src/BARQ.Application/Interfaces/IProjectService.cs,16,Medium,Placeholder,Placeholder text in code,"Task<ProjectDto> CreateProjectFromTemplateAsync(Guid tenantId, Guid templateId, string name);"
+src/BARQ.Application/Interfaces/ITemplateValidationService.cs,6,Medium,Placeholder,Placeholder text in code,public interface ITemplateValidationService
+src/BARQ.Application/Interfaces/ITemplateValidationService.cs,8,Medium,Placeholder,Placeholder text in code,Task<TemplateValidationResult> ValidateTemplateAsync(Guid templateId);
+src/BARQ.Application/Interfaces/ITemplateValidationService.cs,9,Medium,Placeholder,Placeholder text in code,"Task<TemplateValidationResult> ValidateTemplateContentAsync(string templateContent, string templateType);"
+src/BARQ.Application/Interfaces/ITemplateValidationService.cs,11,Medium,Placeholder,Placeholder text in code,"Task<IEnumerable<ConstraintViolation>> GetViolationsAsync(Guid? templateId = null, Guid? taskId = null);"
+src/BARQ.Application/Interfaces/ITemplateValidationService.cs,19,Medium,Placeholder,Placeholder text in code,public class TemplateValidationResult
+src/BARQ.Application/Services/AuditReportService.cs,370,Medium,Placeholder,Placeholder text in code,"var filePath = Path.Combine(Path.GetTempPath(), ""barq_reports"", fileName);"
+src/BARQ.Application/Services/BillingService.cs,885,Medium,Placeholder,Placeholder text in code,"NextPaymentAttempt = subscription.NextPaymentAttempt,"
+src/BARQ.Application/Services/BillingService.cs,886,Medium,Placeholder,Placeholder text in code,"FailedPaymentAttempts = subscription.FailedPaymentAttempts,"
+src/BARQ.Application/Services/BillingService.cs,964,Medium,Placeholder,Placeholder text in code,"PaymentAttempts = invoice.PaymentAttempts,"
+src/BARQ.Application/Services/BillingService.cs,965,Medium,Placeholder,Placeholder text in code,"LastPaymentAttempt = invoice.LastPaymentAttempt,"
+src/BARQ.Application/Services/EmailService.cs,94,Medium,Placeholder,Placeholder text in code,"public async Task<bool> SendTemplatedEmailAsync(string to, string templateName, object templateData, string? language = ""en"")"
+src/BARQ.Application/Services/EmailService.cs,96,Medium,Placeholder,Placeholder text in code,"return await SendTemplatedEmailAsync(new List<string> { to }, templateName, templateData, language);"
+src/BARQ.Application/Services/EmailService.cs,99,Medium,Placeholder,Placeholder text in code,"public async Task<bool> SendTemplatedEmailAsync(List<string> to, string templateName, object templateData, string? language = ""en"")"
+src/BARQ.Application/Services/EmailService.cs,103,Medium,Placeholder,Placeholder text in code,var template = await _context.EmailTemplates
+src/BARQ.Application/Services/EmailService.cs,105,Medium,Placeholder,Placeholder text in code,.FirstOrDefaultAsync(t => t.Name == templateName && t.Language == language && t.IsActive);
+src/BARQ.Application/Services/EmailService.cs,107,Medium,Placeholder,Placeholder text in code,if (template == null)
+src/BARQ.Application/Services/EmailService.cs,109,Medium,Placeholder,Placeholder text in code,"_logger.LogWarning(""Email template not found: {TemplateName} ({Language})"", templateName, language);"
+src/BARQ.Application/Services/EmailService.cs,113,Medium,Placeholder,Placeholder text in code,"var subject = await RenderTemplateContentAsync(template.Subject, templateData);"
+src/BARQ.Application/Services/EmailService.cs,114,Medium,Placeholder,Placeholder text in code,"var htmlBody = await RenderTemplateContentAsync(template.HtmlBody, templateData);"
+src/BARQ.Application/Services/EmailService.cs,115,Medium,Placeholder,Placeholder text in code,var textBody = !string.IsNullOrEmpty(template.TextBody)
+src/BARQ.Application/Services/EmailService.cs,116,Medium,Placeholder,Placeholder text in code,"? await RenderTemplateContentAsync(template.TextBody, templateData)"
+src/BARQ.Application/Services/EmailService.cs,123,Medium,Placeholder,Placeholder text in code,"_logger.LogError(ex, ""Failed to send templated email: {TemplateName}"", templateName);"
+src/BARQ.Application/Services/EmailService.cs,128,Medium,Placeholder,Placeholder text in code,"public async Task<string> RenderTemplateAsync(string templateName, object templateData, string? language = ""en"")"
+src/BARQ.Application/Services/EmailService.cs,130,Medium,Placeholder,Placeholder text in code,var template = await _context.EmailTemplates
+src/BARQ.Application/Services/EmailService.cs,132,Medium,Placeholder,Placeholder text in code,.FirstOrDefaultAsync(t => t.Name == templateName && t.Language == language && t.IsActive);
+src/BARQ.Application/Services/EmailService.cs,134,Medium,Placeholder,Placeholder text in code,if (template == null)
+src/BARQ.Application/Services/EmailService.cs,136,Medium,Placeholder,Placeholder text in code,"throw new ArgumentException($""Email template not found: {templateName} ({language})"");"
+src/BARQ.Application/Services/EmailService.cs,139,Medium,Placeholder,Placeholder text in code,"return await RenderTemplateContentAsync(template.HtmlBody, templateData);"
+src/BARQ.Application/Services/EmailService.cs,158,Medium,Placeholder,Placeholder text in code,"private async Task<string> RenderTemplateContentAsync(string template, object data)"
+src/BARQ.Application/Services/EmailService.cs,160,Medium,Placeholder,Placeholder text in code,var result = template;
+src/BARQ.Application/Services/NotificationService.cs,521,Medium,Placeholder,Placeholder text in code,success = true; // Placeholder
+src/BARQ.Application/Services/ProjectService.cs,64,Medium,Placeholder,Placeholder text in code,"IsTemplate = p.IsTemplate,"
+src/BARQ.Application/Services/ProjectService.cs,65,Medium,Placeholder,Placeholder text in code,"TemplateId = p.TemplateId,"
+src/BARQ.Application/Services/ProjectService.cs,114,Medium,Placeholder,Placeholder text in code,"IsTemplate = project.IsTemplate,"
+src/BARQ.Application/Services/ProjectService.cs,115,Medium,Placeholder,Placeholder text in code,"TemplateId = project.TemplateId,"
+src/BARQ.Application/Services/ProjectService.cs,152,Medium,Placeholder,Placeholder text in code,"IsTemplate = request.IsTemplate,"
+src/BARQ.Application/Services/ProjectService.cs,153,Medium,Placeholder,Placeholder text in code,"TemplateId = request.TemplateId,"
+src/BARQ.Application/Services/ProjectService.cs,247,Medium,Placeholder,Placeholder text in code,public async Task<List<ProjectDto>> GetProjectTemplatesAsync(Guid tenantId)
+src/BARQ.Application/Services/ProjectService.cs,249,Medium,Placeholder,Placeholder text in code,var templates = await _context.Projects
+src/BARQ.Application/Services/ProjectService.cs,250,Medium,Placeholder,Placeholder text in code,.Where(p => p.TenantId == tenantId && p.IsTemplate)
+src/BARQ.Application/Services/ProjectService.cs,269,Medium,Placeholder,Placeholder text in code,"IsTemplate = p.IsTemplate,"
+src/BARQ.Application/Services/ProjectService.cs,275,Medium,Placeholder,Placeholder text in code,return templates;
+src/BARQ.Application/Services/ProjectService.cs,278,Medium,Placeholder,Placeholder text in code,"public async Task<ProjectDto> CreateProjectFromTemplateAsync(Guid tenantId, Guid templateId, string name)"
+src/BARQ.Application/Services/ProjectService.cs,280,Medium,Placeholder,Placeholder text in code,var template = await _context.Projects
+src/BARQ.Application/Services/ProjectService.cs,282,Medium,Placeholder,Placeholder text in code,.FirstOrDefaultAsync(p => p.Id == templateId && p.IsTemplate && p.TenantId == tenantId);
+src/BARQ.Application/Services/ProjectService.cs,284,Medium,Placeholder,Placeholder text in code,if (template == null)
+src/BARQ.Application/Services/ProjectService.cs,285,Medium,Placeholder,Placeholder text in code,"throw new ArgumentException(""Template not found"");"
+src/BARQ.Application/Services/ProjectService.cs,292,Medium,Placeholder,Placeholder text in code,"Description = template.Description,"
+src/BARQ.Application/Services/ProjectService.cs,294,Medium,Placeholder,Placeholder text in code,"Priority = template.Priority,"
+src/BARQ.Application/Services/ProjectService.cs,295,Medium,Placeholder,Placeholder text in code,"Budget = template.Budget,"
+src/BARQ.Application/Services/ProjectService.cs,296,Medium,Placeholder,Placeholder text in code,"Objectives = template.Objectives,"
+src/BARQ.Application/Services/ProjectService.cs,297,Medium,Placeholder,Placeholder text in code,"Scope = template.Scope,"
+src/BARQ.Application/Services/ProjectService.cs,298,Medium,Placeholder,Placeholder text in code,"Deliverables = template.Deliverables,"
+src/BARQ.Application/Services/ProjectService.cs,299,Medium,Placeholder,Placeholder text in code,"Stakeholders = template.Stakeholders,"
+src/BARQ.Application/Services/ProjectService.cs,300,Medium,Placeholder,Placeholder text in code,"Risks = template.Risks,"
+src/BARQ.Application/Services/ProjectService.cs,301,Medium,Placeholder,Placeholder text in code,"Tags = template.Tags,"
+src/BARQ.Application/Services/ProjectService.cs,302,Medium,Placeholder,Placeholder text in code,"IsTemplate = false,"
+src/BARQ.Application/Services/ProjectService.cs,303,Medium,Placeholder,Placeholder text in code,"TemplateId = templateId,"
+src/BARQ.Application/Services/ProjectService.cs,311,Medium,Placeholder,Placeholder text in code,foreach (var templateTask in template.Tasks)
+src/BARQ.Application/Services/ProjectService.cs,318,Medium,Placeholder,Placeholder text in code,"Name = templateTask.Name,"
+src/BARQ.Application/Services/ProjectService.cs,319,Medium,Placeholder,Placeholder text in code,"Description = templateTask.Description,"
+src/BARQ.Application/Services/ProjectService.cs,321,Medium,Placeholder,Placeholder text in code,"Priority = templateTask.Priority,"
+src/BARQ.Application/Services/ProjectService.cs,322,Medium,Placeholder,Placeholder text in code,"TaskType = templateTask.TaskType,"
+src/BARQ.Application/Services/ProjectService.cs,323,Medium,Placeholder,Placeholder text in code,"EstimatedHours = templateTask.EstimatedHours,"
+src/BARQ.Application/Services/ProjectService.cs,324,Medium,Placeholder,Placeholder text in code,"Requirements = templateTask.Requirements,"
+src/BARQ.Application/Services/ProjectService.cs,325,Medium,Placeholder,Placeholder text in code,"AcceptanceCriteria = templateTask.AcceptanceCriteria,"
+src/BARQ.Application/Services/ProjectService.cs,326,Medium,Placeholder,Placeholder text in code,"Tags = templateTask.Tags,"
+src/BARQ.Application/Services/ProjectService.cs,327,Medium,Placeholder,Placeholder text in code,"IsRecurring = templateTask.IsRecurring,"
+src/BARQ.Application/Services/ProjectService.cs,328,Medium,Placeholder,Placeholder text in code,"RecurrencePattern = templateTask.RecurrencePattern,"
+src/BARQ.Application/Services/RecycleBin/RecycleBinService.cs,10,Medium,Placeholder,Placeholder text in code,/// NOTE: This is a stub; refine with strong types and per-entity policies.
+src/BARQ.Application/Services/TemplateValidationService.cs,12,Medium,Placeholder,Placeholder text in code,public class TemplateValidationService : ITemplateValidationService
+src/BARQ.Application/Services/TemplateValidationService.cs,16,Medium,Placeholder,Placeholder text in code,private readonly ILogger<TemplateValidationService> _logger;
+src/BARQ.Application/Services/TemplateValidationService.cs,18,Medium,Placeholder,Placeholder text in code,public TemplateValidationService(
+src/BARQ.Application/Services/TemplateValidationService.cs,21,Medium,Placeholder,Placeholder text in code,ILogger<TemplateValidationService> logger)
+src/BARQ.Application/Services/TemplateValidationService.cs,28,Medium,Placeholder,Placeholder text in code,public async Task<TemplateValidationResult> ValidateTemplateAsync(Guid templateId)
+src/BARQ.Application/Services/TemplateValidationService.cs,32,Medium,Placeholder,Placeholder text in code,var template = await _context.Templates
+src/BARQ.Application/Services/TemplateValidationService.cs,33,Medium,Placeholder,Placeholder text in code,.Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == templateId)
+src/BARQ.Application/Services/TemplateValidationService.cs,35,Medium,Placeholder,Placeholder text in code,if (template == null)
+src/BARQ.Application/Services/TemplateValidationService.cs,37,Medium,Placeholder,Placeholder text in code,return new TemplateValidationResult
+src/BARQ.Application/Services/TemplateValidationService.cs,40,Medium,Placeholder,Placeholder text in code,"Errors = new List<string> { ""Template not found"" },"
+src/BARQ.Application/Services/TemplateValidationService.cs,45,Medium,Placeholder,Placeholder text in code,"return await ValidateTemplateContentAsync(template.Content, template.TemplateType ?? ""Unknown"");"
+src/BARQ.Application/Services/TemplateValidationService.cs,49,Medium,Placeholder,Placeholder text in code,"_logger.LogError(ex, ""Error validating template {TemplateId}"", templateId);"
+src/BARQ.Application/Services/TemplateValidationService.cs,50,Medium,Placeholder,Placeholder text in code,return new TemplateValidationResult
+src/BARQ.Application/Services/TemplateValidationService.cs,59,Medium,Placeholder,Placeholder text in code,"public async Task<TemplateValidationResult> ValidateTemplateContentAsync(string templateContent, string templateType)"
+src/BARQ.Application/Services/TemplateValidationService.cs,61,Medium,Placeholder,Placeholder text in code,var result = new TemplateValidationResult
+src/BARQ.Application/Services/TemplateValidationService.cs,72,Medium,Placeholder,Placeholder text in code,"foreach (var constraint in constraints.Where(c => c.ConstraintType == ""Template"" || c.ConstraintType == templateType))"
+src/BARQ.Application/Services/TemplateValidationService.cs,74,Medium,Placeholder,Placeholder text in code,"var violation = await ValidateAgainstConstraintAsync(templateContent, templateType, constraint);"
+src/BARQ.Application/Services/TemplateValidationService.cs,92,Medium,Placeholder,Placeholder text in code,"_logger.LogInformation(""Template validation completed: TemplateType={TemplateType}, IsValid={IsValid}, ErrorCount={ErrorCount}, WarningCount={WarningCount}"","
+src/BARQ.Application/Services/TemplateValidationService.cs,93,Medium,Placeholder,Placeholder text in code,"templateType, result.IsValid, result.Errors.Count, result.Warnings.Count);"
+src/BARQ.Application/Services/TemplateValidationService.cs,99,Medium,Placeholder,Placeholder text in code,"_logger.LogError(ex, ""Error validating template content"");"
+src/BARQ.Application/Services/TemplateValidationService.cs,131,Medium,Placeholder,Placeholder text in code,"public async Task<IEnumerable<ConstraintViolation>> GetViolationsAsync(Guid? templateId = null, Guid? taskId = null)"
+src/BARQ.Application/Services/TemplateValidationService.cs,135,Medium,Placeholder,Placeholder text in code,.Include(cv => cv.Template)
+src/BARQ.Application/Services/TemplateValidationService.cs,139,Medium,Placeholder,Placeholder text in code,(!templateId.HasValue || cv.TemplateId == templateId) &&
+src/BARQ.Application/Services/TemplateValidationService.cs,254,Medium,Placeholder,Placeholder text in code,"private async Task<ConstraintViolation?> ValidateAgainstConstraintAsync(string templateContent, string templateType, TechnologyConstraint constraint)"
+src/BARQ.Application/Services/TemplateValidationService.cs,268,Medium,Placeholder,Placeholder text in code,"if (templateContent.Contains(deniedValue, StringComparison.OrdinalIgnoreCase))"
+src/BARQ.Application/Services/TemplateValidationService.cs,274,Medium,Placeholder,Placeholder text in code,"ViolationType = ""Template"","
+src/BARQ.Application/Services/TemplateValidationService.cs,275,Medium,Placeholder,Placeholder text in code,"ViolationDetails = $""Template contains denied value: {deniedValue}"","
+src/BARQ.Application/Services/TemplateValidationService.cs,284,Medium,Placeholder,Placeholder text in code,"var hasAllowedValue = allowedValues.Any(av => templateContent.Contains(av, StringComparison.OrdinalIgnoreCase));"
+src/BARQ.Application/Services/TemplateValidationService.cs,291,Medium,Placeholder,Placeholder text in code,"ViolationType = ""Template"","
+src/BARQ.Application/Services/TemplateValidationService.cs,292,Medium,Placeholder,Placeholder text in code,"ViolationDetails = $""Template must contain at least one allowed value: {string.Join("", "", allowedValues)}"","
+src/BARQ.Application/Services/UserService.cs,314,Medium,Placeholder,Placeholder text in code,"Token = ""jwt-token-placeholder"","
+src/BARQ.Application/Services/Workflow/BackgroundJobService.cs,66,Medium,TaskFromResult,Task.FromResult placeholder implementation,return Task.FromResult(jobId);
+src/BARQ.Application/Services/Workflow/BackgroundJobService.cs,94,Medium,TaskFromResult,Task.FromResult placeholder implementation,return Task.FromResult(jobId);
+src/BARQ.Application/Services/Workflow/BackgroundJobService.cs,107,Medium,TaskFromResult,Task.FromResult placeholder implementation,return Task.FromResult(true);
+src/BARQ.Application/Services/Workflow/BackgroundJobService.cs,111,Medium,TaskFromResult,Task.FromResult placeholder implementation,return Task.FromResult(false);
+src/BARQ.Application/Services/Workflow/BackgroundJobService.cs,118,Medium,TaskFromResult,Task.FromResult placeholder implementation,return Task.FromResult(jobInfo.Status);
+src/BARQ.Application/Services/Workflow/BackgroundJobService.cs,121,Medium,TaskFromResult,Task.FromResult placeholder implementation,return Task.FromResult(JobStatus.NotFound);
+src/BARQ.Application/Services/Workflow/BackgroundJobService.cs,140,Medium,TaskFromResult,Task.FromResult placeholder implementation,return Task.FromResult(jobs.OrderByDescending(j => j.CreatedAt).ToList());
+src/BARQ.Application/Services/Workflow/FlowableGateway.cs,54,Medium,Placeholder,Placeholder text in code,"sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt - 1) * _options.RetryDelaySeconds),"
+src/BARQ.Core/DTOs/AI/AiRequest.cs,7,Medium,Placeholder,Placeholder text in code,public float? Temperature { get; set; }
+src/BARQ.Core/DTOs/AIProviderDto.cs,103,Medium,Placeholder,Placeholder text in code,public decimal Temperature { get; set; }
+src/BARQ.Core/DTOs/AIProviderDto.cs,129,Medium,Placeholder,Placeholder text in code,public string? SystemPrompt { get; set; }
+src/BARQ.Core/DTOs/AIProviderDto.cs,139,Medium,Placeholder,Placeholder text in code,public decimal Temperature { get; set; } = 0.7m;
+src/BARQ.Core/DTOs/AuditReportDto.cs,37,Medium,Placeholder,Placeholder text in code,public string? TemplateId { get; set; }
+src/BARQ.Core/DTOs/BillingDto.cs,86,Medium,Placeholder,Placeholder text in code,public DateTime? NextPaymentAttempt { get; set; }
+src/BARQ.Core/DTOs/BillingDto.cs,87,Medium,Placeholder,Placeholder text in code,public int FailedPaymentAttempts { get; set; }
+src/BARQ.Core/DTOs/BillingDto.cs,179,Medium,Placeholder,Placeholder text in code,public int PaymentAttempts { get; set; }
+src/BARQ.Core/DTOs/BillingDto.cs,180,Medium,Placeholder,Placeholder text in code,public DateTime? LastPaymentAttempt { get; set; }
+src/BARQ.Core/DTOs/DocumentDto.cs,19,Medium,Placeholder,Placeholder text in code,public Guid? TemplateId { get; set; }
+src/BARQ.Core/DTOs/DocumentDto.cs,20,Medium,Placeholder,Placeholder text in code,public string? TemplateName { get; set; }
+src/BARQ.Core/DTOs/DocumentDto.cs,22,Medium,Placeholder,Placeholder text in code,public bool IsTemplate { get; set; }
+src/BARQ.Core/DTOs/DocumentDto.cs,45,Medium,Placeholder,Placeholder text in code,public Guid? TemplateId { get; set; }
+src/BARQ.Core/DTOs/DocumentDto.cs,50,Medium,Placeholder,Placeholder text in code,public bool IsTemplate { get; set; } = false;
+src/BARQ.Core/DTOs/DocumentDto.cs,73,Medium,Placeholder,Placeholder text in code,public Guid? TemplateId { get; set; }
+src/BARQ.Core/DTOs/DocumentDto.cs,78,Medium,Placeholder,Placeholder text in code,public bool IsTemplate { get; set; }
+src/BARQ.Core/DTOs/ProjectDto.cs,28,Medium,Placeholder,Placeholder text in code,public bool IsTemplate { get; set; }
+src/BARQ.Core/DTOs/ProjectDto.cs,29,Medium,Placeholder,Placeholder text in code,public Guid? TemplateId { get; set; }
+src/BARQ.Core/DTOs/ProjectDto.cs,30,Medium,Placeholder,Placeholder text in code,public string? TemplateName { get; set; }
+src/BARQ.Core/DTOs/ProjectDto.cs,79,Medium,Placeholder,Placeholder text in code,public bool IsTemplate { get; set; } = false;
+src/BARQ.Core/DTOs/ProjectDto.cs,80,Medium,Placeholder,Placeholder text in code,public Guid? TemplateId { get; set; }
+src/BARQ.Core/Entities/AIAgent.cs,27,Medium,Placeholder,Placeholder text in code,public string? SystemPrompt { get; set; }
+src/BARQ.Core/Entities/AIAgent.cs,39,Medium,Placeholder,Placeholder text in code,public decimal Temperature { get; set; } = 0.7m;
+src/BARQ.Core/Entities/AdminConfiguration.cs,52,Medium,Placeholder,Placeholder text in code,"TemplateConfiguration,"
+src/BARQ.Core/Entities/ConstraintViolation.cs,7,Medium,Placeholder,Placeholder text in code,public Guid? TemplateId { get; set; }
+src/BARQ.Core/Entities/ConstraintViolation.cs,8,Medium,Placeholder,Placeholder text in code,public Template? Template { get; set; }
+src/BARQ.Core/Entities/ConstraintViolation.cs,13,Medium,Placeholder,Placeholder text in code,"public string ViolationType { get; set; } = string.Empty; // ""Template"", ""Stack"", ""Technology"""
+src/BARQ.Core/Entities/Document.cs,41,Medium,Placeholder,Placeholder text in code,public Guid? TemplateId { get; set; }
+src/BARQ.Core/Entities/Document.cs,46,Medium,Placeholder,Placeholder text in code,public bool IsTemplate { get; set; } = false;
+src/BARQ.Core/Entities/Document.cs,64,Medium,Placeholder,Placeholder text in code,"[ForeignKey(""TemplateId"")]"
+src/BARQ.Core/Entities/Document.cs,65,Medium,Placeholder,Placeholder text in code,public virtual Template? Template { get; set; }
+src/BARQ.Core/Entities/EmailTemplate.cs,5,Medium,Placeholder,Placeholder text in code,public class EmailTemplate : BaseEntity
+src/BARQ.Core/Entities/Invoice.cs,61,Medium,Placeholder,Placeholder text in code,public int PaymentAttempts { get; set; } = 0;
+src/BARQ.Core/Entities/Invoice.cs,63,Medium,Placeholder,Placeholder text in code,public DateTime? LastPaymentAttempt { get; set; }
+src/BARQ.Core/Entities/Project.cs,54,Medium,Placeholder,Placeholder text in code,public bool IsTemplate { get; set; } = false;
+src/BARQ.Core/Entities/Project.cs,55,Medium,Placeholder,Placeholder text in code,public Guid? TemplateId { get; set; }
+src/BARQ.Core/Entities/Project.cs,63,Medium,Placeholder,Placeholder text in code,"[ForeignKey(""TemplateId"")]"
+src/BARQ.Core/Entities/Project.cs,64,Medium,Placeholder,Placeholder text in code,public virtual Project? Template { get; set; }
+src/BARQ.Core/Entities/ReportTemplate.cs,5,Medium,Placeholder,Placeholder text in code,public class ReportTemplate : BaseEntity
+src/BARQ.Core/Entities/ReportTemplate.cs,19,Medium,Placeholder,Placeholder text in code,public string TemplateContent { get; set; } = string.Empty; // JSON template definition
+src/BARQ.Core/Entities/ReportTemplate.cs,26,Medium,Placeholder,Placeholder text in code,public bool IsSystemTemplate { get; set; } = false;
+src/BARQ.Core/Entities/TechnologyConstraint.cs,9,Medium,Placeholder,Placeholder text in code,"public string ConstraintType { get; set; } = string.Empty; // ""Technology"", ""Template"", ""Stack"""
+src/BARQ.Core/Entities/Template.cs,6,Medium,Placeholder,Placeholder text in code,"[Table(""Templates"")]"
+src/BARQ.Core/Entities/Template.cs,7,Medium,Placeholder,Placeholder text in code,public class Template : BaseEntity
+src/BARQ.Core/Entities/Template.cs,18,Medium,Placeholder,Placeholder text in code,public string TemplateType { get; set; } = string.Empty;
+src/BARQ.Core/Entities/Template.cs,35,Medium,Placeholder,Placeholder text in code,public bool IsSystemTemplate { get; set; } = false;
+src/BARQ.Core/Entities/Template.cs,48,Medium,Placeholder,Placeholder text in code,public Guid? ParentTemplateId { get; set; }
+src/BARQ.Core/Entities/Template.cs,53,Medium,Placeholder,Placeholder text in code,"[ForeignKey(""ParentTemplateId"")]"
+src/BARQ.Core/Entities/Template.cs,54,Medium,Placeholder,Placeholder text in code,public virtual Template? ParentTemplate { get; set; }
+src/BARQ.Core/Entities/Template.cs,56,Medium,Placeholder,Placeholder text in code,public virtual ICollection<Template> ChildTemplates { get; set; } = new List<Template>();
+src/BARQ.Core/Entities/TemplateValidation.cs,5,Medium,Placeholder,Placeholder text in code,public class TemplateValidation : BaseEntity
+src/BARQ.Core/Entities/TemplateValidation.cs,7,Medium,Placeholder,Placeholder text in code,public Guid TemplateId { get; set; }
+src/BARQ.Core/Entities/TemplateValidation.cs,8,Medium,Placeholder,Placeholder text in code,public Template Template { get; set; } = null!;
+src/BARQ.Core/Entities/TenantSubscription.cs,48,Medium,Placeholder,Placeholder text in code,public DateTime? NextPaymentAttempt { get; set; }
+src/BARQ.Core/Entities/TenantSubscription.cs,50,Medium,Placeholder,Placeholder text in code,public int FailedPaymentAttempts { get; set; } = 0;
+src/BARQ.Infrastructure/Data/BarqDbContext.cs,36,Medium,Placeholder,Placeholder text in code,public DbSet<Template> Templates => Set<Template>();
+src/BARQ.Infrastructure/Data/BarqDbContext.cs,49,Medium,Placeholder,Placeholder text in code,public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
+src/BARQ.Infrastructure/Data/BarqDbContext.cs,58,Medium,Placeholder,Placeholder text in code,public DbSet<ReportTemplate> ReportTemplates => Set<ReportTemplate>();
+src/BARQ.Infrastructure/Data/BarqDbContext.cs,88,Medium,Placeholder,Placeholder text in code,public DbSet<TemplateValidation> TemplateValidations => Set<TemplateValidation>();
+src/BARQ.Infrastructure/Data/Configurations/AIAgentConfiguration.cs,25,Medium,Placeholder,Placeholder text in code,builder.Property(aa => aa.SystemPrompt)
+src/BARQ.Infrastructure/Data/Configurations/ProjectConfiguration.cs,56,Medium,Placeholder,Placeholder text in code,builder.HasIndex(p => p.IsTemplate);
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,96,Medium,Placeholder,Placeholder text in code,"b.Property<string>(""SystemPrompt"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,100,Medium,Placeholder,Placeholder text in code,"b.Property<decimal>(""Temperature"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,1011,Medium,Placeholder,Placeholder text in code,"b.Property<Guid?>(""ReportTemplateId"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,1042,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""ReportTemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,1325,Medium,Placeholder,Placeholder text in code,"b.Property<bool>(""IsTemplate"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,1348,Medium,Placeholder,Placeholder text in code,"b.Property<Guid?>(""TemplateId"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,1368,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,1375,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.EmailTemplate"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,1446,Medium,Placeholder,Placeholder text in code,"b.ToTable(""EmailTemplates"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,2290,Medium,Placeholder,Placeholder text in code,"b.Property<DateTime?>(""LastPaymentAttempt"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,2304,Medium,Placeholder,Placeholder text in code,"b.Property<int>(""PaymentAttempts"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,2911,Medium,Placeholder,Placeholder text in code,"b.Property<bool>(""IsTemplate"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,2958,Medium,Placeholder,Placeholder text in code,"b.Property<Guid?>(""TemplateId"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,2975,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""IsTemplate"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,2979,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,3054,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.ReportTemplate"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,3096,Medium,Placeholder,Placeholder text in code,"b.Property<bool>(""IsSystemTemplate"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,3107,Medium,Placeholder,Placeholder text in code,"b.Property<string>(""TemplateContent"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,3137,Medium,Placeholder,Placeholder text in code,"b.ToTable(""ReportTemplates"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,3826,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.Template"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,3869,Medium,Placeholder,Placeholder text in code,"b.Property<bool>(""IsSystemTemplate"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,3881,Medium,Placeholder,Placeholder text in code,"b.Property<Guid?>(""ParentTemplateId"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,3888,Medium,Placeholder,Placeholder text in code,"b.Property<string>(""TemplateType"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,3919,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""ParentTemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,3923,Medium,Placeholder,Placeholder text in code,"b.ToTable(""Templates"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,4242,Medium,Placeholder,Placeholder text in code,"b.Property<int>(""FailedPaymentAttempts"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,4261,Medium,Placeholder,Placeholder text in code,"b.Property<DateTime?>(""NextPaymentAttempt"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5187,Medium,Placeholder,Placeholder text in code,"b.HasOne(""BARQ.Core.Entities.ReportTemplate"", null)"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5189,Medium,Placeholder,Placeholder text in code,".HasForeignKey(""ReportTemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5219,Medium,Placeholder,Placeholder text in code,"b.HasOne(""BARQ.Core.Entities.Template"", ""Template"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5221,Medium,Placeholder,Placeholder text in code,".HasForeignKey(""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5231,Medium,Placeholder,Placeholder text in code,"b.Navigation(""Template"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5446,Medium,Placeholder,Placeholder text in code,"b.HasOne(""BARQ.Core.Entities.Project"", ""Template"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5448,Medium,Placeholder,Placeholder text in code,".HasForeignKey(""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5458,Medium,Placeholder,Placeholder text in code,"b.Navigation(""Template"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5490,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.ReportTemplate"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5642,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.Template"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5644,Medium,Placeholder,Placeholder text in code,"b.HasOne(""BARQ.Core.Entities.Template"", ""ParentTemplate"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5645,Medium,Placeholder,Placeholder text in code,".WithMany(""ChildTemplates"")"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5646,Medium,Placeholder,Placeholder text in code,".HasForeignKey(""ParentTemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5654,Medium,Placeholder,Placeholder text in code,"b.Navigation(""ParentTemplate"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,5984,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.ReportTemplate"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,6005,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.Template"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.Designer.cs,6007,Medium,Placeholder,Placeholder text in code,"b.Navigation(""ChildTemplates"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,562,Medium,Placeholder,Placeholder text in code,"name: ""EmailTemplates"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,587,Medium,Placeholder,Placeholder text in code,"table.PrimaryKey(""PK_EmailTemplates"", x => x.Id);"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1253,Medium,Placeholder,Placeholder text in code,"IsTemplate = table.Column<bool>(type: ""bit"", nullable: false),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1254,Medium,Placeholder,Placeholder text in code,"TemplateId = table.Column<Guid>(type: ""uniqueidentifier"", nullable: true),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1276,Medium,Placeholder,Placeholder text in code,"name: ""FK_Projects_Projects_TemplateId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1277,Medium,Placeholder,Placeholder text in code,"column: x => x.TemplateId,"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1289,Medium,Placeholder,Placeholder text in code,"name: ""ReportTemplates"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1296,Medium,Placeholder,Placeholder text in code,"TemplateContent = table.Column<string>(type: ""nvarchar(max)"", nullable: false),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1299,Medium,Placeholder,Placeholder text in code,"IsSystemTemplate = table.Column<bool>(type: ""bit"", nullable: false),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1317,Medium,Placeholder,Placeholder text in code,"table.PrimaryKey(""PK_ReportTemplates"", x => x.Id);"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1319,Medium,Placeholder,Placeholder text in code,"name: ""FK_ReportTemplates_AspNetUsers_CreatedByUserId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1325,Medium,Placeholder,Placeholder text in code,"name: ""FK_ReportTemplates_Tenants_TenantId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1416,Medium,Placeholder,Placeholder text in code,"name: ""Templates"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1422,Medium,Placeholder,Placeholder text in code,"TemplateType = table.Column<string>(type: ""nvarchar(100)"", maxLength: 100, nullable: false),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1429,Medium,Placeholder,Placeholder text in code,"IsSystemTemplate = table.Column<bool>(type: ""bit"", nullable: false),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1434,Medium,Placeholder,Placeholder text in code,"ParentTemplateId = table.Column<Guid>(type: ""uniqueidentifier"", nullable: true),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1447,Medium,Placeholder,Placeholder text in code,"table.PrimaryKey(""PK_Templates"", x => x.Id);"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1449,Medium,Placeholder,Placeholder text in code,"name: ""FK_Templates_Templates_ParentTemplateId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1450,Medium,Placeholder,Placeholder text in code,"column: x => x.ParentTemplateId,"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1451,Medium,Placeholder,Placeholder text in code,"principalTable: ""Templates"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1454,Medium,Placeholder,Placeholder text in code,"name: ""FK_Templates_Tenants_TenantId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1530,Medium,Placeholder,Placeholder text in code,"NextPaymentAttempt = table.Column<DateTime>(type: ""datetime2"", nullable: true),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1531,Medium,Placeholder,Placeholder text in code,"FailedPaymentAttempts = table.Column<int>(type: ""int"", nullable: false),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1702,Medium,Placeholder,Placeholder text in code,"SystemPrompt = table.Column<string>(type: ""nvarchar(max)"", maxLength: 5000, nullable: true),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,1709,Medium,Placeholder,Placeholder text in code,"Temperature = table.Column<decimal>(type: ""decimal(18,2)"", nullable: false),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2004,Medium,Placeholder,Placeholder text in code,"ReportTemplateId = table.Column<Guid>(type: ""uniqueidentifier"", nullable: true),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2026,Medium,Placeholder,Placeholder text in code,"name: ""FK_AuditReports_ReportTemplates_ReportTemplateId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2027,Medium,Placeholder,Placeholder text in code,"column: x => x.ReportTemplateId,"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2028,Medium,Placeholder,Placeholder text in code,"principalTable: ""ReportTemplates"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2053,Medium,Placeholder,Placeholder text in code,"TemplateId = table.Column<Guid>(type: ""uniqueidentifier"", nullable: true),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2055,Medium,Placeholder,Placeholder text in code,"IsTemplate = table.Column<bool>(type: ""bit"", nullable: false),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2080,Medium,Placeholder,Placeholder text in code,"name: ""FK_Documents_Templates_TemplateId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2081,Medium,Placeholder,Placeholder text in code,"column: x => x.TemplateId,"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2082,Medium,Placeholder,Placeholder text in code,"principalTable: ""Templates"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2158,Medium,Placeholder,Placeholder text in code,"PaymentAttempts = table.Column<int>(type: ""int"", nullable: false),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2159,Medium,Placeholder,Placeholder text in code,"LastPaymentAttempt = table.Column<DateTime>(type: ""datetime2"", nullable: true),"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2602,Medium,Placeholder,Placeholder text in code,"name: ""IX_AuditReports_ReportTemplateId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2604,Medium,Placeholder,Placeholder text in code,"column: ""ReportTemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2622,Medium,Placeholder,Placeholder text in code,"name: ""IX_Documents_TemplateId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2624,Medium,Placeholder,Placeholder text in code,"column: ""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2737,Medium,Placeholder,Placeholder text in code,"name: ""IX_Projects_IsTemplate"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2739,Medium,Placeholder,Placeholder text in code,"column: ""IsTemplate"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2747,Medium,Placeholder,Placeholder text in code,"name: ""IX_Projects_TemplateId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2749,Medium,Placeholder,Placeholder text in code,"column: ""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2777,Medium,Placeholder,Placeholder text in code,"name: ""IX_ReportTemplates_CreatedByUserId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2778,Medium,Placeholder,Placeholder text in code,"table: ""ReportTemplates"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2782,Medium,Placeholder,Placeholder text in code,"name: ""IX_ReportTemplates_TenantId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2783,Medium,Placeholder,Placeholder text in code,"table: ""ReportTemplates"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2877,Medium,Placeholder,Placeholder text in code,"name: ""IX_Templates_ParentTemplateId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2878,Medium,Placeholder,Placeholder text in code,"table: ""Templates"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2879,Medium,Placeholder,Placeholder text in code,"column: ""ParentTemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2882,Medium,Placeholder,Placeholder text in code,"name: ""IX_Templates_TenantId"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,2883,Medium,Placeholder,Placeholder text in code,"table: ""Templates"","
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,3109,Medium,Placeholder,Placeholder text in code,"name: ""EmailTemplates"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,3172,Medium,Placeholder,Placeholder text in code,"name: ""ReportTemplates"");"
+src/BARQ.Infrastructure/Migrations/20250821193859_A1_UnifyDb_Identity.cs,3211,Medium,Placeholder,Placeholder text in code,"name: ""Templates"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,96,Medium,Placeholder,Placeholder text in code,"b.Property<string>(""SystemPrompt"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,100,Medium,Placeholder,Placeholder text in code,"b.Property<decimal>(""Temperature"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,1011,Medium,Placeholder,Placeholder text in code,"b.Property<Guid?>(""ReportTemplateId"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,1042,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""ReportTemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,1453,Medium,Placeholder,Placeholder text in code,"b.Property<bool>(""IsTemplate"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,1476,Medium,Placeholder,Placeholder text in code,"b.Property<Guid?>(""TemplateId"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,1496,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,1503,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.EmailTemplate"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,1574,Medium,Placeholder,Placeholder text in code,"b.ToTable(""EmailTemplates"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,2567,Medium,Placeholder,Placeholder text in code,"b.Property<DateTime?>(""LastPaymentAttempt"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,2581,Medium,Placeholder,Placeholder text in code,"b.Property<int>(""PaymentAttempts"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,3188,Medium,Placeholder,Placeholder text in code,"b.Property<bool>(""IsTemplate"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,3235,Medium,Placeholder,Placeholder text in code,"b.Property<Guid?>(""TemplateId"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,3252,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""IsTemplate"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,3256,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,3331,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.ReportTemplate"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,3373,Medium,Placeholder,Placeholder text in code,"b.Property<bool>(""IsSystemTemplate"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,3384,Medium,Placeholder,Placeholder text in code,"b.Property<string>(""TemplateContent"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,3414,Medium,Placeholder,Placeholder text in code,"b.ToTable(""ReportTemplates"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,4255,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.Template"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,4298,Medium,Placeholder,Placeholder text in code,"b.Property<bool>(""IsSystemTemplate"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,4310,Medium,Placeholder,Placeholder text in code,"b.Property<Guid?>(""ParentTemplateId"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,4317,Medium,Placeholder,Placeholder text in code,"b.Property<string>(""TemplateType"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,4348,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""ParentTemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,4352,Medium,Placeholder,Placeholder text in code,"b.ToTable(""Templates"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,4671,Medium,Placeholder,Placeholder text in code,"b.Property<int>(""FailedPaymentAttempts"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,4690,Medium,Placeholder,Placeholder text in code,"b.Property<DateTime?>(""NextPaymentAttempt"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,5616,Medium,Placeholder,Placeholder text in code,"b.HasOne(""BARQ.Core.Entities.ReportTemplate"", null)"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,5618,Medium,Placeholder,Placeholder text in code,".HasForeignKey(""ReportTemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,5659,Medium,Placeholder,Placeholder text in code,"b.HasOne(""BARQ.Core.Entities.Template"", ""Template"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,5661,Medium,Placeholder,Placeholder text in code,".HasForeignKey(""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,5671,Medium,Placeholder,Placeholder text in code,"b.Navigation(""Template"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,5914,Medium,Placeholder,Placeholder text in code,"b.HasOne(""BARQ.Core.Entities.Project"", ""Template"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,5916,Medium,Placeholder,Placeholder text in code,".HasForeignKey(""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,5926,Medium,Placeholder,Placeholder text in code,"b.Navigation(""Template"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,5958,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.ReportTemplate"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,6138,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.Template"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,6140,Medium,Placeholder,Placeholder text in code,"b.HasOne(""BARQ.Core.Entities.Template"", ""ParentTemplate"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,6141,Medium,Placeholder,Placeholder text in code,".WithMany(""ChildTemplates"")"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,6142,Medium,Placeholder,Placeholder text in code,".HasForeignKey(""ParentTemplateId"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,6150,Medium,Placeholder,Placeholder text in code,"b.Navigation(""ParentTemplate"");"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,6492,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.ReportTemplate"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,6525,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.Template"", b =>"
+src/BARQ.Infrastructure/Migrations/20250821212829_B2_ComposeFilters_Indexes.Designer.cs,6527,Medium,Placeholder,Placeholder text in code,"b.Navigation(""ChildTemplates"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,93,Medium,Placeholder,Placeholder text in code,"b.Property<string>(""SystemPrompt"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,97,Medium,Placeholder,Placeholder text in code,"b.Property<decimal>(""Temperature"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,1008,Medium,Placeholder,Placeholder text in code,"b.Property<Guid?>(""ReportTemplateId"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,1039,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""ReportTemplateId"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,1450,Medium,Placeholder,Placeholder text in code,"b.Property<bool>(""IsTemplate"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,1473,Medium,Placeholder,Placeholder text in code,"b.Property<Guid?>(""TemplateId"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,1493,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,1500,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.EmailTemplate"", b =>"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,1571,Medium,Placeholder,Placeholder text in code,"b.ToTable(""EmailTemplates"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,2564,Medium,Placeholder,Placeholder text in code,"b.Property<DateTime?>(""LastPaymentAttempt"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,2578,Medium,Placeholder,Placeholder text in code,"b.Property<int>(""PaymentAttempts"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,3185,Medium,Placeholder,Placeholder text in code,"b.Property<bool>(""IsTemplate"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,3232,Medium,Placeholder,Placeholder text in code,"b.Property<Guid?>(""TemplateId"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,3249,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""IsTemplate"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,3253,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,3328,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.ReportTemplate"", b =>"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,3370,Medium,Placeholder,Placeholder text in code,"b.Property<bool>(""IsSystemTemplate"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,3381,Medium,Placeholder,Placeholder text in code,"b.Property<string>(""TemplateContent"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,3411,Medium,Placeholder,Placeholder text in code,"b.ToTable(""ReportTemplates"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,4252,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.Template"", b =>"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,4295,Medium,Placeholder,Placeholder text in code,"b.Property<bool>(""IsSystemTemplate"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,4307,Medium,Placeholder,Placeholder text in code,"b.Property<Guid?>(""ParentTemplateId"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,4314,Medium,Placeholder,Placeholder text in code,"b.Property<string>(""TemplateType"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,4345,Medium,Placeholder,Placeholder text in code,"b.HasIndex(""ParentTemplateId"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,4349,Medium,Placeholder,Placeholder text in code,"b.ToTable(""Templates"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,4668,Medium,Placeholder,Placeholder text in code,"b.Property<int>(""FailedPaymentAttempts"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,4687,Medium,Placeholder,Placeholder text in code,"b.Property<DateTime?>(""NextPaymentAttempt"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,5613,Medium,Placeholder,Placeholder text in code,"b.HasOne(""BARQ.Core.Entities.ReportTemplate"", null)"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,5615,Medium,Placeholder,Placeholder text in code,".HasForeignKey(""ReportTemplateId"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,5656,Medium,Placeholder,Placeholder text in code,"b.HasOne(""BARQ.Core.Entities.Template"", ""Template"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,5658,Medium,Placeholder,Placeholder text in code,".HasForeignKey(""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,5668,Medium,Placeholder,Placeholder text in code,"b.Navigation(""Template"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,5911,Medium,Placeholder,Placeholder text in code,"b.HasOne(""BARQ.Core.Entities.Project"", ""Template"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,5913,Medium,Placeholder,Placeholder text in code,".HasForeignKey(""TemplateId"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,5923,Medium,Placeholder,Placeholder text in code,"b.Navigation(""Template"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,5955,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.ReportTemplate"", b =>"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,6135,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.Template"", b =>"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,6137,Medium,Placeholder,Placeholder text in code,"b.HasOne(""BARQ.Core.Entities.Template"", ""ParentTemplate"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,6138,Medium,Placeholder,Placeholder text in code,".WithMany(""ChildTemplates"")"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,6139,Medium,Placeholder,Placeholder text in code,".HasForeignKey(""ParentTemplateId"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,6147,Medium,Placeholder,Placeholder text in code,"b.Navigation(""ParentTemplate"");"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,6489,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.ReportTemplate"", b =>"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,6522,Medium,Placeholder,Placeholder text in code,"modelBuilder.Entity(""BARQ.Core.Entities.Template"", b =>"
+src/BARQ.Infrastructure/Migrations/BarqDbContextModelSnapshot.cs,6524,Medium,Placeholder,Placeholder text in code,"b.Navigation(""ChildTemplates"");"
+src/BARQ.Infrastructure/Services/AI/OpenAiProvider.cs,39,Medium,Placeholder,Placeholder text in code,temperature = request.Temperature ?? _config.Temperature
+src/BARQ.Infrastructure/Services/AI/OpenAiProvider.cs,71,Medium,TaskFromResult,Task.FromResult placeholder implementation,return Task.FromResult(isValid);
+src/BARQ.Infrastructure/Services/AI/OpenAiProvider.cs,80,Medium,TaskFromResult,Task.FromResult placeholder implementation,return Task.FromResult(totalCost);
+src/BARQ.Infrastructure/Services/AI/OpenAiProvider.cs,90,Medium,Placeholder,Placeholder text in code,public float Temperature { get; set; } = 0.7f;

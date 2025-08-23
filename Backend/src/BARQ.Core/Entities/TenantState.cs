@@ -7,6 +7,9 @@ namespace BARQ.Core.Entities
         [Required]
         public new Guid TenantId { get; set; }
         
+        [MaxLength(100)]
+        public string? TenantName { get; set; }
+        
         [Required]
         [MaxLength(50)]
         public string Status { get; set; } = "Active"; // Active, Suspended, Archived, Migrating, Maintenance

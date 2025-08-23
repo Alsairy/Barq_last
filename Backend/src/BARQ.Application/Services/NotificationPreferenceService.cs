@@ -1,6 +1,7 @@
 using BARQ.Application.Interfaces;
 using BARQ.Core.DTOs;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ namespace BARQ.Application.Services
     public class NotificationPreferenceService : INotificationPreferenceService
     {
         private readonly BarqDbContext _context;
+        private readonly ITenantProvider _tenantProvider;
         private readonly ILogger<NotificationPreferenceService> _logger;
 
         private readonly List<string> _defaultNotificationTypes = new()
@@ -26,9 +28,10 @@ namespace BARQ.Application.Services
             "InApp", "Email", "SMS"
         };
 
-        public NotificationPreferenceService(BarqDbContext context, ILogger<NotificationPreferenceService> logger)
+        public NotificationPreferenceService(BarqDbContext context, ITenantProvider tenantProvider, ILogger<NotificationPreferenceService> logger)
         {
             _context = context;
+            _tenantProvider = tenantProvider;
             _logger = logger;
         }
 
@@ -36,7 +39,7 @@ namespace BARQ.Application.Services
         {
             var userGuid = Guid.Parse(userId);
             var preferences = await _context.NotificationPreferences
-                .Where(p => p.UserId == userGuid)
+                .Where(p => p.TenantId == _tenantProvider.GetTenantId() && p.UserId == userGuid)
                 .Select(p => new NotificationPreferenceDto
                 {
                     Id = p.Id.ToString(),
@@ -62,7 +65,7 @@ namespace BARQ.Application.Services
         {
             var userGuid = Guid.Parse(userId);
             var existing = await _context.NotificationPreferences
-                .FirstOrDefaultAsync(p => p.UserId == userGuid && 
+                .FirstOrDefaultAsync(p => p.TenantId == _tenantProvider.GetTenantId() && p.UserId == userGuid && 
                                         p.NotificationType == request.NotificationType && 
                                         p.Channel == request.Channel);
 
@@ -107,7 +110,7 @@ namespace BARQ.Application.Services
             var userGuid = Guid.Parse(userId);
             var preferenceGuid = Guid.Parse(preferenceId);
             var preference = await _context.NotificationPreferences
-                .FirstOrDefaultAsync(p => p.Id == preferenceGuid && p.UserId == userGuid);
+                .FirstOrDefaultAsync(p => p.TenantId == _tenantProvider.GetTenantId() && p.Id == preferenceGuid && p.UserId == userGuid);
 
             if (preference == null)
             {
@@ -141,7 +144,7 @@ namespace BARQ.Application.Services
             var userGuid = Guid.Parse(userId);
             var preferenceGuid = Guid.Parse(preferenceId);
             var preference = await _context.NotificationPreferences
-                .FirstOrDefaultAsync(p => p.Id == preferenceGuid && p.UserId == userGuid);
+                .FirstOrDefaultAsync(p => p.TenantId == _tenantProvider.GetTenantId() && p.Id == preferenceGuid && p.UserId == userGuid);
 
             if (preference == null)
             {
@@ -161,7 +164,7 @@ namespace BARQ.Application.Services
         {
             var userGuid = Guid.Parse(userId);
             var preference = await _context.NotificationPreferences
-                .FirstOrDefaultAsync(p => p.UserId == userGuid && 
+                .FirstOrDefaultAsync(p => p.TenantId == _tenantProvider.GetTenantId() && p.UserId == userGuid && 
                                         p.NotificationType == notificationType && 
                                         p.Channel == channel);
 
@@ -198,7 +201,7 @@ namespace BARQ.Application.Services
         {
             var userGuid = Guid.Parse(userId);
             var existingPreferences = await _context.NotificationPreferences
-                .Where(p => p.UserId == userGuid)
+                .Where(p => p.TenantId == _tenantProvider.GetTenantId() && p.UserId == userGuid)
                 .ToListAsync();
 
             if (existingPreferences.Any())
@@ -254,7 +257,7 @@ namespace BARQ.Application.Services
         {
             var userGuid = Guid.Parse(userId);
             var preference = await _context.NotificationPreferences
-                .FirstOrDefaultAsync(p => p.UserId == userGuid && 
+                .FirstOrDefaultAsync(p => p.TenantId == _tenantProvider.GetTenantId() && p.UserId == userGuid && 
                                         p.NotificationType == notificationType && 
                                         p.Channel == channel);
 

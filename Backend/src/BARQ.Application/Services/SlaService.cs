@@ -24,13 +24,9 @@ public class SlaService : ISlaService
     public async System.Threading.Tasks.Task<PagedResult<SlaPolicy>> GetSlaPoliciesAsync(int page = 1, int pageSize = 10, string? search = null, CancellationToken cancellationToken = default)
     {
         var query = _context.SlaPolicies
-            .Include(s => s.BusinessCalendar)
-            .AsQueryable();
-
-        if (!string.IsNullOrEmpty(search))
-        {
-            query = query.Where(s => s.Name.Contains(search) || s.Description.Contains(search));
-        }
+            .Where(s => s.TenantId == _tenantProvider.GetTenantId() && 
+                       (string.IsNullOrEmpty(search) || s.Name.Contains(search) || s.Description.Contains(search)))
+            .Include(s => s.BusinessCalendar);
 
         var total = await query.CountAsync(cancellationToken);
         var items = await query
@@ -53,7 +49,7 @@ public class SlaService : ISlaService
         return await _context.SlaPolicies
             .Include(s => s.BusinessCalendar)
             .Include(s => s.EscalationRules)
-            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(s => s.TenantId == _tenantProvider.GetTenantId() && s.Id == id, cancellationToken);
     }
 
     public async System.Threading.Tasks.Task<SlaPolicy> CreateSlaPolicyAsync(SlaPolicy slaPolicy, CancellationToken cancellationToken = default)
@@ -71,7 +67,9 @@ public class SlaService : ISlaService
 
     public async System.Threading.Tasks.Task<SlaPolicy> UpdateSlaPolicyAsync(SlaPolicy slaPolicy, CancellationToken cancellationToken = default)
     {
-        var existing = await _context.SlaPolicies.FindAsync(slaPolicy.Id);
+        var existing = await _context.SlaPolicies
+            .Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.Id == slaPolicy.Id)
+            .FirstOrDefaultAsync();
         if (existing == null)
             throw new InvalidOperationException($"SLA policy {slaPolicy.Id} not found");
 
@@ -94,7 +92,9 @@ public class SlaService : ISlaService
 
     public async System.Threading.Tasks.Task DeleteSlaPolicyAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var slaPolicy = await _context.SlaPolicies.FindAsync(id);
+        var slaPolicy = await _context.SlaPolicies
+            .Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.Id == id)
+            .FirstOrDefaultAsync();
         if (slaPolicy != null)
         {
             slaPolicy.IsDeleted = true;
@@ -109,14 +109,10 @@ public class SlaService : ISlaService
     public async System.Threading.Tasks.Task<PagedResult<SlaViolation>> GetSlaViolationsAsync(int page = 1, int pageSize = 10, string? status = null, CancellationToken cancellationToken = default)
     {
         var query = _context.SlaViolations
+            .Where(v => v.TenantId == _tenantProvider.GetTenantId() && 
+                       (string.IsNullOrEmpty(status) || v.Status == status))
             .Include(v => v.SlaPolicy)
-            .Include(v => v.Task)
-            .AsQueryable();
-
-        if (!string.IsNullOrEmpty(status))
-        {
-            query = query.Where(v => v.Status == status);
-        }
+            .Include(v => v.Task);
 
         var total = await query.CountAsync(cancellationToken);
         var items = await query
@@ -140,7 +136,7 @@ public class SlaService : ISlaService
             .Include(v => v.SlaPolicy)
             .Include(v => v.Task)
             .Include(v => v.EscalationActions)
-            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(v => v.TenantId == _tenantProvider.GetTenantId() && v.Id == id, cancellationToken);
     }
 
     public async System.Threading.Tasks.Task<SlaViolation> CreateSlaViolationAsync(SlaViolation violation, CancellationToken cancellationToken = default)
@@ -158,7 +154,9 @@ public class SlaService : ISlaService
 
     public async System.Threading.Tasks.Task<SlaViolation> UpdateSlaViolationAsync(SlaViolation violation, CancellationToken cancellationToken = default)
     {
-        var existing = await _context.SlaViolations.FindAsync(violation.Id);
+        var existing = await _context.SlaViolations
+            .Where(v => v.TenantId == _tenantProvider.GetTenantId() && v.Id == violation.Id)
+            .FirstOrDefaultAsync();
         if (existing == null)
             throw new InvalidOperationException($"SLA violation {violation.Id} not found");
 
@@ -180,7 +178,7 @@ public class SlaService : ISlaService
         var policy = await _context.SlaPolicies
             .Include(p => p.BusinessCalendar)
             .ThenInclude(c => c!.Holidays)
-            .FirstOrDefaultAsync(p => p.Id == slaPolicyId, cancellationToken);
+            .FirstOrDefaultAsync(p => p.TenantId == _tenantProvider.GetTenantId() && p.Id == slaPolicyId, cancellationToken);
 
         if (policy == null)
             throw new InvalidOperationException($"SLA policy {slaPolicyId} not found");
@@ -233,8 +231,12 @@ public class SlaService : ISlaService
 
     public async System.Threading.Tasks.Task<bool> IsViolationAsync(Guid taskId, Guid slaPolicyId, CancellationToken cancellationToken = default)
     {
-        var task = await _context.Tasks.FindAsync(taskId);
-        var policy = await _context.SlaPolicies.FindAsync(slaPolicyId);
+        var task = await _context.Tasks
+            .Where(t => t.TenantId == _tenantProvider.GetTenantId() && t.Id == taskId)
+            .FirstOrDefaultAsync();
+        var policy = await _context.SlaPolicies
+            .Where(s => s.TenantId == _tenantProvider.GetTenantId() && s.Id == slaPolicyId)
+            .FirstOrDefaultAsync();
 
         if (task == null || policy == null)
             return false;
@@ -246,7 +248,7 @@ public class SlaService : ISlaService
     public async System.Threading.Tasks.Task CheckAndCreateViolationsAsync(CancellationToken cancellationToken = default)
     {
         var activePolicies = await _context.SlaPolicies
-            .Where(p => p.IsActive)
+            .Where(p => p.TenantId == _tenantProvider.GetTenantId() && p.IsActive)
             .ToListAsync(cancellationToken);
 
         foreach (var policy in activePolicies)

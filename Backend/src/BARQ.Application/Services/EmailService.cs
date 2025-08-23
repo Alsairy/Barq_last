@@ -1,5 +1,6 @@
 using BARQ.Application.Interfaces;
 using BARQ.Core.Entities;
+using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,13 +16,15 @@ namespace BARQ.Application.Services
         private readonly ILogger<EmailService> _logger;
         private readonly IConfiguration _configuration;
         private readonly BarqDbContext _context;
+        private readonly ITenantProvider _tenantProvider;
         private readonly SmtpClient _smtpClient;
 
-        public EmailService(ILogger<EmailService> logger, IConfiguration configuration, BarqDbContext context)
+        public EmailService(ILogger<EmailService> logger, IConfiguration configuration, BarqDbContext context, ITenantProvider tenantProvider)
         {
             _logger = logger;
             _configuration = configuration;
             _context = context;
+            _tenantProvider = tenantProvider;
             
             _smtpClient = new SmtpClient
             {
@@ -98,6 +101,7 @@ namespace BARQ.Application.Services
             try
             {
                 var template = await _context.EmailTemplates
+                    .Where(t => t.TenantId == _tenantProvider.GetTenantId())
                     .FirstOrDefaultAsync(t => t.Name == templateName && t.Language == language && t.IsActive);
 
                 if (template == null)
@@ -124,6 +128,7 @@ namespace BARQ.Application.Services
         public async Task<string> RenderTemplateAsync(string templateName, object templateData, string? language = "en")
         {
             var template = await _context.EmailTemplates
+                .Where(t => t.TenantId == _tenantProvider.GetTenantId())
                 .FirstOrDefaultAsync(t => t.Name == templateName && t.Language == language && t.IsActive);
 
             if (template == null)
