@@ -88,13 +88,17 @@ namespace BARQ.Application.Services
         public Task<string> GenerateSignedUrlAsync(string filePath, TimeSpan expiry, string accessType = "read")
         {
             var token = GenerateAccessToken(filePath, expiry, accessType);
-            return Task.FromResult($"{_baseUrl}/download/{Uri.EscapeDataString(filePath)}?token={token}&expires={DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds()}");
+            var encodedToken = Uri.EscapeDataString(token);
+            var exp = DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds();
+            return Task.FromResult($"{_baseUrl}/download/{Uri.EscapeDataString(filePath)}?token={encodedToken}&expires={exp}");
         }
 
         public Task<string> GenerateUploadUrlAsync(string fileName, string contentType, TimeSpan expiry)
         {
             var token = GenerateAccessToken(fileName, expiry, "write");
-            return Task.FromResult($"{_baseUrl}/upload?filename={Uri.EscapeDataString(fileName)}&contentType={Uri.EscapeDataString(contentType)}&token={token}&expires={DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds()}");
+            var encodedToken = Uri.EscapeDataString(token);
+            var exp = DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds();
+            return Task.FromResult($"{_baseUrl}/upload?filename={Uri.EscapeDataString(fileName)}&contentType={Uri.EscapeDataString(contentType)}&token={encodedToken}&expires={exp}");
         }
 
         public Task<long> GetFileSizeAsync(string filePath)
