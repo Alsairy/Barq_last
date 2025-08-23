@@ -36,3 +36,10 @@ obj/
 # Frontend build caches
 Frontend/barq-frontend/tsconfig.tsbuildinfo
 Frontend/barq-frontend/*.tsbuildinfo
+
+# Build artifacts
+**/bin/
+**/obj/
+**/*.dll
+**/*.pdb
+**/*.exe

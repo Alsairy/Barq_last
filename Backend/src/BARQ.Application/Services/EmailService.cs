@@ -139,23 +139,23 @@ namespace BARQ.Application.Services
             return await RenderTemplateContentAsync(template.HtmlBody, templateData);
         }
 
-        public async Task<bool> ValidateEmailAsync(string email)
+        public Task<bool> ValidateEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
-                return false;
+                return Task.FromResult(false);
 
             try
             {
                 var addr = new MailAddress(email);
-                return addr.Address == email;
+                return Task.FromResult(addr.Address == email);
             }
             catch
             {
-                return false;
+                return Task.FromResult(false);
             }
         }
 
-        private async Task<string> RenderTemplateContentAsync(string template, object data)
+        private Task<string> RenderTemplateContentAsync(string template, object data)
         {
             var result = template;
             var properties = data.GetType().GetProperties();
@@ -166,7 +166,7 @@ namespace BARQ.Application.Services
                 result = result.Replace($"{{{{{prop.Name}}}}}", value);
             }
 
-            return result;
+            return Task.FromResult(result);
         }
 
         public void Dispose()

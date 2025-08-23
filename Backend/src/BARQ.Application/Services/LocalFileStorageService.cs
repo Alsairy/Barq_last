@@ -54,10 +54,10 @@ namespace BARQ.Application.Services
                 throw new FileNotFoundException($"File not found: {filePath}");
             }
 
-            return new FileStream(fullPath, FileMode.Open, FileAccess.Read);
+            return Task.FromResult<Stream>(new FileStream(fullPath, FileMode.Open, FileAccess.Read));
         }
 
-        public async Task<bool> DeleteFileAsync(string filePath)
+        public Task<bool> DeleteFileAsync(string filePath)
         {
             var fullPath = Path.Combine(_basePath, filePath);
             
@@ -79,25 +79,25 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> FileExistsAsync(string filePath)
+        public Task<bool> FileExistsAsync(string filePath)
         {
             var fullPath = Path.Combine(_basePath, filePath);
-            return File.Exists(fullPath);
+            return Task.FromResult(File.Exists(fullPath));
         }
 
-        public async Task<string> GenerateSignedUrlAsync(string filePath, TimeSpan expiry, string accessType = "read")
+        public Task<string> GenerateSignedUrlAsync(string filePath, TimeSpan expiry, string accessType = "read")
         {
             var token = GenerateAccessToken(filePath, expiry, accessType);
-            return $"{_baseUrl}/download/{Uri.EscapeDataString(filePath)}?token={token}&expires={DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds()}";
+            return Task.FromResult($"{_baseUrl}/download/{Uri.EscapeDataString(filePath)}?token={token}&expires={DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds()}");
         }
 
-        public async Task<string> GenerateUploadUrlAsync(string fileName, string contentType, TimeSpan expiry)
+        public Task<string> GenerateUploadUrlAsync(string fileName, string contentType, TimeSpan expiry)
         {
             var token = GenerateAccessToken(fileName, expiry, "write");
-            return $"{_baseUrl}/upload?filename={Uri.EscapeDataString(fileName)}&contentType={Uri.EscapeDataString(contentType)}&token={token}&expires={DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds()}";
+            return Task.FromResult($"{_baseUrl}/upload?filename={Uri.EscapeDataString(fileName)}&contentType={Uri.EscapeDataString(contentType)}&token={token}&expires={DateTimeOffset.UtcNow.Add(expiry).ToUnixTimeSeconds()}");
         }
 
-        public async Task<long> GetFileSizeAsync(string filePath)
+        public Task<long> GetFileSizeAsync(string filePath)
         {
             var fullPath = Path.Combine(_basePath, filePath);
             

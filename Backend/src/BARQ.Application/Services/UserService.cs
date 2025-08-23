@@ -32,10 +32,10 @@ namespace BARQ.Application.Services
 
             if (!string.IsNullOrEmpty(request.SearchTerm))
             {
-                query = query.Where(u => u.UserName.Contains(request.SearchTerm) || 
-                                        u.Email.Contains(request.SearchTerm) ||
-                                        u.FirstName.Contains(request.SearchTerm) ||
-                                        u.LastName.Contains(request.SearchTerm));
+                query = query.Where(u => u.UserName!.Contains(request.SearchTerm) || 
+                                        u.Email!.Contains(request.SearchTerm) ||
+                                        (u.FirstName != null && u.FirstName.Contains(request.SearchTerm)) ||
+                                        (u.LastName != null && u.LastName.Contains(request.SearchTerm)));
             }
 
             var totalCount = await query.CountAsync();
@@ -367,9 +367,9 @@ namespace BARQ.Application.Services
 
     public class InviteUserRequest
     {
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Role { get; set; }
+        public required string Email { get; set; }
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
+        public required string Role { get; set; }
     }
 }

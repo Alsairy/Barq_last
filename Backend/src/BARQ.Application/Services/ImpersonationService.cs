@@ -27,7 +27,8 @@ namespace BARQ.Application.Services
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(request.SearchTerm))
-                query = query.Where(s => s.AdminUser.UserName.Contains(request.SearchTerm) || s.TargetUser.UserName.Contains(request.SearchTerm));
+                query = query.Where(s => (s.AdminUser.UserName != null && s.AdminUser.UserName.Contains(request.SearchTerm)) || 
+                                         (s.TargetUser.UserName != null && s.TargetUser.UserName.Contains(request.SearchTerm)));
 
             var totalCount = await query.CountAsync();
             var sessions = await query

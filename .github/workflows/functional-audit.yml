@@ -22,7 +22,7 @@ jobs:
         
     - name: Run Backend Audit
       run: |
-        python3 scripts/backend_audit.py --src Backend --out audit/audit_backend.csv --fail-on High || true
+        python3 scripts/backend_audit.py --src Backend --out audit/audit_backend.csv --fail-on High
     
     - name: Upload Backend Audit Results
       uses: actions/upload-artifact@v4
@@ -48,7 +48,7 @@ jobs:
         
     - name: Run Frontend Audit
       run: |
-        node scripts/frontend_audit.js --src Frontend/barq-frontend --out audit/audit_frontend.csv --fail-on High || true
+        node scripts/frontend_audit.js --src Frontend/barq-frontend --out audit/audit_frontend.csv --fail-on High
     
     - name: Upload Frontend Audit Results
       uses: actions/upload-artifact@v4
