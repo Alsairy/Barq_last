@@ -74,32 +74,17 @@ class BackendAuditor:
                 }
             }
             
-            has_tenant_context = 'TenantId == _tenantProvider.GetTenantId()' in content
-            
             for line_num, line in enumerate(lines, 1):
                 for pattern_name, pattern_info in patterns.items():
-                    if pattern_name == 'TenantGap':
-                        if ('_context.' in line and '.Where(' in line and 'TenantId' not in line and 
-                            not line.strip().startswith('query =') and not line.strip().startswith('.') and
-                            not has_tenant_context):
-                            issues.append({
-                                'file': str(file_path.relative_to(self.src_dir)),
-                                'line': line_num,
-                                'severity': pattern_info['severity'],
-                                'type': pattern_name,
-                                'description': pattern_info['description'],
-                                'code': line.strip()
-                            })
-                    else:
-                        if re.search(pattern_info['regex'], line, re.IGNORECASE):
-                            issues.append({
-                                'file': str(file_path.relative_to(self.src_dir)),
-                                'line': line_num,
-                                'severity': pattern_info['severity'],
-                                'type': pattern_name,
-                                'description': pattern_info['description'],
-                                'code': line.strip()
-                            })
+                    if re.search(pattern_info['regex'], line, re.IGNORECASE):
+                        issues.append({
+                            'file': str(file_path.relative_to(self.src_dir)),
+                            'line': line_num,
+                            'severity': pattern_info['severity'],
+                            'type': pattern_name,
+                            'description': pattern_info['description'],
+                            'code': line.strip()
+                        })
                         
         except Exception as e:
             issues.append({
