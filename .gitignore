@@ -44,3 +44,7 @@ Frontend/barq-frontend/*.tsbuildinfo
 **/*.dll
 **/*.pdb
 **/*.exe
+
+# Audit outputs
+audit/*.csv
+!audit/.gitkeep
