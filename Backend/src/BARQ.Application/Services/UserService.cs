@@ -6,6 +6,11 @@ using BARQ.Core.Services;
 using BARQ.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace BARQ.Application.Services
 {
@@ -15,13 +20,15 @@ namespace BARQ.Application.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly ITenantProvider _tenantProvider;
+        private readonly IConfiguration _configuration;
 
-        public UserService(BarqDbContext context, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, ITenantProvider tenantProvider)
+        public UserService(BarqDbContext context, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, ITenantProvider tenantProvider, IConfiguration configuration)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _tenantProvider = tenantProvider;
+            _configuration = configuration;
         }
 
         public async Task<PagedResult<UserDto>> GetUsersAsync(Guid tenantId, ListRequest request)
@@ -361,7 +368,37 @@ namespace BARQ.Application.Services
 
         private string GenerateJwtToken(ApplicationUser user)
         {
-            return $"jwt-{user.Id}-{DateTime.UtcNow.Ticks}";
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var secretKey = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+            var issuer = jwtSettings["Issuer"] ?? "BARQ";
+            var audience = jwtSettings["Audience"] ?? "BARQ-Users";
+            var expiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"] ?? "60");
+
+            var key = Encoding.ASCII.GetBytes(secretKey);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Name, user.UserName ?? ""),
+                new(ClaimTypes.Email, user.Email ?? ""),
+                new("tenant_id", user.TenantId.ToString()),
+                new("user_id", user.Id.ToString()),
+                new("sub", user.Id.ToString()),
+                new("id", user.Id.ToString())
+            };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(expiryMinutes),
+                Issuer = issuer,
+                Audience = audience,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
     }
 
