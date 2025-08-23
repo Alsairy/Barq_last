@@ -39,12 +39,12 @@ namespace BARQ.Application.Services
             };
         }
 
-        public async Task<bool> SendEmailAsync(string to, string subject, string htmlBody, string? textBody = null)
+        public async System.Threading.Tasks.Task<bool> SendEmailAsync(string to, string subject, string htmlBody, string? textBody = null)
         {
             return await SendEmailAsync(new List<string> { to }, subject, htmlBody, textBody);
         }
 
-        public async Task<bool> SendEmailAsync(List<string> to, string subject, string htmlBody, string? textBody = null)
+        public async System.Threading.Tasks.Task<bool> SendEmailAsync(List<string> to, string subject, string htmlBody, string? textBody = null)
         {
             try
             {
@@ -91,12 +91,12 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<bool> SendTemplatedEmailAsync(string to, string templateName, object templateData, string? language = "en")
+        public async System.Threading.Tasks.Task<bool> SendTemplatedEmailAsync(string to, string templateName, object templateData, string? language = "en")
         {
             return await SendTemplatedEmailAsync(new List<string> { to }, templateName, templateData, language);
         }
 
-        public async Task<bool> SendTemplatedEmailAsync(List<string> to, string templateName, object templateData, string? language = "en")
+        public async System.Threading.Tasks.Task<bool> SendTemplatedEmailAsync(List<string> to, string templateName, object templateData, string? language = "en")
         {
             try
             {
@@ -125,7 +125,7 @@ namespace BARQ.Application.Services
             }
         }
 
-        public async Task<string> RenderTemplateAsync(string templateName, object templateData, string? language = "en")
+        public async System.Threading.Tasks.Task<string> RenderTemplateAsync(string templateName, object templateData, string? language = "en")
         {
             var template = await _context.EmailTemplates
                 .Where(t => t.TenantId == _tenantProvider.GetTenantId())
@@ -139,20 +139,20 @@ namespace BARQ.Application.Services
             return await RenderTemplateContentAsync(template.HtmlBody, templateData);
         }
 
-        public Task<bool> ValidateEmailAsync(string email)
+        public System.Threading.Tasks.Task<bool> ValidateEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
-                return Task.FromResult(false);
+                return System.Threading.Tasks.Task.FromResult(false);
 
             var trimmed = email.Trim();
             try
             {
                 var addr = new MailAddress(trimmed);
-                return Task.FromResult(string.Equals(addr.Address, trimmed, StringComparison.OrdinalIgnoreCase));
+                return System.Threading.Tasks.Task.FromResult(string.Equals(addr.Address, trimmed, StringComparison.OrdinalIgnoreCase));
             }
             catch
             {
-                return Task.FromResult(false);
+                return System.Threading.Tasks.Task.FromResult(false);
             }
         }
 
