@@ -139,19 +139,20 @@ namespace BARQ.Application.Services
             return await RenderTemplateContentAsync(template.HtmlBody, templateData);
         }
 
-        public System.Threading.Tasks.Task<bool> ValidateEmailAsync(string email)
+        public Task<bool> ValidateEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
-                return System.Threading.Tasks.Task.FromResult(false);
+                return Task.FromResult(false);
 
+            var trimmed = email.Trim();
             try
             {
-                var addr = new MailAddress(email);
-                return System.Threading.Tasks.Task.FromResult(addr.Address == email);
+                var addr = new MailAddress(trimmed);
+                return Task.FromResult(string.Equals(addr.Address, trimmed, StringComparison.OrdinalIgnoreCase));
             }
             catch
             {
-                return System.Threading.Tasks.Task.FromResult(false);
+                return Task.FromResult(false);
             }
         }
 

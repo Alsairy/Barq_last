@@ -157,11 +157,19 @@ namespace BARQ.Application.Services
             };
         }
 
+        private void EnsureSameTenant(ApplicationUser user)
+        {
+            if (user.TenantId != _tenantProvider.GetTenantId())
+                throw new UnauthorizedAccessException("Cross-tenant access denied.");
+        }
+
         public async Task<UserDto> UpdateUserAsync(Guid id, UpdateUserRequest request)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
                 throw new ArgumentException("User not found");
+
+            EnsureSameTenant(user);
 
             user.FirstName = request.FirstName;
             user.LastName = request.LastName;
@@ -208,6 +216,8 @@ namespace BARQ.Application.Services
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null) return false;
 
+            EnsureSameTenant(user);
+
             user.IsDeleted = true;
             user.DeletedAt = DateTime.UtcNow;
             user.IsActive = false;
@@ -239,6 +249,8 @@ namespace BARQ.Application.Services
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null) return false;
 
+            EnsureSameTenant(user);
+
             var result = await _userManager.AddToRoleAsync(user, roleName);
             return result.Succeeded;
         }
@@ -247,6 +259,8 @@ namespace BARQ.Application.Services
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null) return false;
+
+            EnsureSameTenant(user);
 
             var result = await _userManager.RemoveFromRoleAsync(user, roleName);
             return result.Succeeded;
@@ -316,10 +330,13 @@ namespace BARQ.Application.Services
 
             var roles = await _userManager.GetRolesAsync(user);
 
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var expiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"] ?? "60");
+            
             return new LoginResponse
             {
                 Token = GenerateJwtToken(user),
-                ExpiresAt = DateTime.UtcNow.AddHours(24),
+                ExpiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes),
                 User = new UserDto
                 {
                     Id = user.Id,
@@ -352,6 +369,8 @@ namespace BARQ.Application.Services
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null) return false;
 
+            EnsureSameTenant(user);
+
             var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
             return result.Succeeded;
         }
@@ -360,6 +379,8 @@ namespace BARQ.Application.Services
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null) return false;
+
+            EnsureSameTenant(user);
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
@@ -370,22 +391,22 @@ namespace BARQ.Application.Services
         {
             var jwtSettings = _configuration.GetSection("Jwt");
             var secretKey = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured");
-            var issuer = jwtSettings["Issuer"] ?? "BARQ";
-            var audience = jwtSettings["Audience"] ?? "BARQ-Users";
+            var issuer = jwtSettings["Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
+            var audience = jwtSettings["Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
             var expiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"] ?? "60");
 
-            var key = Encoding.ASCII.GetBytes(secretKey);
+            var keyBytes = Encoding.UTF8.GetBytes(secretKey);
+            if (keyBytes.Length < 32)
+                throw new InvalidOperationException("JWT Key must be at least 256 bits (32 bytes)");
+
             var tokenHandler = new JwtSecurityTokenHandler();
             
             var claims = new List<Claim>
             {
-                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Name, user.UserName ?? ""),
-                new(ClaimTypes.Email, user.Email ?? ""),
-                new("tenant_id", user.TenantId.ToString()),
-                new("user_id", user.Id.ToString()),
                 new("sub", user.Id.ToString()),
-                new("id", user.Id.ToString())
+                new("tenant_id", user.TenantId.ToString()),
+                new(ClaimTypes.Name, user.UserName ?? ""),
+                new(ClaimTypes.Email, user.Email ?? "")
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -394,7 +415,7 @@ namespace BARQ.Application.Services
                 Expires = DateTime.UtcNow.AddMinutes(expiryMinutes),
                 Issuer = issuer,
                 Audience = audience,
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
