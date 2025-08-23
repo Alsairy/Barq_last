@@ -53,7 +53,7 @@ class BackendAuditor:
                     'description': 'Raw SQL query (potential SQL injection risk)'
                 },
                 'TenantGap': {
-                    'regex': r'_context\.\w+\.Where\([^)]*\)(?!.*TenantId)',
+                    'regex': r'\.Where\([^)]*(?<!TenantId\s*==\s*[^)]*)\s*==\s*[^)]*\)(?!.*TenantId)',
                     'severity': 'High',
                     'description': 'Query without tenant filtering'
                 },

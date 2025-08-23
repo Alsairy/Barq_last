@@ -133,7 +133,8 @@ class FrontendAuditor {
             entries.forEach(entry => {
                 const fullPath = path.join(dir, entry.name);
                 
-                if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules' && entry.name !== 'dist' && entry.name !== 'build' && entry.name !== 'coverage') {
+                if (entry.isDirectory() && !entry.name.startsWith('.') && 
+                    !['node_modules', 'dist', 'build', 'coverage', '.next', 'out'].includes(entry.name)) {
                     scanDir(fullPath);
                 } else if (entry.isFile() && (entry.name.endsWith('.tsx') || entry.name.endsWith('.ts') || entry.name.endsWith('.jsx') || entry.name.endsWith('.js'))) {
                     const fileIssues = this.scanFile(fullPath);
