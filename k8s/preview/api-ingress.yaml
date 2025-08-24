@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: barq-api
+  namespace: barq-preview
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  tls:
+  - hosts:
+    - api.barq-preview.tetco.sa
+    secretName: barq-api-preview-tls
+  rules:
+  - host: api.barq-preview.tetco.sa
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: barq-api
+            port:
+              number: 80

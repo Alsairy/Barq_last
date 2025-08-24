@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: barq-api-config
+  namespace: barq-prod
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  Jwt__Issuer: "BARQ"
+  Jwt__Audience: "BARQ-Users"

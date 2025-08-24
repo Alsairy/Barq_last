@@ -67,39 +67,87 @@ dotnet ef database update --project Backend/src/BARQ.Infrastructure --startup-pr
 ```
 
 ### 3. Application Deployment
+
+#### Preview Environment Deployment
 ```bash
-# Deploy to staging first
-kubectl apply -f k8s/staging/
+# Deploy preview environment first for validation
+gh workflow run deploy-preview.yml -f tag=v1.0.0
 
-# Verify staging deployment
-kubectl get pods -n barq-staging
-curl https://staging-api.barq.platform/health/ready
+# Wait for preview deployment and E2E tests to pass
+# Monitor workflow: gh run list --workflow=deploy-preview.yml
 
-# Run smoke tests against staging
+# Verify preview environment
+curl https://api.barq-preview.tetco.sa/health/ready
+curl https://barq-preview.tetco.sa/
+
+# Run comprehensive E2E tests against preview
 cd Frontend/barq-frontend
-PLAYWRIGHT_BASE_URL=https://staging.barq.platform npx playwright test tests/wiring.smoke.spec.ts
+PLAYWRIGHT_BASE_URL=https://barq-preview.tetco.sa npx playwright test tests/journeys.e2e.spec.ts --reporter=html
+```
 
-# Deploy to production
-kubectl apply -f k8s/production/
+#### Production Canary Deployment
+```bash
+# Phase 1: Deploy with 10% canary traffic
+gh workflow run deploy-prod.yml -f tag=v1.0.0 -f canary_weight=10
 
-# Verify production deployment
-kubectl get pods -n barq-production
-curl https://api.barq.platform/health/ready
+# Monitor health endpoints for 15-30 minutes
+curl https://api.barq.tetco.sa/health/ready
+curl https://api.barq.tetco.sa/health/flowable
+curl https://api.barq.tetco.sa/health/ai
+
+# Check canary ingress status
+kubectl get ingress barq-api-ingress-canary -n barq-production
+
+# Phase 2: Increase to 50% if healthy (error rate < 1%, latency normal)
+gh workflow run deploy-prod.yml -f tag=v1.0.0 -f canary_weight=50
+
+# Monitor for 30-60 minutes
+kubectl logs -f deployment/barq-api -n barq-production
+kubectl top pods -n barq-production
+
+# Phase 3: Complete rollout (removes canary ingress)
+gh workflow run deploy-prod.yml -f tag=v1.0.0 -f canary_weight=100
+
+# Verify canary ingress is removed
+kubectl get ingress -n barq-production
+```
+
+#### Emergency Rollback Commands
+```bash
+# Emergency rollback to previous version
+kubectl rollout undo deployment/barq-api -n barq-production
+kubectl rollout undo deployment/barq-frontend -n barq-production
+
+# Or rollback to specific revision
+kubectl rollout history deployment/barq-api -n barq-production
+kubectl rollout undo deployment/barq-api --to-revision=N -n barq-production
+
+# Remove canary ingress to stop new version traffic
+kubectl delete -f k8s/prod/api-ingress-canary.yaml
 ```
 
 ### 4. Post-Deployment Verification
 ```bash
 # Health check all endpoints
-curl https://api.barq.platform/health/live
-curl https://api.barq.platform/health/ready
-curl https://api.barq.platform/health/flowable
-curl https://api.barq.platform/health/ai
+curl https://api.barq.tetco.sa/health/live
+curl https://api.barq.tetco.sa/health/ready
+curl https://api.barq.tetco.sa/health/flowable
+curl https://api.barq.tetco.sa/health/ai
 
 # Verify key functionality
-curl -X POST https://api.barq.platform/auth/login -H "Content-Type: application/json" -d '{"email":"admin@barq.platform","password":"$ADMIN_PASSWORD"}'
+curl -X POST https://api.barq.tetco.sa/auth/login -H "Content-Type: application/json" -d '{"email":"admin@barq.tetco.sa","password":"$ADMIN_PASSWORD"}'
+
+# Run production smoke tests
+cd Frontend/barq-frontend
+PLAYWRIGHT_BASE_URL=https://barq.tetco.sa npx playwright test tests/wiring.smoke.spec.ts --reporter=line
 
 # Check metrics and logs
 kubectl logs deployment/barq-api -n barq-production --tail=100
+
+# Verify DNS and TLS
+nslookup barq.tetco.sa
+nslookup api.barq.tetco.sa
+openssl s_client -connect api.barq.tetco.sa:443 -servername api.barq.tetco.sa < /dev/null
 ```
 
 ## Rollback Procedures

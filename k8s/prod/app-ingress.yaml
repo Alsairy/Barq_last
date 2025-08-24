@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: barq-frontend
+  namespace: barq-prod
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  tls:
+  - hosts:
+    - barq.tetco.sa
+    secretName: barq-frontend-tls
+  rules:
+  - host: barq.tetco.sa
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: barq-frontend
+            port:
+              number: 80

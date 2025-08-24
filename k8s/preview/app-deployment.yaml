@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: barq-frontend
+  namespace: barq-preview
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: barq-frontend
+  template:
+    metadata:
+      labels:
+        app: barq-frontend
+    spec:
+      containers:
+      - name: app
+        image: ghcr.io/alsairy/barq-frontend:{{TAG}}
+        ports:
+        - containerPort: 4173
+        env:
+        - name: VITE_API_BASE_URL
+          value: "https://api.barq-preview.tetco.sa"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 4173
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 4173
+          initialDelaySeconds: 10
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: barq-frontend
+  namespace: barq-preview
+spec:
+  selector:
+    app: barq-frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 4173
