@@ -1,22 +1,27 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 8080
+# syntax=docker/dockerfile:1
 
+# ---------- BUILD ----------
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["Backend/src/BARQ.API/BARQ.API.csproj", "BARQ.API/"]
-COPY ["Backend/src/BARQ.Application/BARQ.Application.csproj", "BARQ.Application/"]
-COPY ["Backend/src/BARQ.Infrastructure/BARQ.Infrastructure.csproj", "BARQ.Infrastructure/"]
-COPY ["Backend/src/BARQ.Core/BARQ.Core.csproj", "BARQ.Core/"]
-RUN dotnet restore "BARQ.API/BARQ.API.csproj"
-COPY Backend/ .
-WORKDIR "/src/src/BARQ.API"
-RUN dotnet build "BARQ.API.csproj" -c Release -o /app/build
 
-FROM build AS publish
-RUN dotnet publish "BARQ.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+# 1) Copy solution + csproj first (better caching)
+COPY Backend/src/BARQ.API/BARQ.API.csproj Backend/src/BARQ.API/
+COPY Backend/src/BARQ.Application/BARQ.Application.csproj Backend/src/BARQ.Application/
+COPY Backend/src/BARQ.Infrastructure/BARQ.Infrastructure.csproj Backend/src/BARQ.Infrastructure/
+COPY Backend/src/BARQ.Core/BARQ.Core.csproj Backend/src/BARQ.Core/
 
-FROM base AS final
+RUN dotnet restore Backend/src/BARQ.API/BARQ.API.csproj
+
+# 2) Copy the rest of the Backend
+COPY Backend/ ./Backend/
+
+# 3) Build
+RUN dotnet publish Backend/src/BARQ.API/BARQ.API.csproj -c Release -o /app/publish
+
+# ---------- RUNTIME ----------
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish ./
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
 ENTRYPOINT ["dotnet", "BARQ.API.dll"]
